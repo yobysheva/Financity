@@ -1,5 +1,6 @@
 <script>
-// import {authService} from "@/services/auth";
+import {authService} from "@/services/auth";
+import store from "../../store.js";
 // // eslint-disable-next-line vue/no-export-in-script-setup
 export default {
   data() {
@@ -17,9 +18,9 @@ export default {
     }
   },
   methods: {
-    // sendUsername() {
-    //   this.$store.dispatch('updateUsername', this.username);
-    // },
+    sendUsername() {
+      store.dispatch("updateUsername", this.username)
+    },
     openLogin() {
       this.isRegistrationModalVisible = false;
       this.isLoginModalVisible = true;
@@ -28,60 +29,61 @@ export default {
       this.isRegistrationModalVisible = true;
       this.isLoginModalVisible = false;
     },
-    // async login() {
-    //   try {
-    //     const response = await authService.login( {
-    //       username: this.username,
-    //       password: this.password,
-    //     });
-    //     if (response.status === 202) {
-    //       this.$emit('login', true);
-    //       this.sendUsername();
-    //       this.username = '';
-    //       this.password = '';
-    //     }
-    //   } catch (error) {
-    //     if (error.response) {
-    //         alert("Login failed: " + error.response.data || "Unknown error");
-    //         //ошибки в error.response.data лежат в словаре в виде (поле в котором возникла ошибка : массив ошибок в этом поле)
-    //         //я вывожу этот словарь в терминале, в котором запущен сервер джанго, в момент попытки входа или регистрации
-    //       } else if (error.request) {
-    //         alert("No response from server. Please try again later.");
-    //       } else {
-    //         alert("Error setting up request: " + error.message);
-    //       }
-    //   }
-  //
-  //   },
-  //   async register() {
-  //     if (this.password2 === this.password) {
-  //       try {
-  //         const response = await authService.register({
-  //           username: this.username,
-  //           password: this.password,
-  //         });
-  //         if (response.status === 201) {
-  //           this.openLogin();
-  //           alert("User registered successfully!");
-  //           this.username = '';
-  //           this.password = '';
-  //           this.password2 = '';
-  //         }
-  //       } catch (error) {
-  //         if (error.response) {
-  //           alert("Registration failed: " + error.response.data || "Unknown error");
-  //           //ошибки в error.response.data лежат в словаре в виде (поле в котором возникла ошибка : массив ошибок в этом поле)
-  //           //я вывожу этот словарь в терминале, в котором запущен сервер джанго, в момент попытки входа или регистрации
-  //         } else if (error.request) {
-  //           alert("No response from server. Please try again later.");
-  //         } else {
-  //           alert("Error setting up request: " + error.message);
-  //         }
-  //       }
-  //     } else {
-  //       alert("Password must match");
-  //     }
-  //   }
+    async login() {
+      try {
+        const response = await authService.login( {
+          username: this.username,
+          password: this.password,
+        });
+        if (response.status === 202) {
+          // this.$emit('login', true);
+          this.sendUsername();
+          this.$router.push({ name: "home" });
+          this.username = '';
+          this.password = '';
+        }
+      } catch (error) {
+        if (error.response) {
+            alert("Login failed: " + error.response.data || "Unknown error");
+            //ошибки в error.response.data лежат в словаре в виде (поле в котором возникла ошибка : массив ошибок в этом поле)
+            //я вывожу этот словарь в терминале, в котором запущен сервер джанго, в момент попытки входа или регистрации
+          } else if (error.request) {
+            alert("No response from server. Please try again later.");
+          } else {
+            alert("Error setting up request: " + error.message);
+          }
+      }
+
+    },
+    async register() {
+      if (this.password2 === this.password) {
+        try {
+          const response = await authService.register({
+            username: this.username,
+            password: this.password,
+          });
+          if (response.status === 201) {
+            this.openLogin();
+            alert("User registered successfully!");
+            // this.username = '';
+            // this.password = '';
+            // this.password2 = '';
+          }
+        } catch (error) {
+          if (error.response) {
+            alert("Registration failed: " + error.response.data || "Unknown error");
+            //ошибки в error.response.data лежат в словаре в виде (поле в котором возникла ошибка : массив ошибок в этом поле)
+            //я вывожу этот словарь в терминале, в котором запущен сервер джанго, в момент попытки входа или регистрации
+          } else if (error.request) {
+            alert("No response from server. Please try again later.");
+          } else {
+            alert("Error setting up request: " + error.message);
+          }
+        }
+      } else {
+        alert("Password must match");
+      }
+    }
   },
 }
 </script>

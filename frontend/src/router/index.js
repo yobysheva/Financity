@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
-//import HomeComet from '../views/HomeComet.vue';
+import HomeComet from '../views/HomeComet.vue';
 import Login from '../views/auth/LoginRegistrationModal.vue';
+import LoginComet from '../views/auth/Login.vue'
 // import Profile from '../views/Profile.vue';
 import Home from '../views/Home.vue';
 
@@ -11,6 +12,10 @@ const routes = [
     name: 'homepage'
   },
   {
+    path: '/LoginComet',
+    component: LoginComet
+  },
+  {
     path: '/login',
     name: 'login',
     component: Login,
@@ -19,7 +24,12 @@ const routes = [
     path: '/home',
     name: 'home',
     component: Home,
-  }
+  },
+  {
+    path: '/comet',
+    name: 'comet',
+    component: HomeComet
+  },
 ];
 
 const router = createRouter({
