@@ -6,6 +6,23 @@ from rest_framework.response import Response
 from django.contrib.auth import login
 from user.models import User
 import json
+import requests
+
+
+def createCometUser(data):
+    url = "https://2683521c4e6c3899.api-eu.cometchat.io/v3/users"
+    payload = {
+        "avatar": "https://www.google.com/imgres?q=%D0%B0%D0%B2%D0%B0%D1%82%D0%B0%D1%80%D0%BA%D0%B0&imgurl=https%3A%2F%2Fillustrators.ru%2Fuploads%2Fillustration%2Fimage%2F1687137%2F14.jpg&imgrefurl=https%3A%2F%2Fillustrators.ru%2Fillustrations%2F1687137&docid=Ee9obntDZ71kfM&tbnid=zO2JN6AKL7PLYM&vet=12ahUKEwiCx_uH6quKAxU9KBAIHUnqO-kQM3oFCIYBEAA..i&w=2560&h=1600&hcb=2&ved=2ahUKEwiCx_uH6quKAxU9KBAIHUnqO-kQM3oFCIYBEAA",
+        "uid": data["username"],
+        "name": data["username"]
+    }
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "apikey": "127bc8520b38325a216041848a7bba2eaaa850e0"
+    }
+    response = requests.post(url, json=payload, headers=headers)
+    print(response.text)
 
 
 @api_view(['POST'])
@@ -13,6 +30,7 @@ def UserRegisterView(request):
     if request.method == 'POST':
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
+            createCometUser(request.data)
             user = serializer.save()
             login(request, user)
             return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
@@ -48,9 +66,9 @@ def getData(request):
             return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
-api_view(['POST'])
+api_view(['PUT'])
 def updateData(request):
-    if request.method == 'POST':
+    if request.method == 'PUT':
         data = json.loads(request.body.decode())
         try:
             user = User.objects.get(username=data['username'])

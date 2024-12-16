@@ -13,7 +13,7 @@ export const authService = {
         return axios.get(`${apiUrl}getData/`, {params : {username : username}});
     },
     updateData(userData) {
-        return axios.post(`${apiUrl}updateData/`, userData);
+        return axios.put(`${apiUrl}updateData/`, userData);
     },
     getUsersStats(username){
         return axios.get(`${apiUrl}getStats/`, {params : {username : username}});

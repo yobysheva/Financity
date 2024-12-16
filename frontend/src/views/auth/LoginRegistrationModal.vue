@@ -1,6 +1,7 @@
 <script>
 import {authService} from "@/services/auth";
 import store from "../../store.js";
+import {CometChat} from "@cometchat-pro/chat";
 // // eslint-disable-next-line vue/no-export-in-script-setup
 export default {
   data() {
@@ -18,6 +19,21 @@ export default {
     }
   },
   methods: {
+    authLoginUser() {
+      var apiKey = process.env.VUE_APP_COMMETCHAT_API_KEY;
+      this.showSpinner = true;
+
+      CometChat.login(this.username, apiKey).then(
+        () => {
+          this.showSpinner = false;
+          this.$router.push({ name: "home" });
+        },
+        error => {
+          this.showSpinner = false;
+          console.log("Login failed with error:", error.code);
+        }
+      );
+    },
     sendUsername() {
       store.dispatch("updateUsername", this.username)
     },
@@ -38,7 +54,8 @@ export default {
         if (response.status === 202) {
           // this.$emit('login', true);
           this.sendUsername();
-          this.$router.push({ name: "home" });
+          this.authLoginUser();
+          // this.$router.push({ name: "home" });
           this.username = '';
           this.password = '';
         }
@@ -67,7 +84,7 @@ export default {
             alert("User registered successfully!");
             // this.username = '';
             // this.password = '';
-            // this.password2 = '';
+            this.password2 = '';
           }
         } catch (error) {
           if (error.response) {
