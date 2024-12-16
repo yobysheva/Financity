@@ -42,6 +42,8 @@ export default {
       this.isLoginModalVisible = true;
     },
     openRegistration() {
+      this.username = '';
+      this.password = '';
       this.isRegistrationModalVisible = true;
       this.isLoginModalVisible = false;
     },
