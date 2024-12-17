@@ -3,6 +3,7 @@ import HomeComet from '../views/HomeComet.vue';
 import Login from '../views/auth/LoginRegistrationModal.vue';
 // import Profile from '../views/Profile.vue';
 import Home from '../views/Home.vue';
+import Game from '../views/Game.vue'
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: '/comet',
     name: 'comet',
     component: HomeComet
+  },
+  {
+    path: '/game',
+    name: 'game',
+    component: Game
   },
 ];
 

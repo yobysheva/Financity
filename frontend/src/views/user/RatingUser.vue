@@ -43,6 +43,7 @@
 
 p{
   font-size: 10px;
+  font-weight: bold;
 }
 
 .pr{

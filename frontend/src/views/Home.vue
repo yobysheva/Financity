@@ -21,7 +21,8 @@ import CurrentGames from "@/views/CurrentGames.vue";
 
 <style scoped>
 .outer-container {
-  display: flex;
+  //opacity: 0.9;
+  //display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
@@ -32,6 +33,7 @@ import CurrentGames from "@/views/CurrentGames.vue";
 }
 
 .home-page{
+  opacity: 0.9;
   padding: 20px;
   min-width: 95%;
   min-height: 95%;

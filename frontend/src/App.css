@@ -6,7 +6,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
-    color: #333;
+    color: #111;
   }
   #nav {
     padding: 30px;
@@ -45,7 +45,7 @@
   /*background: #190909;*/
   opacity: 0.95;
   padding: 20px;
-  //border: 4px solid #e0c3fc;
+  /*border: 4px solid #e0c3fc;*/
   z-index: 10;
 }
   .modal-content{
@@ -64,9 +64,10 @@
 }
 
 body {
-	background: linear-gradient(-45deg, #d2dbd7, #7cedc1, #a8e6ee, #ffabe1);
+  cursor: default;
+	background: linear-gradient(-45deg, #a2bbf7, #7cedc1, #a8e6ee, #ffabe1);
 	background-size: 400% 400%;
-	animation: gradient 10s ease infinite;
+	animation: gradient 5s ease infinite;
 	height: 100vh;
   align-items: center;
   justify-content: center;
@@ -252,12 +253,13 @@ h3{
   background-color: white;
   border-radius: 100px;
   box-shadow: rgba(44, 187, 99, .1) 0 2px 4px, rgba(44, 187, 99, .05) 0 1px 2px;
-  color: #333;
+  color: #111;
   /*font-family: CerebriSans-Regular, -apple-system, system-ui, Roboto, sans-serif;*/
   padding: 10px 15px;
   font-size: 14px;
   border: 2px solid rgba(44, 187, 99, .3);
   transition: all 250ms;
+  word-wrap: break-word;
 }
 
 .input-custom:focus {
@@ -268,7 +270,7 @@ h3{
 
 .input-custom::placeholder {
   color: #bbddbb;
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 .modal-content {
@@ -288,6 +290,23 @@ h3{
   font-size: 14px;
   border: 2px solid rgba(44, 187, 99, .3);
   /*display: flex;*/
+  min-width: 95%;
+  min-height: 95%;
+  max-height: 95%;
+  opacity: 0.9;
+}
+
+.transparent-container{
+  background-color: transparent;
+  border-radius: 30px;
+  /*box-shadow: rgba(44, 187, 99, .1) 0 2px 4px, rgba(44, 187, 99, .05) 0 1px 2px;*/
+  color: #111;
+  /*padding: 15px;*/
+  /*margin: 20px;*/
+  font-size: 14px;
+  /*border: 2px solid rgba(44, 187, 99, .3);*/
+  /*display: flex;*/
+  align-items: center;
   min-width: 95%;
   min-height: 95%;
   max-height: 95%;

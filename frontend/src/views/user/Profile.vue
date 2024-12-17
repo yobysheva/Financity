@@ -50,6 +50,7 @@
 
 p{
   font-size: 16px;
+  font-weight: bold;
 }
 
 .pr{
