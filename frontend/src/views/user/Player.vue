@@ -37,8 +37,8 @@
 }
 
 .photo{
-  width: 50px;
-  height: 50px;
+  width: 25px;
+  height: 25px;
   margin: 5px;
   background-color: white;
   border-radius: 10px;
@@ -60,6 +60,13 @@
 .photo::placeholder {
   color: #aaa;
   opacity: 0.8;
+}
+
+.photo:hover {
+  //background-color: rgba(100, 255, 200, .9);
+  outline: none;
+  border-color: rgba(44, 187, 99, .6);
+  box-shadow: rgba(44, 187, 99, .35) 0 0 5px;
 }
 
 p{

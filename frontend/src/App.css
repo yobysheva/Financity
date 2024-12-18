@@ -7,6 +7,8 @@
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: #111;
+  height: 100vh;
+  max-height: 100vh;
   }
   #nav {
     padding: 30px;
@@ -69,6 +71,7 @@ body {
 	background-size: 400% 400%;
 	animation: gradient 5s ease infinite;
 	height: 100vh;
+  max-height: 100vh;
   align-items: center;
   justify-content: center;
 }
@@ -123,11 +126,11 @@ h3{
   cursor: pointer;
   display: inline-block;
   /*font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif;*/
+  font-family: "Etude Noire Light", Helvetica, Arial, sans-serif;
   padding: 7px 20px;
   text-align: center;
   text-decoration: none;
   transition: all 250ms;
-  border: 0;
   font-size: 16px;
   user-select: none;
   -webkit-user-select: none;
@@ -143,6 +146,12 @@ h3{
 .button-33:focus,
 .button-33:active {
   outline: none;
+}
+
+.button-33:active {
+  background-color: rgba(194, 251, 215, 0.8); /* Затемнение при нажатии */
+  transform: translateY(2px); /* Сдвиг вниз при нажатии */
+  box-shadow: rgba(44, 187, 99, .2) 0 -20px 16px -10px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px;
 }
 
 .button-82-pushable {
@@ -273,6 +282,13 @@ h3{
   opacity: 0.9;
 }
 
+.input-custom:hover {
+  /*background-color: rgba(100, 255, 200, .9);*/
+  outline: none;
+  border-color: rgba(44, 187, 99, .6);
+  box-shadow: rgba(44, 187, 99, .35) 0 0 5px;
+}
+
 .modal-content {
   background-color: #ffffff;
   border-radius: 12px;
@@ -290,9 +306,9 @@ h3{
   font-size: 14px;
   border: 2px solid rgba(44, 187, 99, .3);
   /*display: flex;*/
-  min-width: 95%;
-  min-height: 95%;
-  max-height: 95%;
+  min-width: 90%;
+  min-height: 90%;
+  max-height: 90%;
   opacity: 0.9;
 }
 
@@ -310,4 +326,42 @@ h3{
   min-width: 95%;
   min-height: 95%;
   max-height: 95%;
+}
+
+
+.photo{
+  width: 150px;
+  height: 150px;
+  margin: 30px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: rgba(44, 187, 99, .1) 0 2px 4px, rgba(44, 187, 99, .05) 0 1px 2px;
+  color: #333;
+  /*font-family: CerebriSans-Regular, -apple-system, system-ui, Roboto, sans-serif;*/
+  padding: 10px 15px;
+  font-size: 16px;
+  border: 2px solid rgba(44, 187, 99, .3);
+  transition: all 250ms;
+}
+
+.photo:focus {
+  outline: none;
+  border-color: rgba(44, 187, 99, .6);
+  box-shadow: rgba(44, 187, 99, .35) 0 0 5px;
+}
+
+.photo::placeholder {
+  color: #aaa;
+  opacity: 0.8;
+}
+
+.photo:hover {
+  /*background-color: rgba(100, 255, 200, .9);*/
+  outline: none;
+  border-color: rgba(44, 187, 99, .6);
+  box-shadow: rgba(44, 187, 99, .35) 0 0 5px;
+}
+
+h3{
+  font-weight: bold;
 }

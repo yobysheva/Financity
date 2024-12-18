@@ -3,32 +3,23 @@
 </script>
 
 <template>
-<!--<div class="modal">-->
-<!--  <div class="modal-content column">-->
-    <div class="row">
-      <div class="photo"></div>
-      <div class="column pr">
-        <p>Имя: Пользователь1234</p>
-        <p>Уровень: 10</p>
-        <p>Выиграно игр: 12/56</p>
-        <p>Место в рейтинге: 5/187</p>
-      </div>
-    </div>
-<!--  </div>-->
-
-<!--</div>-->
-<!--  <div class="overlay"></div>-->
+<div class="row">
+  <p>1</p>
+  <div class="photo"></div>
+  <p>Имя пользователя</p>
+  <p>Все, кто любит роблокс, присоединяйтесь к моей игре!!!</p>
+</div>
 </template>
 
 <style scoped>
 .row{
-  height: 20%;
+  padding: 5px;
 }
 
 .photo{
-  width: 150px;
-  height: 150px;
-  margin: 30px;
+  width: 40px;
+  height: 40px;
+  margin: 10px;
   background-color: white;
   border-radius: 10px;
   box-shadow: rgba(44, 187, 99, .1) 0 2px 4px, rgba(44, 187, 99, .05) 0 1px 2px;
@@ -59,8 +50,9 @@
 }
 
 p{
-  font-size: 14px;
+  font-size: 10px;
   font-weight: bold;
+  margin: 15px;
 }
 
 .pr{
