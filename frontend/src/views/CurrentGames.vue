@@ -1,24 +1,24 @@
 <script setup>
-import RatingUser from "@/views/user/RatingUser.vue";
+
+import GameField from "@/views/GameField.vue";
 </script>
 
 <template>
-  <h3>Присоединись к этим играм!</h3>
 <div class="container games">
-  <RatingUser/>
-    <RatingUser/>
-    <RatingUser/>
-    <RatingUser/>
-    <RatingUser/>
-    <RatingUser/>
-    <RatingUser/>
-    <RatingUser/>
+  <GameField/>
+  <GameField/>
+  <GameField/>
+  <GameField/>
+  <GameField/>
+  <GameField/>
+  <GameField/>
+  <GameField/>
 </div>
 </template>
 
 <style scoped>
 .games{
   overflow-y: scroll;
-  height: 40vh;
+  max-height: 40vh;
 }
 </style>

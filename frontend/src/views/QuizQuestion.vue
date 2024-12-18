@@ -51,6 +51,9 @@
 .modal{
   opacity: 0.9;
   padding: 5%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .column{
