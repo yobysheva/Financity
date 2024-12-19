@@ -16,3 +16,35 @@ class Game (models.Model):
     def __str__(self):
         return f"gameID: {self.id} | status: {self.status}"
 
+class Question(models.Model):
+    id = models.AutoField(primary_key=True)
+    category = models.CharField(max_length=100)
+    text = models.TextField()
+    type = models.IntegerField(choices=QUESTION_TYPES)
+
+    def __str__(self):
+        return f"Question {self.id}: {self.text[:50]}"
+
+
+class Answer(models.Model):
+    id = models.AutoField(primary_key=True)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answers')
+    answer_text = models.TextField()
+    sum_now = models.FloatField()
+    sum_later = models.FloatField()
+    period = models.IntegerField()
+    scip = models.BooleanField(default=False)
+    action_text = models.TextField()
+
+    def __str__(self):
+        return f"Answer {self.id} for Question {self.question.id}"
+
+
+class Action(models.Model):
+    id = models.AutoField(primary_key=True)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='actions')
+    sum = models.FloatField()
+    period = models.IntegerField()
+
+    def __str__(self):
+        return f"Action {self.id} by Player {self.player.id}
