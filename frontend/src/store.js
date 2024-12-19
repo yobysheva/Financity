@@ -3,7 +3,9 @@ import {createStore} from 'vuex'
 const store = createStore({
     state () {
         return {
-            username: ''
+            username: '',
+            gameID: '',
+            playerID: '',
         }
     },
     mutations: {
@@ -14,6 +16,14 @@ const store = createStore({
         setDefault(state) {
             state.username = ""
             state.record = 0
+        },
+
+        setGameID(state, gameID) {
+            state.gameID = gameID;
+        },
+
+        setPlayerID(state, playerID) {
+            state.playerID = playerID;
         }
     },
 
@@ -26,6 +36,13 @@ const store = createStore({
             commit("setDefault")
         },
 
+        updateGameID({commit}, gameID) {
+            commit("setGameID", gameID);
+        },
+
+        updatePlayerID({commit}, playerID) {
+            commit("setPlayerID", playerID);
+        }
     },
 
 

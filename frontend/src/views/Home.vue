@@ -2,45 +2,61 @@
 import Rating from "@/views/Rating.vue";
 import Profile from "@/views/user/Profile.vue";
 import CurrentGames from "@/views/CurrentGames.vue";
-// import RequestGame from "@/views/RequestGame.vue";
+import { authService } from "@/services/auth";
+import store from "../store.js";
 
-
-
+async function makeNewGame() {
+  try {
+    const response = await authService.createGame({
+      username: store.state.username,
+    });
+    console.log(store.state.username, response.status)
+    if (response.status === 200) {
+      await store.dispatch("updateGameID", response.data.gameID);
+      await store.dispatch("updatePlayerID", response.data.playerID);
+      this.$router.push({ name: "game" });
+    }
+  } catch (error) {
+    if (error.response) {
+      alert("Login failed: " + error.response.data || "Unknown error");
+    } else if (error.request) {
+      alert("No response from server. Please try again later.");
+    } else {
+      alert("Error setting up request: " + error.message);
+    }
+  }
+}
 </script>
 
 <template>
-<!--  <RequestGame />-->
   <div class="outer-container">
-<div class="container home-page" style="min-height: 95%; max-height: 95%;">
-    <div class="column" style="width: 70%; height: 95%; max-height: 95%;">
-      <Profile/>
-      <div class="row game-row">
-        <h3>Присоединись к этим играм!</h3>
+    <div class="container home-page" style="min-height: 95%; max-height: 95%;">
+      <div class="column" style="width: 70%; height: 95%; max-height: 95%;">
+        <Profile />
+        <div class="row game-row">
+          <h3>Присоединись к этим играм!</h3>
+        </div>
+        <CurrentGames />
       </div>
-      <CurrentGames/>
-    </div>
-    <div class="column" style="width: 20%; height: 95%; margin-right: 20px;">
-      <button class="button-33" role="button">Новая игра</button>
-      <Rating/>
+      <div class="column" style="width: 20%; height: 95%; margin-right: 20px;">
+        <button class="button-33" role="button" @click="makeNewGame">Новая игра</button>
+        <Rating />
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <style scoped>
 .outer-container {
-  //opacity: 0.9;
-  //display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
-  //max-height: 100vh;
   width: 100%;
   padding: 1%;
   box-sizing: border-box;
 }
 
-.home-page{
+.home-page {
   opacity: 0.9;
   padding: 20px;
   min-width: 95%;
@@ -53,15 +69,16 @@ import CurrentGames from "@/views/CurrentGames.vue";
   justify-content: space-between;
   align-items: center;
 }
-.column{
+
+.column {
   justify-content: space-between;
 }
 
-.game-row{
+.game-row {
   justify-content: center;
 }
 
-h3{
+h3 {
   font-weight: bold;
 }
 </style>
