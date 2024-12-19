@@ -17,6 +17,10 @@ class Game (models.Model):
         return f"gameID: {self.id} | status: {self.status}"
 
 class Question(models.Model):
+    QUESTION_TYPES = [
+        (1, 'Type 1'),
+        (2, 'Type 2'),
+    ]
     id = models.AutoField(primary_key=True)
     category = models.CharField(max_length=100)
     text = models.TextField()
@@ -47,4 +51,4 @@ class Action(models.Model):
     period = models.IntegerField()
 
     def __str__(self):
-        return f"Action {self.id} by Player {self.player.id}
+        return f"Action {self.id} by Player {self.player.id}"
