@@ -6,35 +6,106 @@ import Player from "@/views/user/Player.vue";
 // import QuizQuestion from "@/views/QuizQuestion.vue";
 import { ref } from 'vue';
 
-   const result = ref('');
-   const diceStyle = ref({});
+const positions = [
+  [6.3, 9], [15.3, 9], [26.3, 9], [37.3, 9], [47.3, 9], [56.7, 9], [67.7, 9],
+  [78.7, 9], [88.3, 9], [88.3, 23], [88.3, 36], [88.3, 56], [88.3, 69],
+  [88.3, 83], [78.7, 83], [67.7, 83], [56.7, 83], [47.3, 83], [37.3, 83],
+  [26.3, 83], [15.3, 83], [5.3, 85], [6.3, 69], [6.3, 56], [6.3, 36],
+  [6.3, 23]
+];
+import dotImage from '@/assets/dot.png';
+const dotSrc = dotImage;
+const dotStyle = ref({
+  width: '20px',
+  height: '20px',
+  position: 'absolute',
+  left: `${positions[0][0]}%`,
+  top: `${positions[0][1]}%`,
+  transition: 'all 0.3s ease'
+});
+const dotVisible = ref(true);
 
-   const spinDice = () => {
-       let rnd = Math.floor(Math.random() * 6 + 1);
-       let x, y;
+const result = ref('');
+const diceStyle = ref({});
+let totalSum = ref(0);
+let currentIndex = ref(0);
+let lastRoll = ref(null);
+let lastX = ref(0);
+let lastY = ref(0);
 
-       switch (rnd) {
-           case 1:
-               x = 720;
-               y = 810;
-               break;
-           case 6:
-               x = 720;
-               y = 990;
-               break;
-           default:
-               x = 720 + (6 - rnd) * 90;
-               y = 900;
-               break;
-       }
+const moveDot = (targetIndex) => {
+  const steps = [];
+  if (targetIndex > currentIndex.value) {
+    for (let i = currentIndex.value + 1; i <= targetIndex; i++) {
+      steps.push(i);
+    }
+  } else {
+    for (let i = currentIndex.value + 1; i < positions.length; i++) {
+      steps.push(i);
+    }
+    for (let i = 0; i <= targetIndex; i++) {
+      steps.push(i);
+    }
+  }
 
-       diceStyle.value = {
-           transform: `translateZ(-100px) rotateY(${x}deg) rotateX(${y}deg)`,
-       };
+  let stepIndex = 0;
+  const moveNext = () => {
+    if (stepIndex < steps.length) {
+      const [leftPercent, topPercent] = positions[steps[stepIndex]];
+      dotStyle.value.left = `${leftPercent}%`;
+      dotStyle.value.top = `${topPercent}%`;
+      currentIndex.value = steps[stepIndex];
+      stepIndex++;
+      setTimeout(moveNext, 300);
+    }
+  };
 
-       // Обновление результата
-       result.value = `Выпало: ${rnd}`;
-   };
+  moveNext();
+};
+
+const generateAndSpin = () => {
+  let rnd = Math.floor(Math.random() * 6 + 1);
+  totalSum.value += rnd;
+
+  let x, y;
+
+  if (lastRoll.value === rnd) {
+    x = lastX.value + 360;
+    y = lastY.value + 360;
+  } else {
+    switch (rnd) {
+      case 1:
+        x = 720;
+        y = 810;
+        break;
+      case 6:
+        x = 720;
+        y = 990;
+        break;
+      default:
+        x = 720 + (6 - rnd) * 90;
+        y = 900;
+        break;
+    }
+  }
+
+  diceStyle.value = {
+    transform: `translateZ(-100px) rotateY(${x}deg) rotateX(${y}deg)`
+  };
+
+  lastX.value = x;
+  lastY.value = y;
+  lastRoll.value = rnd;
+
+  setTimeout(() => {
+    let targetIndex = (totalSum.value % 26);
+    if (targetIndex < 0) targetIndex += 26;
+    moveDot(targetIndex);
+  }, 1200);
+
+  result.value = `Выпало: ${rnd}`;
+};
+
 </script>
 
 <template>
@@ -50,10 +121,16 @@ import { ref } from 'vue';
       <Player/>
     </div>
     <div class="column" style="height: 100%; width: 45%; margin-left: 5%;">
-      <div class="container" style="width: 100%; height: 100%;">
+      <div class="container" style="width: 100%; height: 100%; position: relative">
         <img class="image" src="../assets/financity_pole.png" style="width: 100%; height: 100%">
 <!--        <Fields/>-->
 <!--        <img src="../assets/kletki.svg" style="position:absolute; top: 0px; left: 0px; width: 100%; height: 100%">-->
+         <img
+            v-if="dotVisible"
+            :src="dotSrc"
+            :style="dotStyle"
+            alt="dot"
+          />
         <div class="panel">
     <div class="dice" :style="diceStyle">
         <div class="side one">
@@ -107,11 +184,9 @@ import { ref } from 'vue';
         </div>
     </div>
 </div>
-
-    <button id="spin" @click="spinDice">Крутить</button>
-    <div id="result">{{ result }}</div>
-    <div class="dice" :style="diceStyle"></div>
     </div>
+      <button id="spin"  @click="generateAndSpin">Крутить</button>
+    <div id="result">{{ result }}</div>
     </div>
   <div class="column" style="width: 20%; height: 95%; margin-left: 2%;">
     <div class="row buttons">
@@ -183,8 +258,8 @@ import { ref } from 'vue';
     height: 66.67px;
     perspective: 400px;
     position: absolute;
-    left: 46.7%;
-    top: 35.5%;
+    left: 50%;
+    top: 50%;
     transform: translate(-50%, -50%);
 }
 
@@ -196,7 +271,6 @@ import { ref } from 'vue';
     margin: 1.33px;
     background-color: #7cedc1;
 }
-
 .side {
     position: absolute;
     background-color: #a2bbf7;
