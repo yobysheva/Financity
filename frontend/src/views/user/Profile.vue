@@ -1,5 +1,29 @@
 <script setup>
+import { authService } from "@/services/auth";
+import store from "../../store.js";
+import { ref } from 'vue';
 
+let user = ref({
+  username: 'имя',
+  countGames: 0,
+  winGames: 0,
+})
+
+
+async function getData() {
+  try {
+    console.log(store.state.username);
+    const response = await authService.getData(store.state.username);
+    console.log(response);
+    user.value.username = store.state.username;
+    user.value.countGames = response.data['countGames'];
+    user.value.winGames = response.data['winGames'];
+  } catch (error) {
+        console.error(error);
+  }
+}
+
+getData();
 </script>
 
 <template>
@@ -8,9 +32,8 @@
     <div class="row">
       <div class="photo"></div>
       <div class="column pr">
-        <p>Имя: Пользователь1234</p>
-        <p>Уровень: 10</p>
-        <p>Выиграно игр: 12/56</p>
+        <p>Имя: {{ user.username }}</p>
+        <p>Выиграно игр: {{ user.winGames }}/{{ user.countGames }}</p>
         <p>Место в рейтинге: 5/187</p>
       </div>
     </div>
