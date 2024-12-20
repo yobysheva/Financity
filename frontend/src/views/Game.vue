@@ -5,6 +5,26 @@ import Player from "@/views/user/Player.vue";
 // import Question from "@/views/Question.vue";
 // import QuizQuestion from "@/views/QuizQuestion.vue";
 import { ref } from 'vue';
+// import {CometChat} from "@cometchat-pro/chat";
+
+// let user = ref({
+//   username: 'name',
+//   uid: 0,
+// })
+//
+//
+// function getLoggedInUser() {
+//       CometChat.getLoggedinUser().then(
+//         user => {
+//           user.value.username = user.name;
+//           user.value.uid = user.uid;
+//         },
+//         error => {
+//           this.$router.push({ name: "homepage" });
+//           console.log(error);
+//         }
+//       );
+//     }
 
    const result = ref('');
    const diceStyle = ref({});
@@ -35,6 +55,9 @@ import { ref } from 'vue';
        // Обновление результата
        result.value = `Выпало: ${rnd}`;
    };
+
+
+// getLoggedInUser();
 </script>
 
 <template>
@@ -49,7 +72,7 @@ import { ref } from 'vue';
       <Player/>
       <Player/>
     </div>
-    <div class="column" style="height: 100%; width: 45%; margin-left: 5%;">
+    <div class="column" style="height: 100%; width: 55%; margin-left: 2%;">
       <div class="container" style="width: 100%; height: 100%;">
         <img class="image" src="../assets/financity_pole.png" style="width: 100%; height: 100%">
 <!--        <Fields/>-->
@@ -108,7 +131,7 @@ import { ref } from 'vue';
     </div>
 </div>
 
-    <button id="spin" @click="spinDice">Крутить</button>
+    <button class="button-33" role="button" id="spin" @click="spinDice">Крутить</button>
     <div id="result">{{ result }}</div>
     <div class="dice" :style="diceStyle"></div>
     </div>

@@ -18,11 +18,16 @@ class Game (models.Model):
 
 class Question(models.Model):
     QUESTION_TYPES = [
-        (1, 'Type 1'),
-        (2, 'Type 2'),
+        (1, 'Развернутый'),
+        (2, 'Варианты'),
+    ]
+    QUESTION_CATEGORIES = [
+        (1, 'Государство'),
+        (2, 'Развлечения'),
+        (3, 'Недвижимость')
     ]
     id = models.AutoField(primary_key=True)
-    category = models.CharField(max_length=100)
+    category = models.IntegerField(choices=QUESTION_CATEGORIES)
     text = models.TextField()
     type = models.IntegerField(choices=QUESTION_TYPES)
 
