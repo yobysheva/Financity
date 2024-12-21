@@ -111,7 +111,7 @@ export default {
 
   <div v-if="isRegistrationModalVisible" class="modal" id="registration-modal">
     <div class="modal-content">
-      <h2>Войдите или зарегистрируйтесь.</h2>
+      <h2 style="width: 80%; word-break: break-all;">Войдите или зарегистрируйтесь.</h2>
       <input v-model="username" class="input-custom" type="text" placeholder="Введите логин">
       <input v-model="password" class="input-custom" type="password" placeholder="Введите пароль">
       <input v-model="password2" class="input-custom" type="password" placeholder="Повторите пароль">

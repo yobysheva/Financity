@@ -96,7 +96,7 @@ export default {
           this.user.uid = cometUser.uid;
         },
         error => {
-          this.$router.push({ name: "homepage" });
+          this.$router.push({ name: "login" });
           console.log(error);
         }
       );
@@ -125,15 +125,17 @@ export default {
         members.push(new CometChat.GroupMember(user, CometChat.GROUP_MEMBER_SCOPE.PARTICIPANT))
       }
 
-      CometChat.createGroupWithMembers(group, members, []).then(
-        (response) => {
-          console.log("Group created successfully", response);
-        },
-        (error) => {
-          console.log("Some error occurred while creating group", error);
-        }
-      );
-      this.groupUsers = [];
+      return CometChat.createGroupWithMembers(group, members, []).then(
+    (response) => {
+      console.log("Group created successfully", response);
+    },
+    (error) => {
+      console.log("Some error occurred while creating group", error);
+      throw error; // Пробрасываем ошибку для обработки в makeNewGame
+    }
+  ).finally(() => {
+    this.groupUsers = [];
+  });
     },
 
     makeGroupCall(gameId) {
@@ -159,7 +161,7 @@ export default {
     },
 
     async makeNewGame() {
-  try {
+    try {
     const response = await authService.createGame({
       username: store.state.username,
     });
@@ -172,9 +174,7 @@ export default {
       const groupId = String(response.data.gameId);
 
       try {
-        // Ждём создания группы
         await this.makeGroup(groupId);
-        // После успешного создания группы инициируем звонок
         this.makeGroupCall(groupId);
       } catch (error) {
         console.error("Failed to create group or initiate call:", error);
@@ -315,8 +315,9 @@ export default {
 
         <div v-else-if="ongoingCall">
           <button class="btn btn-secondary"> Ongoing Call ... </button>
+          <div id="callScreen"></div>
         </div>
-      <CurrentGames v-if="!incomingCall"/>
+      <CurrentGames v-if="!ongoingCall"/>
     </div>
     <div class="column" style="width: 25%; height: 98%; margin: 2.5%;">
       <button class="button-33" role="button" @click="addUsersToGame">Новая игра</button>
