@@ -93,7 +93,8 @@ const moveDot = (targetIndex) => {
 };
 
 console.log(window.location.host)
-const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/`);
+const gameId = new URLSearchParams(window.location.search).get('id');
+const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${gameId}/`);
 chatSocket.onmessage = function (e) {
     let data = JSON.parse(e.data)
     console.log(data)
@@ -117,7 +118,6 @@ function sendChatMessage() {
     message.value = msg
 }
 
-const gameId = new URLSearchParams(window.location.search).get('id');
 const gameSocket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/`);
 
 gameSocket.onmessage = (event) => {
