@@ -92,8 +92,8 @@ export default {
 
   methods: {
     createSocket() {
-      const showGameSocket = new WebSocket(`ws://localhost:8000/ws/home/`);
-      showGameSocket.onmessage = (event) => {
+      this.activeGamesSocket = new WebSocket(`ws://localhost:8000/ws/home/`);
+      this.activeGamesSocket.onmessage = (event) => {
         let text_data = JSON.parse(event.data)
         console.log(text_data)
       }
@@ -104,7 +104,7 @@ export default {
         "player_id": playerId,
         "game_id": gameId
       }
-      this.showGameSocket.send(
+      this.activeGamesSocket.send(
           JSON.stringify(
               data
           )
@@ -192,8 +192,6 @@ export default {
       await store.dispatch("updateGameID", response.data.gameId);
       await store.dispatch("updatePlayerID", response.data.playerID);
       this.sendMessageToSocket(response.data.gameId, response.data.playerID)
-      // this.$router.push({ name: "Game", query: { id: response.data.gameId } });
-      console.log(response.data.gameId)
       this.$router.push({ name: "Game", query: { id: store.state.gameID } });
 
       const groupId = String(response.data.gameId);
