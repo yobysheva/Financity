@@ -41,3 +41,14 @@ class GameConsumer(WebsocketConsumer):
             'type': 'turn',
             'info': info
         }))
+
+class ShowActiveGamesConsumer(WebsocketConsumer):
+    def connect(self):
+        self.room_group_name = 'home'
+        async_to_sync(self.channel_layer.group_add)(
+            self.room_group_name,
+            self.channel_name
+        )
+
+        self.accept()
+
