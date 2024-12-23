@@ -1,6 +1,7 @@
 <script setup>
 
-import GameField from "@/views/GameField.vue";
+import GameField from "@/views/children/GameField.vue";
+
 </script>
 
 <template>
@@ -19,6 +20,6 @@ import GameField from "@/views/GameField.vue";
 <style scoped>
 .games{
   overflow-y: scroll;
-  max-height: 40vh;
+  max-height: 45vh;
 }
 </style>

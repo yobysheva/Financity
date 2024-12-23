@@ -20,13 +20,11 @@ export default {
   },
   methods: {
     authLoginUser() {
-      var apiKey = process.env.VUE_APP_COMMETCHAT_API_KEY;
       this.showSpinner = true;
 
-      CometChat.login(this.username, apiKey).then(
+      CometChat.login(this.username, "127bc8520b38325a216041848a7bba2eaaa850e0").then(
         () => {
           this.showSpinner = false;
-          this.$router.push({ name: "home" });
         },
         error => {
           this.showSpinner = false;
@@ -56,6 +54,7 @@ export default {
         if (response.status === 202) {
           // this.$emit('login', true);
           this.sendUsername();
+          this.$router.push({ name: "home" });
           this.authLoginUser();
           // this.$router.push({ name: "home" });
           this.username = '';
@@ -111,7 +110,7 @@ export default {
 
   <div v-if="isRegistrationModalVisible" class="modal" id="registration-modal">
     <div class="modal-content">
-      <h2>Войдите или зарегистрируйтесь.</h2>
+      <h2 style="width: 80%; word-break: break-all;">Войдите или зарегистрируйтесь.</h2>
       <input v-model="username" class="input-custom" type="text" placeholder="Введите логин">
       <input v-model="password" class="input-custom" type="password" placeholder="Введите пароль">
       <input v-model="password2" class="input-custom" type="password" placeholder="Повторите пароль">

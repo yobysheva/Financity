@@ -1,6 +1,11 @@
 @import 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css';
 @import 'https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css';
-
+@font-face {
+    font-family: 'Etude Noire Light';
+    src: url('fonts/etude-noire-light.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
 #app {
     font-family: "Etude Noire Light", Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -45,7 +50,7 @@
   display: block;
   transform: translate(-50%, -50%);
   /*background: #190909;*/
-  opacity: 0.95;
+  opacity: 1;
   padding: 20px;
   /*border: 4px solid #e0c3fc;*/
   z-index: 10;

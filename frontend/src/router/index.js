@@ -28,8 +28,9 @@ const routes = [
   },
   {
     path: '/game',
-    name: 'game',
-    component: Game
+    name: 'Game',
+    component: Game,
+    props: (route) => ({ id: route.query.id })
   },
 ];
 
