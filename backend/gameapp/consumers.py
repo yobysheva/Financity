@@ -52,3 +52,22 @@ class ShowActiveGamesConsumer(WebsocketConsumer):
 
         self.accept()
 
+    def receive(self, text_data=None, bytes_data=None):
+        text_data_json = json.loads(text_data)
+
+        async_to_sync(self.channel_layer.group_send)(
+            self.room_group_name,
+            {
+                'type': 'change_active_games_list_handler',
+                "data": text_data_json
+            }
+        )
+
+    def change_active_games_list_handler(self, event):
+        data = event['data']
+
+        self.send(text_data=json.dumps(data))
+
+
+
+
