@@ -9,9 +9,6 @@ from django.contrib.auth import login
 from user.models import User
 import json
 import requests
-from dotenv import load_dotenv
-from pathlib import Path
-import os
 import threading
 
 
