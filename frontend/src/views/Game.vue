@@ -1,10 +1,10 @@
 <script setup>
-
+// import ChatComponent from "@/views/ChatComponent.vue"
 import Player from "@/views/user/Player.vue";
 // import Fields from "@/views/Fields.vue";
 // import Question from "@/views/Question.vue";
 // import QuizQuestion from "@/views/QuizQuestion.vue";
-import { ref } from 'vue';
+import {ref} from 'vue';
 // import {CometChat} from "@cometchat-pro/chat";
 
 // let user = ref({
@@ -26,6 +26,14 @@ import { ref } from 'vue';
 //       );
 //     }
 
+const messages = ref([
+  {
+    id: 0,
+    msg: "content"
+  }
+])
+
+let global_id = 0
 const positions = [
   [6.3, 9], [15.3, 9], [26.3, 9], [37.3, 9], [47.3, 9], [56.7, 9], [67.7, 9],
   [78.7, 9], [88.3, 9], [88.3, 23], [88.3, 36], [88.3, 56], [88.3, 69],
@@ -52,6 +60,7 @@ let currentIndex = ref(0);
 let lastRoll = ref(null);
 let lastX = ref(0);
 let lastY = ref(0);
+let message = ref("")
 
 const moveDot = (targetIndex) => {
   const steps = [];
@@ -82,6 +91,31 @@ const moveDot = (targetIndex) => {
 
   moveNext();
 };
+
+console.log(window.location.host)
+const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/`);
+chatSocket.onmessage = function (e) {
+    let data = JSON.parse(e.data)
+    console.log(data)
+    console.log(messages)
+    message.value = data["message"].value
+    messages.value.push({
+      id: global_id += 1,
+      msg: data["message"].toString()
+    })
+
+    console.log(messages)
+}
+
+function sendMessage() {
+    const input = document.getElementById("123")
+    const msg = input.value
+    chatSocket.send(JSON.stringify({
+      "message": msg
+    }))
+    console.log(msg)
+    message.value = msg
+}
 
 const generateAndSpin = () => {
   let rnd = Math.floor(Math.random() * 6 + 1);
@@ -214,10 +248,16 @@ const generateAndSpin = () => {
       <button class="button-33" role="button">Выйти из игры</button>
       <button class="button-33" role="button">?</button>
     </div>
-    <div class="container" style="width: 100%; height: 100%">
-      <p>Тут должен быть чат</p>
-      <p>Он будет высотой во весь экран</p>
-    </div>
+    <ul class="container">
+      <div v-for="message in messages" v-bind:key="message.id">
+          {{ message.msg }}
+      </div>
+    </ul>
+    <input id="123">
+    <button @click="sendMessage" style="width: 100%; height: 5vh">
+      mbutton
+    </button>
+
     </div>
   </div>
 </div>
