@@ -107,7 +107,7 @@ chatSocket.onmessage = function (e) {
     console.log(messages)
 }
 
-function sendMessage() {
+function sendChatMessage() {
     const input = document.getElementById("123")
     const msg = input.value
     chatSocket.send(JSON.stringify({
@@ -117,10 +117,50 @@ function sendMessage() {
     message.value = msg
 }
 
+const gameId = new URLSearchParams(window.location.search).get('id');
+const gameSocket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/`);
+
+gameSocket.onmessage = (event) => {
+    let text_data = JSON.parse(event.data);
+    let info = text_data["info"];
+    let type = text_data['type'];
+    console.log(type)
+    switch (type) {
+        case "turn":
+            console.log("play_turn_animation")
+          // eslint-disable-next-line no-case-declarations
+            const turn_count = info["turn_count"];
+
+            spin(turn_count);
+            break;
+    }
+    console.log(info);
+};
+
+
+function sendGameInfo(turn_count) {
+    const info = {
+        "type": "turn",
+        "info": {
+          "turn_count": turn_count,
+          // "player_id": player_id
+        }
+
+    }
+    gameSocket.send(JSON.stringify(
+        info
+    ))
+}
+
 const generateAndSpin = () => {
   let rnd = Math.floor(Math.random() * 6 + 1);
   totalSum.value += rnd;
 
+  sendGameInfo(rnd)
+  // spin(rnd)
+}
+
+function spin(rnd) {
   let x, y;
 
   if (lastRoll.value === rnd) {
@@ -142,7 +182,6 @@ const generateAndSpin = () => {
         break;
     }
   }
-
   diceStyle.value = {
     transform: `translateZ(-100px) rotateY(${x}deg) rotateX(${y}deg)`
   };
@@ -158,7 +197,7 @@ const generateAndSpin = () => {
   }, 1200);
 
   result.value = `Выпало: ${rnd}`;
-};
+}
 
 // getLoggedInUser();
 </script>
@@ -254,7 +293,7 @@ const generateAndSpin = () => {
       </div>
     </ul>
     <input id="123">
-    <button @click="sendMessage" style="width: 100%; height: 5vh">
+    <button @click="sendChatMessage" style="width: 100%; height: 5vh">
       mbutton
     </button>
 
