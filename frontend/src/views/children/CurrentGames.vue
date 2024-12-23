@@ -1,6 +1,7 @@
 <script setup>
 
 import GameField from "@/views/children/GameField.vue";
+
 </script>
 
 <template>

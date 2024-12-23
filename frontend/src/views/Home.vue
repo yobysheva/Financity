@@ -167,8 +167,10 @@ export default {
     if (response.status === 200) {
       await store.dispatch("updateGameID", response.data.gameId);
       await store.dispatch("updatePlayerID", response.data.playerID);
-      // this.$router.push({ name: "game" });
+      // this.$router.push({ name: "Game", query: { id: response.data.gameId } });
       console.log(response.data.gameId)
+      this.$router.push({ name: "Game", query: { id: store.state.gameID } });
+
       const groupId = String(response.data.gameId);
 
       try {
@@ -315,6 +317,7 @@ export default {
 
         <div v-else-if="ongoingCall">
           <button class="btn btn-secondary"> Ongoing Call ... </button>
+          <div id="callScreen"></div>
         </div>
       <CurrentGames v-if="!incomingCall"/>
     </div>

@@ -26,7 +26,6 @@ export default {
       CometChat.login(this.username, apiKey).then(
         () => {
           this.showSpinner = false;
-          this.$router.push({ name: "home" });
         },
         error => {
           this.showSpinner = false;
@@ -56,6 +55,7 @@ export default {
         if (response.status === 202) {
           // this.$emit('login', true);
           this.sendUsername();
+          this.$router.push({ name: "home" });
           this.authLoginUser();
           // this.$router.push({ name: "home" });
           this.username = '';
