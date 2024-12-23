@@ -1,4 +1,15 @@
 <script setup>
+
+import { defineProps, defineEmits } from 'vue';
+
+defineProps({
+  caseTitle: String,
+  questionText: String,
+  visible: Boolean,
+  color: String
+});
+const emit = defineEmits(['close']);
+
   document.addEventListener("DOMContentLoaded", function() {
     const textarea = document.querySelector('.input-custom');
     const container = document.querySelector('.modal-container');
@@ -14,18 +25,25 @@
 </script>
 
 <template>
-<div class="modal" style="top: 35%; width: 50%; min-height: 40%; height: auto;overflow: visible;">
-  <div class="container modal-container" style="width: 100%; min-height: 100%; ">
+<div v-if="visible" class="modal" :style="{
+      top: '35%',
+      width: '50%',
+      minHeight: '40%',
+      height: 'auto',
+      overflow: 'visible'
+    }">
+  <div class="container modal-container" :style="{backgroundColor: color, width: '100%', minHeight: '100%'}">
     <div class="column">
       <div class="row">
-      <div class="photo"></div>
-      <h3 style="width: 400px;">Это какой-то вопрос на очень важную тему, дайте свой ответ</h3>
+        <h3 style="width: 400px;">{{ caseTitle }} </h3>
+      <h3 style="width: 400px;">{{ questionText }} </h3>
     </div>
       <textarea class="input-custom" style="min-height: 60%; width: 400px;" placeholder="Введите свой ответ или проговорите его вслух"></textarea>
     </div>
+    <button class="button-33" role="button" @click="emit('close')">Закрыть</button>
   </div>
 </div>
-  <div class="overlay"></div>
+  <div v-if="visible" class="overlay"></div>
 </template>
 
 <style scoped>

@@ -1,40 +1,247 @@
 <script setup>
-
+// import ChatComponent from "@/views/ChatComponent.vue"
 import Player from "@/views/user/Player.vue";
 // import Fields from "@/views/Fields.vue";
-// import Question from "@/views/Question.vue";
+  import Question from "@/views/Question.vue";
 // import QuizQuestion from "@/views/QuizQuestion.vue";
-import { ref } from 'vue';
+import {ref} from 'vue';
+// import {CometChat} from "@cometchat-pro/chat";
 
-   const result = ref('');
-   const diceStyle = ref({});
+// let user = ref({
+//   username: 'name',
+//   uid: 0,
+// })
+//
+//
+// function getLoggedInUser() {
+//       CometChat.getLoggedinUser().then(
+//         user => {
+//           user.value.username = user.name;
+//           user.value.uid = user.uid;
+//         },
+//         error => {
+//           this.$router.push({ name: "homepage" });
+//           console.log(error);
+//         }
+//       );
+//     }
 
-   const spinDice = () => {
-       let rnd = Math.floor(Math.random() * 6 + 1);
-       let x, y;
+let global_id = 0;
+const positions = [
+  [6.3, 9], [15.3, 9], [26.3, 9], [37.3, 9], [47.3, 9], [56.7, 9], [67.7, 9],
+  [78.7, 9], [88.3, 9], [88.3, 23], [88.3, 36], [88.3, 56], [88.3, 69],
+  [88.3, 83], [78.7, 83], [67.7, 83], [56.7, 83], [47.3, 83], [37.3, 83],
+  [26.3, 83], [15.3, 83], [5.3, 85], [6.3, 69], [6.3, 56], [6.3, 36],
+  [6.3, 23]
+];
 
-       switch (rnd) {
-           case 1:
-               x = 720;
-               y = 810;
-               break;
-           case 6:
-               x = 720;
-               y = 990;
-               break;
-           default:
-               x = 720 + (6 - rnd) * 90;
-               y = 900;
-               break;
-       }
+const dotStyle = ref({
+  width: "20px",
+  height: "20px",
+  position: "absolute",
+  left: `${positions[0][0]}%`,
+  top: `${positions[0][1]}%`,
+  transition: "all 0.3s ease"
+});
 
-       diceStyle.value = {
-           transform: `translateZ(-100px) rotateY(${x}deg) rotateX(${y}deg)`,
-       };
+const dotVisible = ref(true);
+const result = ref("");
+const diceStyle = ref({});
+const totalSum = ref(0);
+const currentIndex = ref(0);
+const lastRoll = ref(null);
+const lastX = ref(0);
+const lastY = ref(0);
 
-       // Обновление результата
-       result.value = `Выпало: ${rnd}`;
-   };
+const isSpinDisabled = ref(true);
+const spinButtonLabel = ref("Крутить");
+let spinTimer = null;
+
+const questions = {
+  state: ["Вопрос 1 (Государство)", "Вопрос 2 (Государство)", "Вопрос 3 (Государство)"],
+  entertainment: ["Вопрос 1 (Развлечения)", "Вопрос 2 (Развлечения)", "Вопрос 3 (Развлечения)"],
+  realEstate: ["Вопрос 1 (Недвижимость)", "Вопрос 2 (Недвижимость)", "Вопрос 3 (Недвижимость)"]
+};
+
+const modalVisible = ref(false);
+const modalTitle = ref("");
+const modalQuestion = ref("");
+
+const getRandomQuestion = (category) => {
+  const caseQuestions = questions[category];
+  return caseQuestions[Math.floor(Math.random() * caseQuestions.length)];
+};
+const modalColor = ref("")
+const checkPositionAndShowModal = (currentCoords) => {
+  const stateCoords = [[15.3, 9], [26.3, 9], [37.3, 9], [6.3, 36], [6.3, 23]];
+  const entertainmentCoords = [[56.7, 9], [67.7, 9], [78.7, 9], [88.3, 23], [88.3, 36]];
+  const realEstateCoords = [[88.3, 56], [88.3, 69], [78.7, 83], [67.7, 83], [56.7, 83]];
+  const allCasesCoords = [[37.3, 83], [26.3, 83], [15.3, 83], [6.3, 69], [6.3, 56]];
+
+  let category = null;
+
+  if (stateCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
+    category = "state";
+    modalColor.value = "#ADA1F6"; // Фиолетовый
+  } else if (entertainmentCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
+    category = "entertainment";
+    modalColor.value = "#FFBBF8"; // Розовый
+  } else if (realEstateCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
+    category = "realEstate";
+    modalColor.value = "#C8E3FE"; // Голубой
+  } else if (allCasesCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
+    category = ["state", "entertainment", "realEstate"][Math.floor(Math.random() * 3)];
+    modalColor.value = "#E7FC93"; // Желтый
+  }
+
+  if (category) {
+    modalTitle.value = `Кейс: ${category === "state" ? "Государство" : category === "entertainment" ? "Развлечения" : "Недвижимость"}`;
+    modalQuestion.value = getRandomQuestion(category);
+     setTimeout(() => {
+          modalVisible.value = true;
+        }, 500);
+  }
+};
+const closeModal = () => {
+  modalVisible.value = false; // Закрытие модального окна
+};
+const moveDot = (targetIndex) => {
+  const steps = [];
+  if (targetIndex > currentIndex.value) {
+    for (let i = currentIndex.value + 1; i <= targetIndex; i++) {
+      steps.push(i);
+    }
+  } else {
+    for (let i = currentIndex.value + 1; i < positions.length; i++) {
+      steps.push(i);
+    }
+    for (let i = 0; i <= targetIndex; i++) {
+      steps.push(i);
+    }
+  }
+
+  let stepIndex = 0;
+  const moveNext = () => {
+    if (stepIndex < steps.length) {
+      const [leftPercent, topPercent] = positions[steps[stepIndex]];
+      dotStyle.value.left = `${leftPercent}%`;
+      dotStyle.value.top = `${topPercent}%`;
+      currentIndex.value = steps[stepIndex];
+      stepIndex++;
+
+      if (stepIndex === steps.length) {
+        const [currentX, currentY] = positions[currentIndex.value];
+        checkPositionAndShowModal([currentX, currentY]);
+      }
+
+      setTimeout(moveNext, 300);
+    }
+  };
+
+  moveNext();
+};
+
+const generateAndSpin = () => {
+  let rnd = Math.floor(Math.random() * 6 + 1);
+  totalSum.value += rnd;
+
+  let x, y;
+
+  if (lastRoll.value === rnd) {
+    x = lastX.value + 360;
+    y = lastY.value + 360;
+  } else {
+    switch (rnd) {
+      case 1:
+        x = 720;
+        y = 810;
+        break;
+      case 6:
+        x = 720;
+        y = 990;
+        break;
+      default:
+        x = 720 + (6 - rnd) * 90;
+        y = 900;
+        break;
+    }
+  }
+
+  diceStyle.value = {
+    transform: `translateZ(-100px) rotateY(${x}deg) rotateX(${y}deg)`
+  };
+
+  lastX.value = x;
+  lastY.value = y;
+  lastRoll.value = rnd;
+
+  setTimeout(() => {
+    let targetIndex = totalSum.value % 26;
+    if (targetIndex < 0) targetIndex += 26;
+    moveDot(targetIndex);
+  }, 1200);
+
+  result.value = `Выпало: ${rnd}`;
+  isSpinDisabled.value = true;
+  spinButtonLabel.value = "Крутить";
+};
+
+const manualSpin = () => {
+  clearTimeout(spinTimer);
+  generateAndSpin();
+};
+
+const startTurn = () => {
+  isSpinDisabled.value = false;
+  spinButtonLabel.value = "Крутить (3 сек)";
+  let countdown = 3;
+
+  const updateLabel = () => {
+    if (countdown > 0) {
+      spinButtonLabel.value = `Крутить (${countdown--} сек)`;
+      spinTimer = setTimeout(updateLabel, 1000);
+    } else {
+      generateAndSpin();
+    }
+  };
+
+  updateLabel();
+};
+
+const messages = ref([
+  {
+    id: 0,
+    msg: "content"
+  }
+])
+let message = ref("")
+
+console.log(window.location.host)
+const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/`);
+chatSocket.onmessage = function (e) {
+    let data = JSON.parse(e.data)
+    console.log(data)
+    console.log(messages)
+    message.value = data["message"].value
+    messages.value.push({
+      id: global_id += 1,
+      msg: data["message"].toString()
+    })
+
+    console.log(messages)
+}
+
+function sendMessage() {
+    const input = document.getElementById("123")
+    const msg = input.value
+    chatSocket.send(JSON.stringify({
+      "message": msg
+    }))
+    console.log(msg)
+    message.value = msg
+}
+
+// getLoggedInUser();
 </script>
 
 <template>
@@ -49,11 +256,17 @@ import { ref } from 'vue';
       <Player/>
       <Player/>
     </div>
-    <div class="column" style="height: 100%; width: 45%; margin-left: 5%;">
-      <div class="container" style="width: 100%; height: 100%;">
+    <div class="column" style="height: 100%; width: 55%; margin-left: 2%;">
+      <div class="container" style="width: 100%; height: 100%; position: relative">
         <img class="image" src="../assets/financity_pole.png" style="width: 100%; height: 100%">
 <!--        <Fields/>-->
 <!--        <img src="../assets/kletki.svg" style="position:absolute; top: 0px; left: 0px; width: 100%; height: 100%">-->
+         <img
+            v-if="dotVisible"
+            :src="dotSrc"
+            :style="dotStyle"
+            alt="dot"
+          />
         <div class="panel">
     <div class="dice" :style="diceStyle">
         <div class="side one">
@@ -107,21 +320,36 @@ import { ref } from 'vue';
         </div>
     </div>
 </div>
-
-    <button id="spin" @click="spinDice">Крутить</button>
-    <div id="result">{{ result }}</div>
-    <div class="dice" :style="diceStyle"></div>
     </div>
+       <!-- Кнопка "Сделать ход" -->
+    <button class="button-33" @click="startTurn">Сделать ход</button>
+
+    <!-- Кнопка "Крутить" -->
+    <button
+      class="button-33"
+      :disabled="isSpinDisabled"
+      @click="manualSpin">
+      {{ spinButtonLabel }}
+    </button>
+      <Question :caseTitle= modalTitle  :questionText=modalQuestion :visible="modalVisible" :color="modalColor" @close="closeModal" />
+
+    <div id="result">{{ result }}</div>
     </div>
   <div class="column" style="width: 20%; height: 95%; margin-left: 2%;">
     <div class="row buttons">
       <button class="button-33" role="button">Выйти из игры</button>
       <button class="button-33" role="button">?</button>
     </div>
-    <div class="container" style="width: 100%; height: 100%">
-      <p>Тут должен быть чат</p>
-      <p>Он будет высотой во весь экран</p>
-    </div>
+    <ul class="container">
+      <div v-for="message in messages" v-bind:key="message.id">
+          {{ message.msg }}
+      </div>
+    </ul>
+    <input id="123">
+    <button @click="sendMessage" style="width: 100%; height: 5vh">
+      mbutton
+    </button>
+
     </div>
   </div>
 </div>
@@ -183,8 +411,8 @@ import { ref } from 'vue';
     height: 66.67px;
     perspective: 400px;
     position: absolute;
-    left: 46.7%;
-    top: 35.5%;
+    left: 50%;
+    top: 50%;
     transform: translate(-50%, -50%);
 }
 
@@ -291,5 +519,12 @@ import { ref } from 'vue';
   border-radius: 10px;
     transform: rotateX(90deg) translateZ(33.33px);
     z-index: 6;
+}
+.button-33 {
+  cursor: pointer;
+}
+
+.button-33:disabled {
+  cursor: not-allowed;
 }
 </style>
