@@ -41,6 +41,7 @@ let loggedUser = ref({
   uid: 0,
 });
 
+let players = []
 let callInformation = ref({
       session_id: "",
       receiver_id: null,
@@ -346,27 +347,46 @@ function sendMessage() {
 }
 
 
-const gameSocket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/`);
+const gameSocket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/${loggedUser.value.uid}/`);
 gameSocket.onmessage = (event) => {
     let text_data = JSON.parse(event.data);
     let info = text_data["info"];
     let type = text_data['type'];
     console.log(type)
     switch (type) {
-        case "turn":
+        case "on_turn_start":
             console.log("play_turn_animation")
           // eslint-disable-next-line no-case-declarations
             const turn_count = info["turn_count"];
             totalSum.value += turn_count;
             spin(turn_count);
             break;
+        case "on_question_open":
+            break;
+        case "notification_about_connect_to_game":
+            players.append(info['player_id'])
+            break;
+
     }
     console.log(info);
 };
 
-function sendGameInfo(turn_count) {
+// function sendQuestion() {
+//   const info = {
+//     "type": "on_question_open",
+//     "info": {
+//       "title": modalTitle.value,
+//       "question": modalQuestion.value
+//     }
+//   }
+//   gameSocket.send(JSON.stringify(
+//       info
+//   ))
+// }
+
+function sendTurnCount(turn_count) {
     const info = {
-        "type": "turn",
+        "type": "on_turn_start",
         "info": {
           "turn_count": turn_count,
           // "player_id": player_id
@@ -380,7 +400,7 @@ function sendGameInfo(turn_count) {
 
 const generateAndSpin = () => {
   let rnd = Math.floor(Math.random() * 6 + 1);
-  sendGameInfo(rnd)
+  sendTurnCount(rnd)
 };
 function spin(rnd) {
   let x, y;

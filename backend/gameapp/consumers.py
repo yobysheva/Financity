@@ -8,15 +8,26 @@ class GameConsumer(WebsocketConsumer):
     }
 
     def connect(self):
-        self.id = self.scope["url_route"]["kwargs"]["game_id"]
-        self.room_group_name = f'game_{self.id}'
+        self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
+        self.player_id = self.scope["url_route"]["kwargs"]["player_id"]
+        self.room_group_name = f'game_{self.game_id}'
 
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name,
             self.channel_name
         )
 
-        print(f"Connected to game {self.id}")
+        async_to_sync(self.channel_layer.group_send)(
+            self.room_group_name,
+            {
+                'type': 'notification_about_connect_to_game_handler',
+                'info': {
+                    'player_id': self.player_id,
+                }
+            }
+        )
+
+        print(f"Connected to game {self.game_id}")
         self.accept()
 
     def receive(self, text_data=None, bytes_data=None):
@@ -38,7 +49,15 @@ class GameConsumer(WebsocketConsumer):
         info = event['info']
 
         self.send(text_data=json.dumps({
-            'type': 'turn',
+            'type': 'on_turn_start',
+            'info': info
+        }))
+
+    def notification_about_connect_to_game_handler(self, event):
+        info = event['info']
+
+        self.send(text_data=json.dumps({
+            'type': 'notification_about_connect_to_game',
             'info': info
         }))
 
@@ -62,6 +81,9 @@ class ShowActiveGamesConsumer(WebsocketConsumer):
                 "data": text_data_json
             }
         )
+
+    def disconnect(self, close_code):
+        async_to_sync(self.channel_layer.group_discard)(self.room_group_name, self.channel_name)
 
     def change_active_games_list_handler(self, event):
         data = event['data']
@@ -96,6 +118,9 @@ class SendGameRequestConsumer(WebsocketConsumer):
                 }
             }
         )
+
+    def disconnect(self, close_code):
+        async_to_sync(self.channel_layer.group_discard)(self.room_group_name, self.channel_name)
 
     def send_game_request_handler(self, event):
         data = event['data']
