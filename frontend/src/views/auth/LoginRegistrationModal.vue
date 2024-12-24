@@ -25,6 +25,7 @@ export default {
       CometChat.login(this.username, "127bc8520b38325a216041848a7bba2eaaa850e0").then(
         () => {
           this.showSpinner = false;
+          this.$router.push({ name: "home" });
         },
         error => {
           this.showSpinner = false;
@@ -54,7 +55,6 @@ export default {
         if (response.status === 202) {
           // this.$emit('login', true);
           this.sendUsername();
-          this.$router.push({ name: "home" });
           this.authLoginUser();
           // this.$router.push({ name: "home" });
           this.username = '';
@@ -83,8 +83,8 @@ export default {
           if (response.status === 201) {
             this.openLogin();
             alert("User registered successfully!");
-            // this.username = '';
-            // this.password = '';
+            this.username = '';
+            this.password = '';
             this.password2 = '';
           }
         } catch (error) {
