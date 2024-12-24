@@ -69,7 +69,7 @@ class Chance(models.Model):
     text = models.TextField()
     sum = models.FloatField()
     period = models.IntegerField()
-
+    scip = models.BooleanField(default=False)
     def __str__(self):
         return f"Chance {self.id} with action {self.text}"
 

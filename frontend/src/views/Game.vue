@@ -334,6 +334,7 @@ gameSocket.onmessage = (event) => {
     }
     console.log(info);
 };
+
 function sendGameInfo(turn_count) {
     const info = {
         "type": "turn",
