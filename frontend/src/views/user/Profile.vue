@@ -75,7 +75,6 @@ getData();
 }
 
 .photo:hover {
-  //background-color: rgba(100, 255, 200, .9);
   outline: none;
   border-color: rgba(44, 187, 99, .6);
   box-shadow: rgba(44, 187, 99, .35) 0 0 5px;

@@ -12,6 +12,9 @@ export const authService = {
     createGame(userData) {
         return axios.post(`${apiUrl}gameApp/createGame/`, userData);
     },
+    createPlayer(userData){
+        return axios.post(`${apiUrl}gameApp/createPlayer/`, userData);
+    },
     getData(username) {
         return axios.get(`${apiUrl}user/getData/`, {params : {username : username}});
     },

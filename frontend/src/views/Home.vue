@@ -112,13 +112,17 @@ export default {
     },
 
     getLoggedInUser() {
+      if(!store.state.username) {
+        this.$router.push({ name: "login" });
+        return;
+      }
       CometChat.getLoggedinUser().then(
         cometUser => {
           this.user.username = cometUser.name;
           this.user.uid = cometUser.uid;
         },
         error => {
-          // this.$router.push({ name: "login" });
+          this.$router.push({ name: "login" });
           console.log(error);
         }
       );
@@ -225,7 +229,7 @@ export default {
       this.ongoingCall = true;
       this.incomingCall = false;
       var sessionID = this.session_id;
-      this.$router.push({ name: "Game", query: { id: 44} });
+      this.$router.push({ name: "Game", query: { id: 54} });
       CometChat.acceptCall(sessionID).then(
         call => {
           console.log("Call accepted successfully:", call);
