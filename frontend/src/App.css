@@ -1,13 +1,14 @@
 @import 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css';
 @import 'https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css';
 @font-face {
-    font-family: 'Etude Noire Light';
+    font-family: 'myfont';
     src: url('fonts/etude-noire-light.woff') format('woff');
+    src: url('fonts/etude-noire-light.woff2') format('woff2');
     font-weight: normal;
     font-style: normal;
 }
 #app {
-    font-family: "Etude Noire Light", Helvetica, Arial, sans-serif;
+    font-family: "myfont", Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
@@ -131,7 +132,7 @@ h3{
   cursor: pointer;
   display: inline-block;
   /*font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif;*/
-  font-family: "Etude Noire Light", Helvetica, Arial, sans-serif;
+  font-family: "myfont", Helvetica, Arial, sans-serif;
   padding: 7px 20px;
   text-align: center;
   text-decoration: none;
