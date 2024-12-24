@@ -43,6 +43,8 @@ let loggedUser = ref({
 });
 
 let players = []
+let current_player_index = 0
+
 let callInformation = ref({
       session_id: "",
       receiver_id: null,
@@ -271,18 +273,30 @@ const checkPositionAndShowModal = (currentCoords) => {
       modalChanceVisible.value = true;
     }, 500);
   }
-
-  if (category) {
+  console.log(loggedUser.value.uid.toString(), players)
+  if (category && players[current_player_index] === loggedUser.value.uid.toString()) {
     modalTitle.value = `Кейс: ${category === "state" ? "Государство" : category === "entertainment" ? "Развлечения" : "Недвижимость"}`;
     modalQuestion.value = getRandomQuestion(category);
-     setTimeout(() => {
-          modalVisible.value = true;
-        }, 500);
+    console.log("smth")
+    sendQuestion()
+    setTimeout(() => {
+        modalVisible.value = true;
+    }, 500);
+
   }
 };
+const openModalWithValues = (title, question) => {
+  modalTitle.value = title
+  modalQuestion.value = question
+  setTimeout(() => {
+        modalVisible.value = true;
+    }, 500);
+}
+
 const closeModal = () => {
   modalVisible.value = false;
   modalChanceVisible.value = false;
+  sendCloseQuestion()
 };
 const moveDot = (targetIndex) => {
   const steps = [];
@@ -351,39 +365,65 @@ function sendMessage() {
 const gameSocket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/${loggedUser.value.uid}/`);
 gameSocket.onmessage = (event) => {
     let text_data = JSON.parse(event.data);
+    text_data = text_data["info"];
     let info = text_data["info"];
     let type = text_data['type'];
-    console.log(type)
     switch (type) {
         case "on_turn_start":
-            console.log("play_turn_animation")
           // eslint-disable-next-line no-case-declarations
             const turn_count = info["turn_count"];
+            console.log("?")
             totalSum.value += turn_count;
             spin(turn_count);
             break;
         case "on_question_open":
+          // eslint-disable-next-line no-case-declarations
+            const title = info["title"]
+          // eslint-disable-next-line no-case-declarations
+            const question = info["question"]
+            if (!players[current_player_index] === loggedUser.value.uid.toString())
+            openModalWithValues(
+                title, question
+            )
+            break;
+        case "on_question_close":
+            modalVisible.value = false
+            modalChanceVisible.value = false
             break;
         case "notification_about_connect_to_game":
             players.push(info['player_id']);
             break;
 
     }
-    console.log(info);
+    console.log(text_data);
 };
 
-// function sendQuestion() {
-//   const info = {
-//     "type": "on_question_open",
-//     "info": {
-//       "title": modalTitle.value,
-//       "question": modalQuestion.value
-//     }
-//   }
-//   gameSocket.send(JSON.stringify(
-//       info
-//   ))
-// }
+function sendCloseQuestion() {
+    current_player_index++
+    const info = {
+        "type": "on_question_close",
+        "info": {
+            "player_index": current_player_index %= players.length,
+            "result": false
+        }
+    }
+    gameSocket.send(JSON.stringify(
+        info
+    ))
+}
+
+function sendQuestion() {
+  const info = {
+    "type": "on_question_open",
+    "info": {
+      "title": modalTitle.value,
+      "question": modalQuestion.value
+    }
+  }
+  gameSocket.send(JSON.stringify(
+      info
+  ))
+}
 
 function sendTurnCount(turn_count) {
     const info = {

@@ -32,8 +32,8 @@ class GameConsumer(WebsocketConsumer):
 
     def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
-        info = text_data_json["info"]
-
+        info = text_data_json
+        print(info)
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
@@ -49,7 +49,6 @@ class GameConsumer(WebsocketConsumer):
         info = event['info']
 
         self.send(text_data=json.dumps({
-            'type': 'on_turn_start',
             'info': info
         }))
 
@@ -57,8 +56,10 @@ class GameConsumer(WebsocketConsumer):
         info = event['info']
 
         self.send(text_data=json.dumps({
-            'type': 'notification_about_connect_to_game',
-            'info': info
+            'info': {
+                "info": info,
+                "type": 'notification_about_connect_to_game'
+            }
         }))
 
 class ShowActiveGamesConsumer(WebsocketConsumer):
