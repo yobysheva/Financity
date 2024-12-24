@@ -273,8 +273,8 @@ const checkPositionAndShowModal = (currentCoords) => {
       modalChanceVisible.value = true;
     }, 500);
   }
-  console.log(loggedUser.value.uid.toString(), players)
-  if (category && players[current_player_index] === loggedUser.value.uid.toString()) {
+  console.log(store.state.playerID.toString(), players)
+  if (category && players[current_player_index] === store.state.playerID.toString()) {
     modalTitle.value = `Кейс: ${category === "state" ? "Государство" : category === "entertainment" ? "Развлечения" : "Недвижимость"}`;
     modalQuestion.value = getRandomQuestion(category);
     console.log("smth")
@@ -362,7 +362,7 @@ function sendMessage() {
 }
 
 
-const gameSocket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/${loggedUser.value.uid}/`);
+const gameSocket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/${store.state.playerID}/`);
 gameSocket.onmessage = (event) => {
     let text_data = JSON.parse(event.data);
     text_data = text_data["info"];
@@ -381,7 +381,7 @@ gameSocket.onmessage = (event) => {
             const title = info["title"]
           // eslint-disable-next-line no-case-declarations
             const question = info["question"]
-            if (!players[current_player_index] === loggedUser.value.uid.toString())
+            if (players[current_player_index] ===! store.state.playerID.toString())
             openModalWithValues(
                 title, question
             )
