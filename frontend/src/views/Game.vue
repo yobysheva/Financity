@@ -2,29 +2,160 @@
 // import ChatComponent from "@/views/ChatComponent.vue"
 import Player from "@/views/user/Player.vue";
 // import Fields from "@/views/Fields.vue";
-// import Question from "@/views/Question.vue";
+import Question from "@/views/Question.vue";
 // import QuizQuestion from "@/views/QuizQuestion.vue";
 import {ref} from 'vue';
-// import {CometChat} from "@cometchat-pro/chat";
+// import { getCurrentInstance } from 'vue';
+import {CometChat} from "@cometchat-pro/chat";
+import dotImage from '@/assets/dot.png';
+const dotSrc = dotImage;
 
-// let user = ref({
-//   username: 'name',
-//   uid: 0,
-// })
+// const props = defineProps({
+//   id: {
+//     type: String,
+//     required: true
+//   },
+//   sessionId: {
+//     type: String,
+//     required: false
+//   },
+//   userType: {
+//     type: Boolean,
+//     required: true
+//   }
+// });
+
+let loggedUser = ref({
+  username: 'name',
+  uid: 0,
+});
+
+let callInformation = ref({
+      session_id: "",
+      receiver_id: null,
+      GameCreated: false,
+      IsGameRequested: false,
+      incomingCall: false,
+      ongoingCall: false,
+})
+
+function getLoggedInUser() {
+      CometChat.getLoggedinUser().then(
+        user => {
+          loggedUser.value.username = user.name;
+          loggedUser.value.uid = user.uid;
+        },
+        error => {
+          this.$router.push({ name: "homepage" });
+          console.log(error);
+        }
+      );
+    }
+
+getLoggedInUser();
 //
-//
-// function getLoggedInUser() {
-//       CometChat.getLoggedinUser().then(
-//         user => {
-//           user.value.username = user.name;
-//           user.value.uid = user.uid;
+// if(!props.userType){
+  // let sessionID = props.sessionId;
+
+// CometChat.acceptCall(props.sessionId).then(
+//         call => {
+//           console.log("Call accepted successfully:", call);
+//           console.log("call accepted now....");
+//           // start the call using the startCall() method
+//           console.log(callInformation.value.ongoingCall);
+//           CometChat.startCall(
+//             call.sessionId,
+//             document.getElementById("callScreen"),
+//             new CometChat.OngoingCallListener({
+//               onUserJoined: user => {
+//                 /* Notification received here if another user joins the call. */
+//                 console.log("User joined call:", user);
+//                 /* this method can be use to display message or perform any actions if someone joining the call */
+//               },
+//               onUserLeft: user => {
+//                 /* Notification received here if another user left the call. */
+//                 console.log("User left call:", user);
+//                 /* this method can be use to display message or perform any actions if someone leaving the call */
+//               },
+//               onCallEnded: call => {
+//                 /* Notification received here if current ongoing call is ended. */
+//                 console.log("Call ended:", call);
+//                 callInformation.value.ongoingCall = false;
+//                 callInformation.value.incomingCall = false;
+//                 /* hiding/closing the call screen can be done here. */
+//               }
+//             })
+//           );
 //         },
 //         error => {
-//           this.$router.push({ name: "homepage" });
-//           console.log(error);
+//           console.log("Call acceptance failed with error", error);
+//           // handle exception
 //         }
 //       );
-//     }
+// } else {
+  // let globalContext = callInformation.value;
+    var listnerID = loggedUser.value.username;
+    CometChat.addCallListener(
+      listnerID,
+      new CometChat.CallListener({
+        onIncomingCallReceived(call) {
+          console.log("Incoming call:", call);
+          callInformation.value.incomingCall = true;
+          callInformation.value.session_id = call.sessionId;
+        },
+
+        onOutgoingCallAccepted(call) {
+          console.log("Outgoing call accepted:", call);
+          callInformation.value.ongoingCall = true;
+          CometChat.startCall(
+            call.sessionId,
+            document.getElementById("callScreen"),
+            new CometChat.OngoingCallListener({
+              onUserJoined: user => {
+                /* Notification received here if another user joins the call. */
+                console.log("User joined call:", user);
+                /* this method can be use to display message or perform any actions if someone joining the call */
+              },
+              onUserLeft: user => {
+                /* Notification received here if another user left the call. */
+                console.log("User left call:", user);
+                /* this method can be use to display message or perform any actions if someone leaving the call */
+              },
+              onCallEnded: call => {
+                callInformation.value.ongoingCall = false;
+                callInformation.value.incomingCall = false;
+                /* Notification received here if current ongoing call is ended. */
+                console.log("Call ended:", call);
+                /* hiding/closing the call screen can be done here. */
+              }
+            })
+          );
+          // Outgoing Call Accepted
+        },
+        onOutgoingCallRejected(call) {
+          console.log("Outgoing call rejected:", call);
+          this.incomingCall = false;
+          this.ongoingCall = false;
+          this.receiver_id = "";
+          // Outgoing Call Rejected
+        },
+        onIncomingCallCancelled(call) {
+          console.log("Incoming call calcelled:", call);
+        }
+      })
+    );
+// }
+
+
+function leaveCall() {
+  CometChat.endCall(callInformation.value.session_id).then(
+      call => {
+        console.log('call ended', call);
+      }, error => {
+        console.log('error', error);
+      }
+    );
+}
 
 const messages = ref([
   {
@@ -32,6 +163,8 @@ const messages = ref([
     msg: "content"
   }
 ])
+
+let newMessage = ref("")
 
 let global_id = 0
 const positions = [
@@ -41,8 +174,7 @@ const positions = [
   [26.3, 83], [15.3, 83], [5.3, 85], [6.3, 69], [6.3, 56], [6.3, 36],
   [6.3, 23]
 ];
-import dotImage from '@/assets/dot.png';
-const dotSrc = dotImage;
+
 const dotStyle = ref({
   width: '20px',
   height: '20px',
@@ -108,8 +240,9 @@ chatSocket.onmessage = function (e) {
 }
 
 function sendMessage() {
-    const input = document.getElementById("123")
-    const msg = input.value
+    const input = newMessage.value
+    newMessage.value = ""
+    const msg = input
     chatSocket.send(JSON.stringify({
       "message": msg
     }))
@@ -165,6 +298,8 @@ const generateAndSpin = () => {
 
 <template>
 <!--  <QuizQuestion/>-->
+  <Question v-if="questionActive"/>
+  <div id="callScreen" style="position: absolute; width: 0px; height: 0px; overflow:hidden;"></div>
 <div class="outer-container">
 <div class="transparent-container game-page" style="min-height: 98%; max-height: 98%; min-width: 96%; max-width: 96%;">
   <div class="row" style="height: 100%; width: 100%;">
@@ -243,25 +378,27 @@ const generateAndSpin = () => {
       <button class="button-33" role="button" id="spin"  @click="generateAndSpin">Крутить</button>
     <div id="result">{{ result }}</div>
     </div>
-  <div class="column" style="width: 20%; height: 95%; margin-left: 2%;">
+  <div class="column" style="width: 20%; min-height: 95vh; height: 95%; margin-left: 2%;">
     <div class="row buttons">
-      <button class="button-33" role="button">Выйти из игры</button>
+      <button class="button-33" role="button" @click="leaveCall">Выйти из игры</button>
       <button class="button-33" role="button">?</button>
     </div>
-    <ul class="container">
-      <div v-for="message in messages" v-bind:key="message.id">
+    <div class="container" style=" min-height: 80vh; max-height:80%; display:flex; flex-direction:column; align-items:center; justify-content: end; position: relative;">
+    <div class="column" id="messageContainer" style="align-items:center; justify-content:center; max-height: 50vh; height: 80%; width: 90%; overflow-y: scroll; display: flex; flex-direction: column;">
+      <div v-for="message in messages" v-bind:key="message.id" style=" align-items:center; justify-content:center; word-break: break-word;">
           {{ message.msg }}
       </div>
-    </ul>
-    <input id="123">
-    <button @click="sendMessage" style="width: 100%; height: 5vh">
-      mbutton
+    </div>
+    <input class="input-custom" id="123" v-model="newMessage" style="width: 80%;">
+    <button class="button-33" role="button" @click="sendMessage" style="width: 80%;">
+      send message
     </button>
-
+</div>
     </div>
   </div>
 </div>
 </div>
+  <div id="callScreen" style="position: absolute; width: 0px; height: 0px;"></div>
 </template>
 
 <style scoped>

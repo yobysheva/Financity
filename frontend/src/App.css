@@ -284,7 +284,7 @@ h3{
 
 .input-custom::placeholder {
   color: #bbddbb;
-  opacity: 0.9;
+  opacity: 1;
 }
 
 .input-custom:hover {
@@ -312,9 +312,9 @@ h3{
   border: 2px solid rgba(44, 187, 99, .3);
   /*display: flex;*/
   min-width: 90%;
-  min-height: 90%;
-  max-height: 90%;
-  opacity: 0.9;
+  min-height: 95%;
+  max-height: 95%;
+  opacity: 1;
 }
 
 .transparent-container{

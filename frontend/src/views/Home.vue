@@ -2,7 +2,6 @@
 import Rating from "@/views/children/Rating.vue";
 import Profile from "@/views/user/Profile.vue";
 import CurrentGames from "@/views/children/CurrentGames.vue";
-import RequestGame from "@/views/RequestGame.vue";
 import { authService } from "@/services/auth";
 import store from "../store.js";
 import { CometChat } from "@cometchat-pro/chat";
@@ -12,7 +11,6 @@ export default {
     Rating,
     Profile,
     CurrentGames,
-    RequestGame,
   },
 
   data() {
@@ -28,7 +26,8 @@ export default {
       GameCreated: false,
       IsGameRequested: false,
       incomingCall: false,
-      ongoingCall: false
+      ongoingCall: false,
+      gameId: null
     };
   },
 
@@ -36,7 +35,7 @@ export default {
     this.getLoggedInUser();
     let globalContext = this;
 
-    var listnerID = "UNIQUE_LISTENER_ID";
+    var listnerID = this.user.username;
     CometChat.addCallListener(
       listnerID,
       new CometChat.CallListener({
@@ -49,6 +48,7 @@ export default {
         onOutgoingCallAccepted(call) {
           console.log("Outgoing call accepted:", call);
           globalContext.ongoingCall = true;
+          call.setSessionId(this.gameId);
           CometChat.startCall(
             call.sessionId,
             document.getElementById("callScreen"),
@@ -103,9 +103,11 @@ export default {
     },
 
     addUserToGroup() {
-      if (this.newUser) {
+      if (this.newUser && this.groupUsers.length < 5) {
         this.groupUsers.push(this.newUser);
         this.newUser = '';
+    } else if(this.groupUsers.length >= 5){
+        alert('Максимальное число игорков: 6');
       }
     },
 
@@ -169,15 +171,17 @@ export default {
     if (response.status === 200) {
       await store.dispatch("updateGameID", response.data.gameId);
       await store.dispatch("updatePlayerID", response.data.playerID);
-      // this.$router.push({ name: "Game", query: { id: response.data.gameId } });
-      console.log(response.data.gameId)
-      this.$router.push({ name: "Game", query: { id: store.state.gameID } });
+      // this.$router.push({ name: "Game", query: { id: response.data.gameId, sessionId: call.sessionId } });
+      this.gameId = String(response.data.gameId);
+      console.log(response.data.gameId);
+      // this.$router.push({ name: "Game", query: { id: store.state.gameId } });
 
       const groupId = String(response.data.gameId);
 
       try {
         await this.makeGroup(groupId);
         this.makeGroupCall(groupId);
+        this.$router.push({ name: "Game", query: { id: response.data.gameId} });
       } catch (error) {
         console.error("Failed to create group or initiate call:", error);
       }
@@ -193,41 +197,20 @@ export default {
   }
 },
 
-
-//       startVideoChat() {
-//       if (!this.receiver_id) this.error = true;
-//       this.showSpinner = true;
-//
-//       var receiverID = this.receiver_id;
-//       var callType = CometChat.CALL_TYPE.AUDIO;
-//       var receiverType = CometChat.RECEIVER_TYPE.USER;
-//
-//       var call = new CometChat.Call(receiverID, callType, receiverType);
-//
-//       CometChat.initiateCall(call).then(
-//         outGoingCall => {
-//           this.showSpinner = false;
-//           console.log("Call initiated successfully:", outGoingCall);
-//           // perform action on success. Like show your calling screen.
-//         },
-//         error => {
-//           console.log("Call initialization failed with exception:", error);
-//         }
-//       );
-//     },
-
-
- acceptCall() {
+    acceptCall() {
       let globalContext = this;
       this.ongoingCall = true;
       this.incomingCall = false;
       var sessionID = this.session_id;
+      this.$router.push({ name: "Game", query: { id: 44} });
       CometChat.acceptCall(sessionID).then(
         call => {
           console.log("Call accepted successfully:", call);
           console.log("call accepted now....");
           // start the call using the startCall() method
           console.log(globalContext.ongoingCall);
+          console.log(this.sessionID);
+          console.log(call.sessionId);
           CometChat.startCall(
             call.sessionId,
             document.getElementById("callScreen"),
@@ -282,13 +265,12 @@ export default {
 </script>
 
 <template>
-<!--  <AddUsersToGroup v-if="GameCreated" v-bind:group="group"/>-->
   <div class="add-users" v-if="GameCreated">
     <div class="modal" style="top: 35%; width: 50%; height: 60%; overflow: visible; padding: 15px;">
-  <div class="container modal-container" style="opacity: 1; width: 100%; min-height: 100%; padding: 15px; align-items: center; justify-content: center;">
-    <div class="column">
+  <div class="container modal-container" style="opacity: 1; width: 100%; min-height: 100%; padding: 15px; align-items: center; justify-content: center; position: relative;">
+    <div class="column" style="width: 100%; align-items: center; justify-content: center;">
       <div class="column" style="justify-content: center;">
-      <h3 style="width: 80%;">Вы пригласили в игру пользователей:</h3>
+      <h3 style="text-align: center; margin-bottom: 15px; margin-top: 15px;">Вы пригласили в игру пользователей:</h3>
           <ul>
           <li v-for="user in groupUsers" :key="user.id">{{ user }}</li>
           </ul>
@@ -301,7 +283,7 @@ export default {
 </div>
   <div class="overlay"></div>
   </div>
-  <RequestGame v-if="IsGameRequested"/>
+
 
   <div class="outer-container">
 <div class="container home-page" style="min-height: 95%; max-height: 95%;">
@@ -311,16 +293,31 @@ export default {
         <h3>Присоединись к этим играм!</h3>
       </div>
        <div v-if="incomingCall">
-          <button class="btn btn-success" @click="acceptCall">Accept Call</button>
-          <button class="btn btn-success" @click="rejectCall">Reject Call</button>
+<!--          <button class="btn btn-success" @click="acceptCall">Accept Call</button>-->
+<!--          <button class="btn btn-success" @click="rejectCall">Reject Call</button>-->
+         <div class="modal" style="top: 35%; width: 60%; min-height: 30%; height: auto; overflow: visible;">
+            <div class="container modal-container" style="width: 100%; min-height: 100%; padding: 5%;  align-items: center; justify-content: center;">
+                <h3>Приглашение в игру</h3>
+                <div class="row" style=" align-items: center; justify-content: center;">
+                <p>Пользователь User123 приглашает вас присоединиться к игре</p>
+              </div>
+                <div class="row" style=" align-items: center; justify-content: center;">
+                <button class="button-33" role="button" @click="acceptCall">Принять приглашение</button>
+                <button class="button-33" role="button" @click="rejectCall">Отклонить приглашение</button>
+                </div>
+            </div>
+          </div>
+            <div class="overlay"></div>
         </div>
 
         <div v-else-if="ongoingCall">
           <button class="btn btn-secondary"> Ongoing Call ... </button>
-          <div id="callScreen"></div>
         </div>
-      <CurrentGames v-if="!ongoingCall"/>
+
+      <CurrentGames v-if="!ongoingCall && !incomingCall"/>
+      <div id="callScreen" style="position: absolute; width: 0px; height: 0px; overflow:hidden;"></div>
     </div>
+
     <div class="column" style="width: 25%; height: 98%; margin: 2.5%;">
       <button class="button-33" role="button" @click="addUsersToGame">Новая игра</button>
       <Rating/>
