@@ -19,6 +19,7 @@ export default {
         username: 'name',
         uid: 0,
       },
+      activeGamesSocket: false,
       session_id: "",
       receiver_id: null,
       groupUsers: [],
@@ -32,6 +33,7 @@ export default {
   },
 
   created() {
+    this.createSocket()
     this.getLoggedInUser();
     let globalContext = this;
 
@@ -89,6 +91,26 @@ export default {
   },
 
   methods: {
+    createSocket() {
+      this.activeGamesSocket = new WebSocket(`ws://localhost:8000/ws/home/`);
+      this.activeGamesSocket.onmessage = (event) => {
+        let text_data = JSON.parse(event.data)
+        console.log(text_data)
+      }
+    },
+
+    sendMessageToSocket(gameId, playerId) {
+      let data = {
+        "player_id": playerId,
+        "game_id": gameId
+      }
+      this.activeGamesSocket.send(
+          JSON.stringify(
+              data
+          )
+      )
+    },
+
     getLoggedInUser() {
       CometChat.getLoggedinUser().then(
         cometUser => {
@@ -96,7 +118,7 @@ export default {
           this.user.uid = cometUser.uid;
         },
         error => {
-          this.$router.push({ name: "login" });
+          // this.$router.push({ name: "login" });
           console.log(error);
         }
       );
@@ -171,11 +193,12 @@ export default {
     if (response.status === 200) {
       await store.dispatch("updateGameID", response.data.gameId);
       await store.dispatch("updatePlayerID", response.data.playerID);
-      // this.$router.push({ name: "Game", query: { id: response.data.gameId, sessionId: call.sessionId } });
+      this.sendMessageToSocket(response.data.gameId, response.data.playerID)
+      // this.$router.push({ name: "Game", query: { id: store.state.gameID } });
+      // this.$router.push({ name: "Game", query: { id: store.state.gameID } });
+
       this.gameId = String(response.data.gameId);
       console.log(response.data.gameId);
-      // this.$router.push({ name: "Game", query: { id: store.state.gameId } });
-
       const groupId = String(response.data.gameId);
 
       try {
@@ -272,7 +295,7 @@ export default {
       <div class="column" style="justify-content: center;">
       <h3 style="text-align: center; margin-bottom: 15px; margin-top: 15px;">Вы пригласили в игру пользователей:</h3>
           <ul>
-          <li v-for="user in groupUsers" :key="user.id">{{ user }}</li>
+          <li v-for="user in  groupUsers" :key="user.id">{{ user }}</li>
           </ul>
     </div>
       <input id="add-user" v-model="newUser" class="input-custom" style="min-height: 20%; width: 80%;" placeholder="Введите уникальный id пользователей, которых хотите пригласить в игру">

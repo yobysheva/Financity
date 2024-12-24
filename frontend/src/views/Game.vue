@@ -2,7 +2,7 @@
 // import ChatComponent from "@/views/ChatComponent.vue"
 import Player from "@/views/user/Player.vue";
 // import Fields from "@/views/Fields.vue";
-import Question from "@/views/Question.vue";
+  import Question from "@/views/Question.vue";
 // import QuizQuestion from "@/views/QuizQuestion.vue";
 import {ref} from 'vue';
 // import { getCurrentInstance } from 'vue';
@@ -38,6 +38,8 @@ let callInformation = ref({
       incomingCall: false,
       ongoingCall: false,
 })
+
+let newMessage = ref("")
 
 function getLoggedInUser() {
       CometChat.getLoggedinUser().then(
@@ -157,16 +159,7 @@ function leaveCall() {
     );
 }
 
-const messages = ref([
-  {
-    id: 0,
-    msg: "content"
-  }
-])
-
-let newMessage = ref("")
-
-let global_id = 0
+let global_id = 0;
 const positions = [
   [6.3, 9], [15.3, 9], [26.3, 9], [37.3, 9], [47.3, 9], [56.7, 9], [67.7, 9],
   [78.7, 9], [88.3, 9], [88.3, 23], [88.3, 36], [88.3, 56], [88.3, 69],
@@ -176,24 +169,75 @@ const positions = [
 ];
 
 const dotStyle = ref({
-  width: '20px',
-  height: '20px',
-  position: 'absolute',
+  width: "20px",
+  height: "20px",
+  position: "absolute",
   left: `${positions[0][0]}%`,
   top: `${positions[0][1]}%`,
-  transition: 'all 0.3s ease'
+  transition: "all 0.3s ease"
 });
+
 const dotVisible = ref(true);
-
-const result = ref('');
+const result = ref("");
 const diceStyle = ref({});
-let totalSum = ref(0);
-let currentIndex = ref(0);
-let lastRoll = ref(null);
-let lastX = ref(0);
-let lastY = ref(0);
-let message = ref("")
+const totalSum = ref(0);
+const currentIndex = ref(0);
+const lastRoll = ref(null);
+const lastX = ref(0);
+const lastY = ref(0);
 
+const isSpinDisabled = ref(true);
+const spinButtonLabel = ref("Крутить");
+let spinTimer = null;
+
+const questions = {
+  state: ["Вопрос 1 (Государство)", "Вопрос 2 (Государство)", "Вопрос 3 (Государство)"],
+  entertainment: ["Вопрос 1 (Развлечения)", "Вопрос 2 (Развлечения)", "Вопрос 3 (Развлечения)"],
+  realEstate: ["Вопрос 1 (Недвижимость)", "Вопрос 2 (Недвижимость)", "Вопрос 3 (Недвижимость)"]
+};
+
+const modalVisible = ref(false);
+const modalTitle = ref("");
+const modalQuestion = ref("");
+
+const getRandomQuestion = (category) => {
+  const caseQuestions = questions[category];
+  return caseQuestions[Math.floor(Math.random() * caseQuestions.length)];
+};
+const modalColor = ref("")
+const checkPositionAndShowModal = (currentCoords) => {
+  const stateCoords = [[15.3, 9], [26.3, 9], [37.3, 9], [6.3, 36], [6.3, 23]];
+  const entertainmentCoords = [[56.7, 9], [67.7, 9], [78.7, 9], [88.3, 23], [88.3, 36]];
+  const realEstateCoords = [[88.3, 56], [88.3, 69], [78.7, 83], [67.7, 83], [56.7, 83]];
+  const allCasesCoords = [[37.3, 83], [26.3, 83], [15.3, 83], [6.3, 69], [6.3, 56]];
+
+  let category = null;
+
+  if (stateCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
+    category = "state";
+    modalColor.value = "#ADA1F6"; // Фиолетовый
+  } else if (entertainmentCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
+    category = "entertainment";
+    modalColor.value = "#FFBBF8"; // Розовый
+  } else if (realEstateCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
+    category = "realEstate";
+    modalColor.value = "#C8E3FE"; // Голубой
+  } else if (allCasesCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
+    category = ["state", "entertainment", "realEstate"][Math.floor(Math.random() * 3)];
+    modalColor.value = "#E7FC93"; // Желтый
+  }
+
+  if (category) {
+    modalTitle.value = `Кейс: ${category === "state" ? "Государство" : category === "entertainment" ? "Развлечения" : "Недвижимость"}`;
+    modalQuestion.value = getRandomQuestion(category);
+     setTimeout(() => {
+          modalVisible.value = true;
+        }, 500);
+  }
+};
+const closeModal = () => {
+  modalVisible.value = false; // Закрытие модального окна
+};
 const moveDot = (targetIndex) => {
   const steps = [];
   if (targetIndex > currentIndex.value) {
@@ -217,12 +261,27 @@ const moveDot = (targetIndex) => {
       dotStyle.value.top = `${topPercent}%`;
       currentIndex.value = steps[stepIndex];
       stepIndex++;
+
+      if (stepIndex === steps.length) {
+        const [currentX, currentY] = positions[currentIndex.value];
+        checkPositionAndShowModal([currentX, currentY]);
+      }
+
       setTimeout(moveNext, 300);
     }
   };
 
   moveNext();
 };
+
+
+const messages = ref([
+  {
+    id: 0,
+    msg: "content"
+  }
+])
+let message = ref("")
 
 console.log(window.location.host)
 const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/`);
@@ -285,13 +344,38 @@ const generateAndSpin = () => {
   lastRoll.value = rnd;
 
   setTimeout(() => {
-    let targetIndex = (totalSum.value % 26);
+    let targetIndex = totalSum.value % 26;
     if (targetIndex < 0) targetIndex += 26;
     moveDot(targetIndex);
   }, 1200);
 
   result.value = `Выпало: ${rnd}`;
+  isSpinDisabled.value = true;
+  spinButtonLabel.value = "Крутить";
 };
+
+const manualSpin = () => {
+  clearTimeout(spinTimer);
+  generateAndSpin();
+};
+
+const startTurn = () => {
+  isSpinDisabled.value = false;
+  spinButtonLabel.value = "Крутить (3 сек)";
+  let countdown = 3;
+
+  const updateLabel = () => {
+    if (countdown > 0) {
+      spinButtonLabel.value = `Крутить (${countdown--} сек)`;
+      spinTimer = setTimeout(updateLabel, 1000);
+    } else {
+      generateAndSpin();
+    }
+  };
+
+  updateLabel();
+};
+
 
 // getLoggedInUser();
 </script>
@@ -375,7 +459,18 @@ const generateAndSpin = () => {
     </div>
 </div>
     </div>
-      <button class="button-33" role="button" id="spin"  @click="generateAndSpin">Крутить</button>
+       <!-- Кнопка "Сделать ход" -->
+    <button class="button-33" @click="startTurn">Сделать ход</button>
+
+    <!-- Кнопка "Крутить" -->
+    <button
+      class="button-33"
+      :disabled="isSpinDisabled"
+      @click="manualSpin">
+      {{ spinButtonLabel }}
+    </button>
+      <Question :caseTitle= modalTitle  :questionText=modalQuestion :visible="modalVisible" :color="modalColor" @close="closeModal" />
+
     <div id="result">{{ result }}</div>
     </div>
   <div class="column" style="width: 20%; min-height: 95vh; height: 95%; margin-left: 2%;">
@@ -564,5 +659,12 @@ const generateAndSpin = () => {
   border-radius: 10px;
     transform: rotateX(90deg) translateZ(33.33px);
     z-index: 6;
+}
+.button-33 {
+  cursor: pointer;
+}
+
+.button-33:disabled {
+  cursor: not-allowed;
 }
 </style>

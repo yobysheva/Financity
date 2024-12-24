@@ -1,6 +1,5 @@
 from django.http import JsonResponse
 from django.template.defaultfilters import lower
-
 from .serializers import UserSerializer, UserLoginSerializer, UpdateData
 from rest_framework import status
 from rest_framework.decorators import api_view
