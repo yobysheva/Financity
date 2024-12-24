@@ -284,7 +284,8 @@ const messages = ref([
 let message = ref("")
 
 console.log(window.location.host)
-const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/`);
+const gameId = new URLSearchParams(window.location.search).get('id');
+const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${gameId}/`);
 chatSocket.onmessage = function (e) {
     let data = JSON.parse(e.data)
     console.log(data)
