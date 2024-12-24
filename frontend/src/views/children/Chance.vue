@@ -22,47 +22,31 @@ onUnmounted(() => {
 });
 
 defineProps({
-  caseTitle: String,
   questionText: String,
   visible: Boolean,
   color: String
 });
 
-onMounted(() => {
-  const textarea = document.querySelector('.input-custom');
-  const container = document.querySelector('.modal-container');
-
-  if (textarea && container) {
-    textarea.addEventListener('input', function () {
-      this.style.height = 'auto'; // Сбрасываем высоту текстового поля
-      this.style.height = this.scrollHeight + 'px'; // Устанавливаем высоту равной высоте содержимого
-
-      // Увеличиваем высоту контейнера в зависимости от высоты текстового поля
-      container.style.minHeight = this.scrollHeight + 140 + 'px'; // Добавьте отступ для упаковки
-    });
-  }
-});
 </script>
 
 <template>
-<div v-if="visible" class="modal" :style="{
+  <div v-if="visible" class="modal" :style="{
       top: '35%',
       width: '50%',
       minHeight: '40%',
       height: 'auto',
       overflow: 'visible'
     }">
-  <div class="container modal-container" :style="{backgroundColor: color, width: '100%', minHeight: '100%'}">
-    <div class="column">
-      <div class="row">
-        <h3 style="width: 400px;">{{ caseTitle }} </h3>
-      <h3 style="width: 400px;">{{ questionText }} </h3>
+    <div class="container modal-container" :style="{backgroundColor: color, width: '100%', minHeight: '100%'}">
+      <div class="column">
+        <div class="row">
+          <h3 style="width: 400px;">Шанс </h3>
+          <h3 style="width: 400px;">{{ questionText }} </h3>
+        </div>
+      </div>
+      <button class="button-33" role="button" @click="emit('close')">Закрыть</button>
     </div>
-      <textarea class="input-custom" style="min-height: 60%;"></textarea>
-    </div>
-    <button class="button-33" role="button" @click="emit('close')">Закрыть</button>
   </div>
-</div>
   <div v-if="visible" class="overlay"></div>
 </template>
 
