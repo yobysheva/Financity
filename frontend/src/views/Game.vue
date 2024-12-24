@@ -2,12 +2,13 @@
 // import ChatComponent from "@/views/ChatComponent.vue"
 import Player from "@/views/user/Player.vue";
 // import Fields from "@/views/Fields.vue";
-  import Question from "@/views/Question.vue";
+import Question from "@/views/Question.vue";
 // import QuizQuestion from "@/views/QuizQuestion.vue";
 import {ref} from 'vue';
 // import { getCurrentInstance } from 'vue';
 import {CometChat} from "@cometchat-pro/chat";
 import dotImage from '@/assets/dot.png';
+
 const dotSrc = dotImage;
 
 // const props = defineProps({
@@ -276,23 +277,16 @@ const moveDot = (targetIndex) => {
 
 
 const messages = ref([
-  {
-    id: 0,
-    msg: ""
-  }
 ])
-let message = ref("")
 
 console.log(window.location.host)
 const gameId = new URLSearchParams(window.location.search).get('id');
 const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${gameId}/`);
-chatSocket.onmessage = function (e) {
-    let data = JSON.parse(e.data)
-    console.log(data)
-    console.log(messages)
-    message.value = data["message"].value
+chatSocket.onmessage = function (event) {
+    let data = JSON.parse(event.data)
     messages.value.push({
       id: global_id += 1,
+      player_id: data["player_id"],
       msg: data["message"].toString()
     })
 
@@ -302,18 +296,49 @@ chatSocket.onmessage = function (e) {
 function sendMessage() {
     const input = newMessage.value
     newMessage.value = ""
-    const msg = input
     chatSocket.send(JSON.stringify({
-      "message": msg
-    }))
-    console.log(msg)
-    message.value = msg
+        "message": input,
+        "player_id": loggedUser.value.uid
+      }))
 }
+
+
+const gameSocket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/`);
+gameSocket.onmessage = (event) => {
+    let text_data = JSON.parse(event.data);
+    let info = text_data["info"];
+    let type = text_data['type'];
+    console.log(type)
+    switch (type) {
+        case "turn":
+            console.log("play_turn_animation")
+          // eslint-disable-next-line no-case-declarations
+            const turn_count = info["turn_count"];
+            spin(turn_count);
+            break;
+    }
+    console.log(info);
+};
+function sendGameInfo(turn_count) {
+    const info = {
+        "type": "turn",
+        "info": {
+          "turn_count": turn_count,
+          // "player_id": player_id
+        }
+    }
+    gameSocket.send(JSON.stringify(
+        info
+    ))
+}
+
 
 const generateAndSpin = () => {
   let rnd = Math.floor(Math.random() * 6 + 1);
   totalSum.value += rnd;
-
+  sendGameInfo(rnd)
+};
+function spin(rnd) {
   let x, y;
 
   if (lastRoll.value === rnd) {
@@ -353,7 +378,7 @@ const generateAndSpin = () => {
   result.value = `Выпало: ${rnd}`;
   isSpinDisabled.value = true;
   spinButtonLabel.value = "Крутить";
-};
+}
 
 const manualSpin = () => {
   clearTimeout(spinTimer);
