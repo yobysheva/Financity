@@ -269,10 +269,15 @@ export default {
       this.incomingCall = false;
       var sessionID = this.session_id;
       CometChat.acceptCall(sessionID).then(
-        call => {
+         async call => {
           console.log("Call accepted successfully:", call);
           let group = call.getCallReceiver();
           let groupId = group.getGuid();
+          const response = await authService.createPlayer({
+            username: store.state.username,
+            id: groupId,
+          });
+          store.state.playerID = response.data.playerID;
           this.$router.push({ name: "Game", query: { id: groupId} });
           console.log("call accepted now....");
           // start the call using the startCall() method

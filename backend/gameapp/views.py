@@ -27,7 +27,7 @@ def createPlayer(request):
         try:
             user = User.objects.get(username=data['username'])
             player = Player.objects.create(user=user)
-            game = Game.objects.get(id=data['gameId'])
+            game = Game.objects.get(id=data['id'])
             game.players.add(player)
             return JsonResponse({'gameId': game.id, 'playerID': player.id})
         except User.DoesNotExist:

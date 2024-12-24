@@ -18,6 +18,7 @@ const av3Src = av3;
 import av4 from '@/assets/av4.png';
 const av4Src = av4;
 import av5 from '@/assets/av5.png';
+import store from "@/store";
 const av5Src = av5;
 // import av6 from '@/assets/av6.png';
 // const av6Src = av6;
@@ -342,7 +343,7 @@ function sendMessage() {
     newMessage.value = ""
     chatSocket.send(JSON.stringify({
         "message": input,
-        "player_id": loggedUser.value.uid
+        "player_id": store.state.playerID
       }))
 }
 
@@ -364,7 +365,7 @@ gameSocket.onmessage = (event) => {
         case "on_question_open":
             break;
         case "notification_about_connect_to_game":
-            players.append(info['player_id'])
+            players.push(info['player_id']);
             break;
 
     }
