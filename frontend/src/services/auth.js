@@ -23,5 +23,11 @@ export const authService = {
     },
     getUsersStats(username){
         return axios.get(`${apiUrl}user/getStats/`, {params : {username : username}});
+    },
+    getQuestion(id){
+        return axios.get(`${apiUrl}gameApp/getQuestion/`, {params: {id: id}})
+    },
+    getAnswers(id){
+        return axios.get(`${apiUrl}gameApp/getAnswers/`, {params: {id: id}})
     }
 };

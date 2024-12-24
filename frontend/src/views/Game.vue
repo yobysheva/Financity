@@ -357,6 +357,7 @@ gameSocket.onmessage = (event) => {
             console.log("play_turn_animation")
           // eslint-disable-next-line no-case-declarations
             const turn_count = info["turn_count"];
+            totalSum.value += turn_count;
             spin(turn_count);
             break;
     }
@@ -379,7 +380,6 @@ function sendGameInfo(turn_count) {
 
 const generateAndSpin = () => {
   let rnd = Math.floor(Math.random() * 6 + 1);
-  totalSum.value += rnd;
   sendGameInfo(rnd)
 };
 function spin(rnd) {
@@ -537,7 +537,7 @@ const startTurn = () => {
       @click="manualSpin">
       {{ spinButtonLabel }}
     </button>
-      <Question :caseTitle= modalTitle  :questionText=modalQuestion :visible="modalVisible" :color="modalColor" @close="closeModal" />
+      <Question :questionId=5 :caseTitle= modalTitle  :questionText=modalQuestion :visible="modalVisible" :color="modalColor" @close="closeModal" />
       <Chance  :questionText=modalChance :visible="modalChanceVisible" @close="closeModal" />
     </div>
   <div class="column" style="width: 20%; min-height: 95vh; height: 95%; margin-left: 2%;">
