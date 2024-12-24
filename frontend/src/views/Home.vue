@@ -127,7 +127,7 @@ export default {
     },
 
     sendWaitingRequestSocket(senderUsername, recipientUsername, gameID) {
-      let sendRequestSocket = new WebSocket(`ws://localhost:8000/ws/waiting_request/${recipientUsername}`)
+      let sendRequestSocket = new WebSocket(`ws://localhost:8000/ws/for_waiting_request/${recipientUsername}`)
       let data = {
         "sender_id": senderUsername,
         "game_id": gameID
