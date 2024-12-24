@@ -35,11 +35,9 @@ onMounted(() => {
       overflow: 'visible'
     }">
   <div class="container modal-container" :style="{backgroundColor: color, width: '100%', minHeight: '100%'}">
-    <div class="column">
-      <div class="row">
-        <h3 style="width: 400px;">{{ caseTitle }} </h3>
-      <h3 style="width: 400px;">{{ questionText }} </h3>
-    </div>
+    <div class="column" >
+    <h3 style="width: 80%;">{{ caseTitle }} </h3>
+      <h3 style="width: 80%;">{{ questionText }} </h3>
       <textarea class="input-custom" style="min-height: 60%;"></textarea>
     </div>
     <button class="button-33" role="button" @click="emit('close')">Закрыть</button>

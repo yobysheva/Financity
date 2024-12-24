@@ -1,0 +1,162 @@
+[
+  {
+    "model": "gameapp.professions",
+    "pk": 1,
+    "fields": {
+      "name": "Медсестра",
+      "salary": 30000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 2,
+    "fields": {
+      "name": "Архитектор",
+      "salary": 90000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 3,
+    "fields": {
+      "name": "Веб-разработчик",
+      "salary": 120000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 4,
+    "fields": {
+      "name": "Дальнобойщик",
+      "salary": 190000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 5,
+    "fields": {
+      "name": "Адвокат",
+      "salary": 80000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 6,
+    "fields": {
+      "name": "Юрист",
+      "salary": 60000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 7,
+    "fields": {
+      "name": "Охраник",
+      "salary": 60000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 8,
+    "fields": {
+      "name": "Администратор",
+      "salary": 60000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 9,
+    "fields": {
+      "name": "Строитель",
+      "salary": 80000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 10,
+    "fields": {
+      "name": "Логист",
+      "salary": 50000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 11,
+    "fields": {
+      "name": "Воспитатель в детском саду",
+      "salary": 30000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 12,
+    "fields": {
+      "name": "Шеф-повар",
+      "salary": 90000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 13,
+    "fields": {
+      "name": "Курьер",
+      "salary": 35000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 14,
+    "fields": {
+      "name": "Водитель грузовика",
+      "salary": 70000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 15,
+    "fields": {
+      "name": "Учитель",
+      "salary": 38000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 16,
+    "fields": {
+      "name": "Психолог",
+      "salary": 60000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 17,
+    "fields": {
+      "name": "Актер театра",
+      "salary": 30000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 18,
+    "fields": {
+      "name": "Продавец",
+      "salary": 40000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 19,
+    "fields": {
+      "name": "Дизайнер",
+      "salary": 80000.0
+    }
+  },
+  {
+    "model": "gameapp.professions",
+    "pk": 20,
+    "fields": {
+      "name": "Бухгалтер",
+      "salary": 50000.0
+    }
+  }
+]
