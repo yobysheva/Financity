@@ -3,6 +3,7 @@
 import Player from "@/views/user/Player.vue";
 // import Fields from "@/views/Fields.vue";
   import Question from "@/views/Question.vue";
+  import Rules from "@/views/children/Rules.vue"
 // import QuizQuestion from "@/views/QuizQuestion.vue";
 import {ref} from 'vue';
 // import { getCurrentInstance } from 'vue';
@@ -41,6 +42,8 @@ let callInformation = ref({
 
 let newMessage = ref("")
 
+let rulesVisible = ref(false)
+
 function getLoggedInUser() {
       CometChat.getLoggedinUser().then(
         user => {
@@ -55,6 +58,13 @@ function getLoggedInUser() {
     }
 
 getLoggedInUser();
+
+function showRules() {
+  rulesVisible.value = !rulesVisible.value;
+}
+function closeRules() {
+  rulesVisible.value = !rulesVisible.value;
+}
 //
 // if(!props.userType){
   // let sessionID = props.sessionId;
@@ -383,6 +393,7 @@ const startTurn = () => {
 
 <template>
 <!--  <QuizQuestion/>-->
+  <Rules v-if="rulesVisible" @close="closeRules"/>
   <Question v-if="questionActive"/>
   <div id="callScreen" style="position: absolute; width: 0px; height: 0px; overflow:hidden;"></div>
 <div class="outer-container">
@@ -395,7 +406,7 @@ const startTurn = () => {
       <Player/>
       <Player/>
     </div>
-    <div class="column" style="height: 100%; width: 55%; margin-left: 2%;">
+    <div class="column" style="height: 100%; width: 60%; margin-left: 2%;">
       <div class="container" style="width: 100%; height: 100%; position: relative">
         <img class="image" src="../assets/financity_pole.png" style="width: 100%; height: 100%">
 <!--        <Fields/>-->
@@ -477,10 +488,11 @@ const startTurn = () => {
   <div class="column" style="width: 20%; min-height: 95vh; height: 95%; margin-left: 2%;">
     <div class="row buttons">
       <button class="button-33" role="button" @click="leaveCall">Выйти из игры</button>
-      <button class="button-33" role="button">?</button>
+      <button class="button-33" role="button" @click="showRules">?</button>
     </div>
     <div class="container" style=" min-height: 80vh; max-height:80%; display:flex; flex-direction:column; align-items:center; justify-content: end; position: relative;">
-    <div class="column" id="messageContainer" style="align-items:center; justify-content:center; max-height: 50vh; height: 80%; width: 90%; overflow-y: scroll; display: flex; flex-direction: column;">
+    <div class="column" id="messageContainer" style="-ms-overflow-style: none;
+      scrollbar-width: none; align-items:center; justify-content:center; max-height: 50vh; height: 80%; width: 90%; overflow-y: scroll; display: flex; flex-direction: column;">
       <div v-for="message in messages" v-bind:key="message.id" style=" align-items:center; justify-content:center; word-break: break-word;">
           {{ message.msg }}
       </div>
@@ -536,6 +548,7 @@ const startTurn = () => {
   justify-content: center;
   align-items: center;
 }
+
 .dice {
   border-radius: 10px;
     height: 66.67px;

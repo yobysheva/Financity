@@ -54,9 +54,9 @@ export default {
         if (response.status === 202) {
           // this.$emit('login', true);
           this.sendUsername();
-          this.$router.push({ name: "home" });
-          this.authLoginUser();
           // this.$router.push({ name: "home" });
+          this.authLoginUser();
+          this.$router.push({ name: "home" });
           this.username = '';
           this.password = '';
         }

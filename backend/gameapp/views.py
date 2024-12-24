@@ -16,3 +16,17 @@ def createGame(request):
             return JsonResponse({'gameId': game.id, 'playerID': player.id})
         except User.DoesNotExist:
             return JsonResponse({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+def createPlayer(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode())
+        try:
+            user = User.objects.get(username=data['username'])
+            player = Player.objects.create(user=user)
+            game = Game.objects.get(id=data['gameId'])
+            game.players.add(player)
+            return JsonResponse({'gameId': game.id, 'playerID': player.id})
+        except User.DoesNotExist:
+            return JsonResponse({"detail": "User or game not found"}, status=status.HTTP_404_NOT_FOUND)

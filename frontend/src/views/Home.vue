@@ -112,13 +112,17 @@ export default {
     },
 
     getLoggedInUser() {
+      if(!store.state.username) {
+        this.$router.push({ name: "login" });
+        return;
+      }
       CometChat.getLoggedinUser().then(
         cometUser => {
           this.user.username = cometUser.name;
           this.user.uid = cometUser.uid;
         },
         error => {
-          // this.$router.push({ name: "login" });
+          this.$router.push({ name: "login" });
           console.log(error);
         }
       );
