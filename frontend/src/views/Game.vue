@@ -503,7 +503,7 @@ const startTurn = () => {
       @click="manualSpin">
       {{ spinButtonLabel }}
     </button>
-      <Question :caseTitle= modalTitle  :questionText=modalQuestion :visible="modalVisible" :color="modalColor" @close="closeModal" />
+      <Question :questionId=5 :caseTitle= modalTitle  :questionText=modalQuestion :visible="modalVisible" :color="modalColor" @close="closeModal" />
 
     <div id="result">{{ result }}</div>
     </div>

@@ -1,14 +1,23 @@
 <script setup>
-
 import { defineProps, defineEmits, onMounted  } from 'vue';
+import store from "@/store";
+import {ref} from 'vue';
+import {authService} from "@/services/auth";
 
-defineProps({
+const props = defineProps({
+  questionId: Number,
   caseTitle: String,
   questionText: String,
   visible: Boolean,
-  color: String
+  color: String,
 });
 const emit = defineEmits(['close']);
+
+let question = ref({
+  text : "",
+});
+
+// let answers = ref([])
 
 onMounted(() => {
   const textarea = document.querySelector('.input-custom');
@@ -24,20 +33,35 @@ onMounted(() => {
     });
   }
 });
+
+
+async function getQuestion() {
+  try {
+    console.log(store.state.username);
+    const response = await authService.getQuestion(props.questionId);
+    console.log(response);
+    question.value.text = response.data['text'];
+    question.value.type = response.data['type'];
+  } catch (error) {
+        console.error(error);
+  }
+}
+
+getQuestion();
 </script>
 
 <template>
 <div v-if="visible" class="modal" :style="{
       top: '35%',
-      width: '50%',
-      minHeight: '40%',
+      width: '70%',
+      minHeight: '60%',
       height: 'auto',
       overflow: 'visible'
     }">
   <div class="container modal-container" :style="{backgroundColor: color, width: '100%', minHeight: '100%'}">
     <div class="column" >
     <h3 style="width: 80%;">{{ caseTitle }} </h3>
-      <h3 style="width: 80%;">{{ questionText }} </h3>
+      <h3 style="width: 80%;">{{question.text}} </h3>
       <textarea class="input-custom" style="min-height: 60%;"></textarea>
     </div>
     <button class="button-33" role="button" @click="emit('close')">Закрыть</button>
