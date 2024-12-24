@@ -519,7 +519,7 @@ const startTurn = () => {
 <div class="outer-container">
 <div class="transparent-container game-page" style="min-height: 98%; max-height: 98%; min-width: 96%; max-width: 96%;">
   <div class="row" style="height: 100%; width: 100%;">
-    <div class="column" style="height: 100%; width: 10%;">
+    <div class="column" style="height: 85%; width: 10%;">
       <Player :jobName= job1Name  :jobPayment=job1Payment :av="av1Src"/>
       <Player :jobName= job2Name  :jobPayment=job2Payment :av="av2Src"/>
       <Player :jobName= job3Name  :jobPayment=job3Payment :av="av3Src"/>

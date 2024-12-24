@@ -9,12 +9,12 @@ defineProps({
 </script>
 
 <template>
-<div class="player-container">
+<div class="player-container" style="height: 10%;">
   <div class="column">
     <div class="photo" ><img :src="av" style="width: 100%; /* Заполняет ширину блока */
   height: auto; /* Сохраняет пропорции изображения */
   display: block; "/></div>
-        <p>Пользователь1234</p>
+<!--        <p>Пользователь1234</p>-->
         <p>Профессия: {{jobName}}</p>
         <p>{{jobPayment}}₽</p>
   </div>

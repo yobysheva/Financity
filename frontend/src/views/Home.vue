@@ -383,11 +383,11 @@ export default {
             <div class="overlay"></div>
         </div>
 
-        <div v-else-if="ongoingCall">
-          <button class="btn btn-secondary"> Ongoing Call ... </button>
-        </div>
+<!--        <div v-else-if="ongoingCall">-->
+<!--          <button class="btn btn-secondary"> Ongoing Call ... </button>-->
+<!--        </div>-->
 
-      <CurrentGames v-if="!ongoingCall && !incomingCall"/>
+      <CurrentGames/>
       <div id="callScreen" style="position: absolute; width: 0px; height: 0px; overflow:hidden;"></div>
     </div>
 
