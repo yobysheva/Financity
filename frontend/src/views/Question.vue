@@ -1,8 +1,28 @@
 <script setup>
-import { defineProps, defineEmits, onMounted  } from 'vue';
+import { defineProps, defineEmits, onMounted, onUnmounted } from 'vue';
 import store from "@/store";
 import {ref} from 'vue';
 import {authService} from "@/services/auth";
+
+const emit = defineEmits(['close']);
+
+const close = () => {
+  emit('close');
+};
+
+const handleKeyDown = (event) => {
+  if (event.key === 'Escape') {
+    close();
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyDown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown);
+});
 
 const props = defineProps({
   questionId: Number,
@@ -11,7 +31,6 @@ const props = defineProps({
   visible: Boolean,
   color: String,
 });
-const emit = defineEmits(['close']);
 
 let question = ref({
   text : "",

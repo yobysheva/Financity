@@ -4,6 +4,7 @@ import Player from "@/views/user/Player.vue";
 // import Fields from "@/views/Fields.vue";
   import Question from "@/views/Question.vue";
   import Rules from "@/views/children/Rules.vue"
+  import Chance from "@/views/children/Chance.vue";
 // import QuizQuestion from "@/views/QuizQuestion.vue";
 import {ref} from 'vue';
 // import { getCurrentInstance } from 'vue';
@@ -202,10 +203,12 @@ const questions = {
   entertainment: ["Вопрос 1 (Развлечения)", "Вопрос 2 (Развлечения)", "Вопрос 3 (Развлечения)"],
   realEstate: ["Вопрос 1 (Недвижимость)", "Вопрос 2 (Недвижимость)", "Вопрос 3 (Недвижимость)"]
 };
-
+const chances = ["chance1", "chance2", "chanse3"]
 const modalVisible = ref(false);
 const modalTitle = ref("");
 const modalQuestion = ref("");
+const modalChance = ref("");
+const modalChanceVisible = ref(false);
 
 const getRandomQuestion = (category) => {
   const caseQuestions = questions[category];
@@ -217,7 +220,7 @@ const checkPositionAndShowModal = (currentCoords) => {
   const entertainmentCoords = [[56.7, 9], [67.7, 9], [78.7, 9], [88.3, 23], [88.3, 36]];
   const realEstateCoords = [[88.3, 56], [88.3, 69], [78.7, 83], [67.7, 83], [56.7, 83]];
   const allCasesCoords = [[37.3, 83], [26.3, 83], [15.3, 83], [6.3, 69], [6.3, 56]];
-
+  const ChanceCoords = [[47.3, 9], [88.3, 9], [88.3, 83], [47.3, 83], [5.3, 85]];
   let category = null;
 
   if (stateCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
@@ -232,6 +235,11 @@ const checkPositionAndShowModal = (currentCoords) => {
   } else if (allCasesCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
     category = ["state", "entertainment", "realEstate"][Math.floor(Math.random() * 3)];
     modalColor.value = "#E7FC93"; // Желтый
+  }else if (ChanceCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
+    modalChance.value = chances[Math.floor(Math.random() * chances.length)];
+    setTimeout(() => {
+      modalChanceVisible.value = true;
+    }, 500);
   }
 
   if (category) {
@@ -243,7 +251,8 @@ const checkPositionAndShowModal = (currentCoords) => {
   }
 };
 const closeModal = () => {
-  modalVisible.value = false; // Закрытие модального окна
+  modalVisible.value = false;
+  modalChanceVisible.value = false;
 };
 const moveDot = (targetIndex) => {
   const steps = [];
@@ -320,6 +329,7 @@ gameSocket.onmessage = (event) => {
             console.log("play_turn_animation")
           // eslint-disable-next-line no-case-declarations
             const turn_count = info["turn_count"];
+            totalSum.value += turn_count;
             spin(turn_count);
             break;
     }
@@ -342,7 +352,6 @@ function sendGameInfo(turn_count) {
 
 const generateAndSpin = () => {
   let rnd = Math.floor(Math.random() * 6 + 1);
-  totalSum.value += rnd;
   sendGameInfo(rnd)
 };
 function spin(rnd) {
@@ -493,10 +502,7 @@ const startTurn = () => {
     </div>
 </div>
     </div>
-       <!-- Кнопка "Сделать ход" -->
     <button class="button-33" @click="startTurn">Сделать ход</button>
-
-    <!-- Кнопка "Крутить" -->
     <button
       class="button-33"
       :disabled="isSpinDisabled"
@@ -504,8 +510,7 @@ const startTurn = () => {
       {{ spinButtonLabel }}
     </button>
       <Question :questionId=5 :caseTitle= modalTitle  :questionText=modalQuestion :visible="modalVisible" :color="modalColor" @close="closeModal" />
-
-    <div id="result">{{ result }}</div>
+      <Chance  :questionText=modalChance :visible="modalChanceVisible" @close="closeModal" />
     </div>
   <div class="column" style="width: 20%; min-height: 95vh; height: 95%; margin-left: 2%;">
     <div class="row buttons">
@@ -519,7 +524,7 @@ const startTurn = () => {
           {{ message.msg }}
       </div>
     </div>
-    <input class="input-custom" id="123" v-model="newMessage" style="width: 80%;">
+    <input class="input-custom" id="123" v-model="newMessage" style="width: 80%;" @keydown.enter="sendMessage">
     <button class="button-33" role="button" @click="sendMessage" style="width: 80%;">
       send message
     </button>
@@ -587,7 +592,7 @@ const startTurn = () => {
     height: 66.67px;
     perspective: 400px;
     position: absolute;
-    left: 50%;
+    left: 50.7%;
     top: 50%;
     transform: translate(-50%, -50%);
 }

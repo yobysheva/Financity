@@ -33,7 +33,8 @@ export default {
   },
 
   created() {
-    this.createSocket()
+    this.createWaitingRequestSocket()
+    this.createActiveGamesSocket()
     this.getLoggedInUser();
     let globalContext = this;
 
@@ -91,15 +92,15 @@ export default {
   },
 
   methods: {
-    createSocket() {
-      this.activeGamesSocket = new WebSocket(`ws://localhost:8000/ws/home/`);
-      this.activeGamesSocket.onmessage = (event) => {
+    createActiveGamesSocket() {
+        this.activeGamesSocket = new WebSocket(`ws://localhost:8000/ws/home/`);
+        this.activeGamesSocket.onmessage = (event) => {
         let text_data = JSON.parse(event.data)
         console.log(text_data)
       }
     },
 
-    sendMessageToSocket(gameId, playerId) {
+    sendMessageToActiveGamesSocket(gameId, playerId) {
       let data = {
         "player_id": playerId,
         "game_id": gameId
@@ -109,6 +110,35 @@ export default {
               data
           )
       )
+    },
+
+    createWaitingRequestSocket() {
+      let username = store.state.username
+      this.waitingRequestSocket = new WebSocket(`ws://localhost:8000/ws/waiting_request/${username}/`)
+      this.waitingRequestSocket.onmessage = (event) => {
+          let text_data = JSON.parse(event.data)
+          // let user = store.state.username
+          // if (text_data['sender_name'] === user) {
+          //   return false
+          // }
+          console.log(1)
+          console.log(text_data)
+      }
+    },
+
+    sendWaitingRequestSocket(senderUsername, recipientUsername, gameID) {
+      let sendRequestSocket = new WebSocket(`ws://localhost:8000/ws/waiting_request/${recipientUsername}`)
+      let data = {
+        "sender_id": senderUsername,
+        "game_id": gameID
+      }
+      sendRequestSocket.send(
+          JSON.stringify(
+              data
+          )
+      )
+
+      // sendRequestSocket.close()
     },
 
     getLoggedInUser() {
@@ -122,7 +152,7 @@ export default {
           this.user.uid = cometUser.uid;
         },
         error => {
-          this.$router.push({ name: "login" });
+          // this.$router.push({ name: "login" });
           console.log(error);
         }
       );
@@ -188,6 +218,14 @@ export default {
       this.GameCreated = true;
     },
 
+    sendInvitation(gameID) {
+      let senderUser = store.state.username
+      for (let user in this.groupUsers) {
+        console.log(user)
+        this.sendWaitingRequestSocket(senderUser, user, gameID)
+      }
+    },
+
     async makeNewGame() {
     try {
     const response = await authService.createGame({
@@ -197,7 +235,7 @@ export default {
     if (response.status === 200) {
       await store.dispatch("updateGameID", response.data.gameId);
       await store.dispatch("updatePlayerID", response.data.playerID);
-      this.sendMessageToSocket(response.data.gameId, response.data.playerID)
+      this.sendMessageToActiveGamesSocket(response.data.gameId, response.data.playerID)
       // this.$router.push({ name: "Game", query: { id: store.state.gameID } });
       // this.$router.push({ name: "Game", query: { id: store.state.gameID } });
 
@@ -206,6 +244,7 @@ export default {
       const groupId = String(response.data.gameId);
 
       try {
+        this.sendInvitation(this.gameId)
         await this.makeGroup(groupId);
         this.makeGroupCall(groupId);
         this.$router.push({ name: "Game", query: { id: response.data.gameId} });
@@ -229,7 +268,7 @@ export default {
       this.ongoingCall = true;
       this.incomingCall = false;
       var sessionID = this.session_id;
-      this.$router.push({ name: "Game", query: { id: 44} });
+      this.$router.push({ name: "Game", query: { id: 47} });
       CometChat.acceptCall(sessionID).then(
         call => {
           console.log("Call accepted successfully:", call);
