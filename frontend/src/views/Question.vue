@@ -1,6 +1,6 @@
 <script setup>
 
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, onMounted  } from 'vue';
 
 defineProps({
   caseTitle: String,
@@ -10,18 +10,20 @@ defineProps({
 });
 const emit = defineEmits(['close']);
 
-  document.addEventListener("DOMContentLoaded", function() {
-    const textarea = document.querySelector('.input-custom');
-    const container = document.querySelector('.modal-container');
+onMounted(() => {
+  const textarea = document.querySelector('.input-custom');
+  const container = document.querySelector('.modal-container');
 
-    textarea.addEventListener('input', function() {
+  if (textarea && container) {
+    textarea.addEventListener('input', function () {
       this.style.height = 'auto'; // Сбрасываем высоту текстового поля
       this.style.height = this.scrollHeight + 'px'; // Устанавливаем высоту равной высоте содержимого
 
       // Увеличиваем высоту контейнера в зависимости от высоты текстового поля
-      container.style.minHeight = (this.scrollHeight + 140) + 'px'; // Добавьте отступ для упаковки
+      container.style.minHeight = this.scrollHeight + 140 + 'px'; // Добавьте отступ для упаковки
     });
-  });
+  }
+});
 </script>
 
 <template>
@@ -38,6 +40,7 @@ const emit = defineEmits(['close']);
         <h3 style="width: 400px;">{{ caseTitle }} </h3>
       <h3 style="width: 400px;">{{ questionText }} </h3>
     </div>
+      <textarea class="input-custom" style="min-height: 60%;"></textarea>
     </div>
     <button class="button-33" role="button" @click="emit('close')">Закрыть</button>
   </div>

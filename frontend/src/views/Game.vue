@@ -278,7 +278,7 @@ const moveDot = (targetIndex) => {
 const messages = ref([
   {
     id: 0,
-    msg: "content"
+    msg: ""
   }
 ])
 let message = ref("")
