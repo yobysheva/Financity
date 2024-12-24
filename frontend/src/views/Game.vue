@@ -323,12 +323,12 @@ gameSocket.onmessage = (event) => {
     let text_data = JSON.parse(event.data);
     let info = text_data["info"];
     let type = text_data['type'];
-    console.log(type)
     switch (type) {
         case "turn":
             console.log("play_turn_animation")
           // eslint-disable-next-line no-case-declarations
             const turn_count = info["turn_count"];
+            totalSum.value += turn_count;
             spin(turn_count);
             break;
     }
@@ -351,7 +351,6 @@ function sendGameInfo(turn_count) {
 
 const generateAndSpin = () => {
   let rnd = Math.floor(Math.random() * 6 + 1);
-  totalSum.value += rnd;
   sendGameInfo(rnd)
 };
 function spin(rnd) {
