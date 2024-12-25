@@ -1,13 +1,22 @@
 <script setup>
+import {defineProps} from 'vue';
+defineProps({
+  jobName: String,
+  jobPayment: Number,
+  av: String
+});
 
 </script>
 
 <template>
-<div class="player-container">
+<div class="player-container" style="height: 10%;">
   <div class="column">
-    <div class="photo"></div>
-        <p>Пользователь1234</p>
-        <p>100000$</p>
+    <div class="photo" ><img :src="av" style="width: 100%; /* Заполняет ширину блока */
+  height: auto; /* Сохраняет пропорции изображения */
+  display: block; "/></div>
+<!--        <p>Пользователь1234</p>-->
+        <p>Профессия: {{jobName}}</p>
+        <p>{{jobPayment}}₽</p>
   </div>
 </div>
 </template>
@@ -23,7 +32,6 @@
   font-size: 8px;
   border: 2px solid rgba(44, 187, 99, .3);
   /*display: flex;*/
-  //opacity: 0.9;
   align-items: center;
   justify-content: center;
   width: 100%;
@@ -37,18 +45,20 @@
 }
 
 .photo{
-  width: 25px;
-  height: 25px;
+  width: 45px;
+  height: 45px;
   margin: 5px;
   background-color: white;
   border-radius: 10px;
   box-shadow: rgba(44, 187, 99, .1) 0 2px 4px, rgba(44, 187, 99, .05) 0 1px 2px;
   color: #333;
   /*font-family: CerebriSans-Regular, -apple-system, system-ui, Roboto, sans-serif;*/
-  padding: 10px 15px;
+  padding: 0px 0px;
   font-size: 16px;
   border: 2px solid rgba(44, 187, 99, .3);
   transition: all 250ms;
+  position: relative;
+  overflow: hidden;
 }
 
 .photo:focus {
@@ -63,7 +73,6 @@
 }
 
 .photo:hover {
-  //background-color: rgba(100, 255, 200, .9);
   outline: none;
   border-color: rgba(44, 187, 99, .6);
   box-shadow: rgba(44, 187, 99, .35) 0 0 5px;

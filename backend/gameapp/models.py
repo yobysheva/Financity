@@ -16,13 +16,10 @@ class Game (models.Model):
     def __str__(self):
         return f"gameID: {self.id} | status: {self.status}"
 
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         print(f"ID: {self.id} | Статус: {self.status}")
-
-
-
-
 
 class Question(models.Model):
     QUESTION_TYPES = [
@@ -65,3 +62,22 @@ class Action(models.Model):
 
     def __str__(self):
         return f"Action {self.id} by Player {self.player.id}"
+
+
+class Chance(models.Model):
+    id = models.AutoField(primary_key=True)
+    text = models.TextField()
+    sum = models.FloatField()
+    period = models.IntegerField()
+    scip = models.BooleanField(default=False)
+    def __str__(self):
+        return f"Chance {self.id} with action {self.text}"
+
+
+class Professions(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.TextField()
+    salary = models.FloatField()
+
+    def __str__(self):
+        return f"Profession {self.name} with salary {self.salary}"

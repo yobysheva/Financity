@@ -1,31 +1,92 @@
 <script setup>
-  document.addEventListener("DOMContentLoaded", function() {
-    const textarea = document.querySelector('.input-custom');
-    const container = document.querySelector('.modal-container');
+import { defineProps, defineEmits, onMounted, onUnmounted } from 'vue';
+import store from "@/store";
+import {ref} from 'vue';
+import {authService} from "@/services/auth";
 
-    textarea.addEventListener('input', function() {
+const emit = defineEmits(['close']);
+
+const close = () => {
+  emit('close');
+};
+
+const handleKeyDown = (event) => {
+  if (event.key === 'Escape') {
+    close();
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyDown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown);
+});
+
+const props = defineProps({
+  questionId: Number,
+  caseTitle: String,
+  questionText: String,
+  visible: Boolean,
+  color: String,
+});
+
+let question = ref({
+  text : "",
+});
+
+// let answers = ref([])
+
+onMounted(() => {
+  const textarea = document.querySelector('.input-custom');
+  const container = document.querySelector('.modal-container');
+
+  if (textarea && container) {
+    textarea.addEventListener('input', function () {
       this.style.height = 'auto'; // Сбрасываем высоту текстового поля
       this.style.height = this.scrollHeight + 'px'; // Устанавливаем высоту равной высоте содержимого
 
       // Увеличиваем высоту контейнера в зависимости от высоты текстового поля
-      container.style.minHeight = (this.scrollHeight + 140) + 'px'; // Добавьте отступ для упаковки
+      container.style.minHeight = this.scrollHeight + 140 + 'px'; // Добавьте отступ для упаковки
     });
-  });
+  }
+});
+
+
+async function getQuestion() {
+  try {
+    console.log(store.state.username);
+    const response = await authService.getQuestion(props.questionId);
+    console.log(response);
+    question.value.text = response.data['text'];
+    question.value.type = response.data['type'];
+  } catch (error) {
+        console.error(error);
+  }
+}
+
+getQuestion();
 </script>
 
 <template>
-<div class="modal" style="top: 35%; width: 50%; min-height: 40%; height: auto;overflow: visible;">
-  <div class="container modal-container" style="width: 100%; min-height: 100%; ">
-    <div class="column">
-      <div class="row">
-      <div class="photo"></div>
-      <h3 style="width: 400px;">Это какой-то вопрос на очень важную тему, дайте свой ответ</h3>
+<div v-if="visible" class="modal" :style="{
+      top: '35%',
+      width: '70%',
+      minHeight: '60%',
+      height: 'auto',
+      overflow: 'visible'
+    }">
+  <div class="container modal-container" :style="{backgroundColor: color, width: '100%', minHeight: '100%'}">
+    <div class="column" >
+    <h3 style="width: 80%;">{{ caseTitle }} </h3>
+      <h3 style="width: 80%;">{{question.text}} </h3>
+      <textarea class="input-custom" style="min-height: 60%;"></textarea>
     </div>
-      <textarea class="input-custom" style="min-height: 60%; width: 400px;" placeholder="Введите свой ответ или проговорите его вслух"></textarea>
-    </div>
+    <button class="button-33" role="button" @click="emit('close')">Закрыть</button>
   </div>
 </div>
-  <div class="overlay"></div>
+  <div v-if="visible" class="overlay"></div>
 </template>
 
 <style scoped>
@@ -61,5 +122,10 @@
   opacity: 1;
 }
 
+.buttons{
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+}
 
 </style>

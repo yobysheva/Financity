@@ -12,6 +12,9 @@ export const authService = {
     createGame(userData) {
         return axios.post(`${apiUrl}gameApp/createGame/`, userData);
     },
+    createPlayer(userData){
+        return axios.post(`${apiUrl}gameApp/createPlayer/`, userData);
+    },
     getData(username) {
         return axios.get(`${apiUrl}user/getData/`, {params : {username : username}});
     },
@@ -20,5 +23,11 @@ export const authService = {
     },
     getUsersStats(username){
         return axios.get(`${apiUrl}user/getStats/`, {params : {username : username}});
+    },
+    getQuestion(id){
+        return axios.get(`${apiUrl}gameApp/getQuestion/`, {params: {id: id}})
+    },
+    getAnswers(id){
+        return axios.get(`${apiUrl}gameApp/getAnswers/`, {params: {id: id}})
     }
 };

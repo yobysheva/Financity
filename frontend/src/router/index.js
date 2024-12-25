@@ -30,7 +30,7 @@ const routes = [
     path: '/game',
     name: 'Game',
     component: Game,
-    props: (route) => ({ id: route.query.id })
+    props: (route) => ({ id: route.query.id})
   },
 ];
 

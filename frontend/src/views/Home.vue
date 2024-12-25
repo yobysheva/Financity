@@ -2,7 +2,6 @@
 import Rating from "@/views/children/Rating.vue";
 import Profile from "@/views/user/Profile.vue";
 import CurrentGames from "@/views/children/CurrentGames.vue";
-import RequestGame from "@/views/RequestGame.vue";
 import { authService } from "@/services/auth";
 import store from "../store.js";
 import { CometChat } from "@cometchat-pro/chat";
@@ -12,7 +11,6 @@ export default {
     Rating,
     Profile,
     CurrentGames,
-    RequestGame,
   },
 
   data() {
@@ -29,16 +27,18 @@ export default {
       GameCreated: false,
       IsGameRequested: false,
       incomingCall: false,
-      ongoingCall: false
+      ongoingCall: false,
+      gameId: null
     };
   },
 
   created() {
-    this.createSocket()
+    // this.createWaitingRequestSocket()
+    this.createActiveGamesSocket()
     this.getLoggedInUser();
     let globalContext = this;
 
-    var listnerID = "UNIQUE_LISTENER_ID";
+    var listnerID = this.user.username;
     CometChat.addCallListener(
       listnerID,
       new CometChat.CallListener({
@@ -51,6 +51,7 @@ export default {
         onOutgoingCallAccepted(call) {
           console.log("Outgoing call accepted:", call);
           globalContext.ongoingCall = true;
+          call.setSessionId(this.gameId);
           CometChat.startCall(
             call.sessionId,
             document.getElementById("callScreen"),
@@ -91,15 +92,15 @@ export default {
   },
 
   methods: {
-    createSocket() {
-      this.activeGamesSocket = new WebSocket(`ws://localhost:8000/ws/home/`);
-      this.activeGamesSocket.onmessage = (event) => {
+    createActiveGamesSocket() {
+        this.activeGamesSocket = new WebSocket(`ws://localhost:8000/ws/home/`);
+        this.activeGamesSocket.onmessage = (event) => {
         let text_data = JSON.parse(event.data)
         console.log(text_data)
       }
     },
 
-    sendMessageToSocket(gameId, playerId) {
+    sendMessageToActiveGamesSocket(gameId, playerId) {
       let data = {
         "player_id": playerId,
         "game_id": gameId
@@ -111,7 +112,39 @@ export default {
       )
     },
 
+    // createWaitingRequestSocket() {
+    //   let username = store.state.username
+    //   this.waitingRequestSocket = new WebSocket(`ws://localhost:8000/ws/waiting_request/${username}/`)
+    //   this.waitingRequestSocket.onmessage = (event) => {
+    //       let text_data = JSON.parse(event.data)
+    //       // let user = store.state.username
+    //       // if (text_data['sender_name'] === user) {
+    //       //   return false
+    //       // }
+    //       console.log(1)
+    //       console.log(text_data)
+    //   }
+    // },
+    //
+    // sendWaitingRequestSocket(senderUsername, recipientUsername, gameID) {
+    //   let sendRequestSocket = new WebSocket(`ws://localhost:8000/ws/for_waiting_request/${recipientUsername}`)
+    //   let data = {
+    //     "sender_id": senderUsername,
+    //     "game_id": gameID
+    //   }
+    //   sendRequestSocket.send(
+    //       JSON.stringify(
+    //           data
+    //       )
+    //   )
+    //   // sendRequestSocket.close()
+    // },
+
     getLoggedInUser() {
+      if(!store.state.username) {
+        this.$router.push({ name: "login" });
+        return;
+      }
       CometChat.getLoggedinUser().then(
         cometUser => {
           this.user.username = cometUser.name;
@@ -125,9 +158,11 @@ export default {
     },
 
     addUserToGroup() {
-      if (this.newUser) {
+      if (this.newUser && this.groupUsers.length < 5) {
         this.groupUsers.push(this.newUser);
         this.newUser = '';
+    } else if(this.groupUsers.length >= 5){
+        alert('Максимальное число игорков: 6');
       }
     },
 
@@ -182,6 +217,14 @@ export default {
       this.GameCreated = true;
     },
 
+    // sendInvitation(gameID) {
+    //   let senderUser = store.state.username
+    //   for (let user in this.groupUsers) {
+    //     console.log(user)
+    //     this.sendWaitingRequestSocket(senderUser, user, gameID)
+    //   }
+    // },
+
     async makeNewGame() {
     try {
     const response = await authService.createGame({
@@ -191,14 +234,20 @@ export default {
     if (response.status === 200) {
       await store.dispatch("updateGameID", response.data.gameId);
       await store.dispatch("updatePlayerID", response.data.playerID);
-      this.sendMessageToSocket(response.data.gameId, response.data.playerID)
-      this.$router.push({ name: "Game", query: { id: store.state.gameID } });
+      this.sendMessageToActiveGamesSocket(response.data.gameId, response.data.playerID);
 
+      // this.$router.push({ name: "Game", query: { id: store.state.gameID } });
+      // this.$router.push({ name: "Game", query: { id: store.state.gameID } });
+
+      this.gameId = String(response.data.gameId);
+      console.log(response.data.gameId);
       const groupId = String(response.data.gameId);
 
       try {
         await this.makeGroup(groupId);
         this.makeGroupCall(groupId);
+        // this.sendInvitation(this.gameId);
+        this.$router.push({ name: "Game", query: { id: response.data.gameId} });
       } catch (error) {
         console.error("Failed to create group or initiate call:", error);
       }
@@ -214,41 +263,27 @@ export default {
   }
 },
 
-
-//       startVideoChat() {
-//       if (!this.receiver_id) this.error = true;
-//       this.showSpinner = true;
-//
-//       var receiverID = this.receiver_id;
-//       var callType = CometChat.CALL_TYPE.AUDIO;
-//       var receiverType = CometChat.RECEIVER_TYPE.USER;
-//
-//       var call = new CometChat.Call(receiverID, callType, receiverType);
-//
-//       CometChat.initiateCall(call).then(
-//         outGoingCall => {
-//           this.showSpinner = false;
-//           console.log("Call initiated successfully:", outGoingCall);
-//           // perform action on success. Like show your calling screen.
-//         },
-//         error => {
-//           console.log("Call initialization failed with exception:", error);
-//         }
-//       );
-//     },
-
-
- acceptCall() {
+    acceptCall() {
       let globalContext = this;
       this.ongoingCall = true;
       this.incomingCall = false;
       var sessionID = this.session_id;
       CometChat.acceptCall(sessionID).then(
-        call => {
+         async call => {
           console.log("Call accepted successfully:", call);
+          let group = call.getCallReceiver();
+          let groupId = group.getGuid();
+          const response = await authService.createPlayer({
+            username: store.state.username,
+            id: groupId,
+          });
+          store.state.playerID = response.data.playerID;
+          this.$router.push({ name: "Game", query: { id: groupId} });
           console.log("call accepted now....");
           // start the call using the startCall() method
           console.log(globalContext.ongoingCall);
+          console.log(this.sessionID);
+          console.log(call.sessionId);
           CometChat.startCall(
             call.sessionId,
             document.getElementById("callScreen"),
@@ -303,13 +338,12 @@ export default {
 </script>
 
 <template>
-<!--  <AddUsersToGroup v-if="GameCreated" v-bind:group="group"/>-->
   <div class="add-users" v-if="GameCreated">
     <div class="modal" style="top: 35%; width: 50%; height: 60%; overflow: visible; padding: 15px;">
-  <div class="container modal-container" style="opacity: 1; width: 100%; min-height: 100%; padding: 15px; align-items: center; justify-content: center;">
-    <div class="column">
+  <div class="container modal-container" style="opacity: 1; width: 100%; min-height: 100%; padding: 15px; align-items: center; justify-content: center; position: relative;">
+    <div class="column" style="width: 100%; align-items: center; justify-content: center;">
       <div class="column" style="justify-content: center;">
-      <h3 style="width: 80%;">Вы пригласили в игру пользователей:</h3>
+      <h3 style="text-align: center; margin-bottom: 15px; margin-top: 15px;">Вы пригласили в игру пользователей:</h3>
           <ul>
           <li v-for="user in  groupUsers" :key="user.id">{{ user }}</li>
           </ul>
@@ -322,7 +356,7 @@ export default {
 </div>
   <div class="overlay"></div>
   </div>
-  <RequestGame v-if="IsGameRequested"/>
+
 
   <div class="outer-container">
 <div class="container home-page" style="min-height: 95%; max-height: 95%;">
@@ -332,16 +366,31 @@ export default {
         <h3>Присоединись к этим играм!</h3>
       </div>
        <div v-if="incomingCall">
-          <button class="btn btn-success" @click="acceptCall">Accept Call</button>
-          <button class="btn btn-success" @click="rejectCall">Reject Call</button>
+<!--          <button class="btn btn-success" @click="acceptCall">Accept Call</button>-->
+<!--          <button class="btn btn-success" @click="rejectCall">Reject Call</button>-->
+         <div class="modal" style="top: 35%; width: 60%; min-height: 30%; height: auto; overflow: visible;">
+            <div class="container modal-container" style="width: 100%; min-height: 100%; padding: 5%;  align-items: center; justify-content: center;">
+                <h3>Приглашение в игру</h3>
+                <div class="row" style=" align-items: center; justify-content: center;">
+                <p>Пользователь User123 приглашает вас присоединиться к игре</p>
+              </div>
+                <div class="row" style=" align-items: center; justify-content: center;">
+                <button class="button-33" role="button" @click="acceptCall">Принять приглашение</button>
+                <button class="button-33" role="button" @click="rejectCall">Отклонить приглашение</button>
+                </div>
+            </div>
+          </div>
+            <div class="overlay"></div>
         </div>
 
-        <div v-else-if="ongoingCall">
-          <button class="btn btn-secondary"> Ongoing Call ... </button>
-          <div id="callScreen"></div>
-        </div>
-      <CurrentGames v-if="!ongoingCall"/>
+<!--        <div v-else-if="ongoingCall">-->
+<!--          <button class="btn btn-secondary"> Ongoing Call ... </button>-->
+<!--        </div>-->
+
+      <CurrentGames/>
+      <div id="callScreen" style="position: absolute; width: 0px; height: 0px; overflow:hidden;"></div>
     </div>
+
     <div class="column" style="width: 25%; height: 98%; margin: 2.5%;">
       <button class="button-33" role="button" @click="addUsersToGame">Новая игра</button>
       <Rating/>
