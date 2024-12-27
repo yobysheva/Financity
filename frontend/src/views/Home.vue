@@ -372,7 +372,7 @@ export default {
             <div class="container modal-container" style="width: 100%; min-height: 100%; padding: 5%;  align-items: center; justify-content: center;">
                 <h3>Приглашение в игру</h3>
                 <div class="row" style=" align-items: center; justify-content: center;">
-                <p>Пользователь User123 приглашает вас присоединиться к игре</p>
+                <p>Вас приглашают присоединиться к игре</p>
               </div>
                 <div class="row" style=" align-items: center; justify-content: center;">
                 <button class="button-33" role="button" @click="acceptCall">Принять приглашение</button>

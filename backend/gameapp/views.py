@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from django.template.defaultfilters import random
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
@@ -50,6 +51,7 @@ def getQuestion(request):
         except User.DoesNotExist:
             return Response({"detail": "Question not found"}, status=status.HTTP_404_NOT_FOUND)
 
+
 api_view(['Get'])
 def getAnswers(request):
     if request.method == 'GET':
@@ -64,3 +66,22 @@ def getAnswers(request):
             return JsonResponse(responseData)
         except User.DoesNotExist:
             return Response({"detail": "Question not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+api_view(['Get'])
+def getRandomQuestion(request):
+    if request.method == 'GET':
+        category_id = request.GET.get('category_id', None)
+        try:
+            question = Question.objects.filter(category=category_id).order_by('?').first()
+            responseData = {
+                "id" : question.id,
+                "category": question.category,
+                # "text": question.text,
+                "type": question.type
+            }
+            print(responseData)
+            return JsonResponse(responseData)
+        except User.DoesNotExist:
+            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+

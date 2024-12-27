@@ -38,11 +38,9 @@ defineProps({
       overflow: 'visible'
     }">
     <div class="container modal-container" :style="{backgroundColor: color, width: '100%', minHeight: '100%'}">
-      <div class="column">
-        <div class="row">
-          <h3 style="width: 400px;">Шанс </h3>
-          <h3 style="width: 400px;">{{ questionText }} </h3>
-        </div>
+      <div class="column" style="text-align: center; justify-content: center; align-items: center;">
+          <h3 style="width: 80%;">Шанс</h3>
+          <h3 style="width: 80%;">Вы выиграли небольшой приз в конкурсе, ваш баланс пополнен на 4.000 рублей.</h3>
       </div>
       <button class="button-33" role="button" @click="emit('close')">Закрыть</button>
     </div>

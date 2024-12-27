@@ -27,7 +27,8 @@ onUnmounted(() => {
 const props = defineProps({
   questionId: Number,
   caseTitle: String,
-  questionText: String,
+  questionType: Number,
+  // questionText: String,
   visible: Boolean,
   color: String,
 });

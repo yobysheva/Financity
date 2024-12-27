@@ -29,5 +29,8 @@ export const authService = {
     },
     getAnswers(id){
         return axios.get(`${apiUrl}gameApp/getAnswers/`, {params: {id: id}})
+    },
+    getRandomQuestion(category_id){
+        return axios.get(`${apiUrl}gameApp/getRandomQuestion/`, {params: {category_id : category_id}})
     }
 };

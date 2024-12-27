@@ -5,6 +5,7 @@ import Player from "@/views/user/Player.vue";
   import Question from "@/views/Question.vue";
   import Rules from "@/views/children/Rules.vue"
   import Chance from "@/views/children/Chance.vue";
+  import { authService } from "@/services/auth";
 // import QuizQuestion from "@/views/QuizQuestion.vue";
 import {ref} from 'vue';
 // import { getCurrentInstance } from 'vue';
@@ -76,6 +77,7 @@ getLoggedInUser();
 function showRules() {
   rulesVisible.value = !rulesVisible.value;
 }
+
 //
 // if(!props.userType){
   // let sessionID = props.sessionId;
@@ -117,6 +119,7 @@ function showRules() {
 //       );
 // } else {
   // let globalContext = callInformation.value;
+
     var listnerID = loggedUser.value.username;
     CometChat.addCallListener(
       listnerID,
@@ -206,22 +209,16 @@ const currentIndex = ref(0);
 const lastRoll = ref(null);
 const lastX = ref(0);
 const lastY = ref(0);
-
 const isSpinDisabled = ref(true);
 const spinButtonLabel = ref("Крутить");
 let spinTimer = null;
 
-const questions = {
-  state: ["Вопрос 1 (Государство)", "Вопрос 2 (Государство)", "Вопрос 3 (Государство)"],
-  entertainment: ["Вопрос 1 (Развлечения)", "Вопрос 2 (Развлечения)", "Вопрос 3 (Развлечения)"],
-  realEstate: ["Вопрос 1 (Недвижимость)", "Вопрос 2 (Недвижимость)", "Вопрос 3 (Недвижимость)"]
-};
+
 const chances = ["chance1", "chance2", "chanse3"]
 const modalVisible = ref(false);
-const modalTitle = ref("");
-const modalQuestion = ref("");
 const modalChance = ref("");
 const modalChanceVisible = ref(false);
+
 const jobs = [["медсестра", 30000], ["архитектор", 90000], ["веб-разработчик", 190000], ["адвокат", 90000] ]
 const job1 = jobs[Math.floor(Math.random() * jobs.length)];
 const job1Name = job1[0]
@@ -242,12 +239,26 @@ const job5Payment= job5[1]
 // const job6Name = job6[0]
 // const job6Payment= job6[1]
 
-const getRandomQuestion = (category) => {
-  const caseQuestions = questions[category];
-  return caseQuestions[Math.floor(Math.random() * caseQuestions.length)];
-};
+const modalTitle = ref("");
+// const modalQuestion = ref("");
+const modalQuestionId = ref(0);
+const modalQuestionType = ref(1);
+
+// async function getRandomQuestion(category) {
+//   try {
+//     const response = await authService.getRandomQuestion(category);
+//     console.log('ppp');
+//     console.log(response);
+//     modalQuestion.value.id = response["id"];
+//     modalQuestion.value.type = response["type"];
+//   } catch (error) {
+//         console.error(error);
+//   }
+// }
+
+
 const modalColor = ref("")
-const checkPositionAndShowModal = (currentCoords) => {
+async function checkPositionAndShowModal (currentCoords){
   const stateCoords = [[14.3, 8], [25.5, 8], [36.7, 8], [5.3, 36], [5.3, 22]];
   const entertainmentCoords = [[56.7, 8], [67.7, 8], [79, 8], [88.3, 22], [88.3, 35.5]];
   const realEstateCoords = [[88.3, 56], [88.3, 69], [78.7, 83], [67.7, 83], [56.7, 83]];
@@ -256,16 +267,16 @@ const checkPositionAndShowModal = (currentCoords) => {
   let category = null;
 
   if (stateCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
-    category = "state";
+    category = 1;
     modalColor.value = "#ADA1F6"; // Фиолетовый
   } else if (entertainmentCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
-    category = "entertainment";
+    category = 2;
     modalColor.value = "#FFBBF8"; // Розовый
   } else if (realEstateCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
-    category = "realEstate";
+    category = 3;
     modalColor.value = "#C8E3FE"; // Голубой
   } else if (allCasesCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
-    category = ["state", "entertainment", "realEstate"][Math.floor(Math.random() * 3)];
+    category = [1, 2, 3][Math.floor(Math.random() * 3)];
     modalColor.value = "#E7FC93"; // Желтый
   }else if (ChanceCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
     modalChance.value = chances[Math.floor(Math.random() * chances.length)];
@@ -273,31 +284,47 @@ const checkPositionAndShowModal = (currentCoords) => {
       modalChanceVisible.value = true;
     }, 500);
   }
-  console.log(store.state.playerID.toString(), players)
+  console.log(store.state.playerID.toString(), players);
   if (category && players[current_player_index] === store.state.playerID.toString()) {
-    modalTitle.value = `Кейс: ${category === "state" ? "Государство" : category === "entertainment" ? "Развлечения" : "Недвижимость"}`;
-    modalQuestion.value = getRandomQuestion(category);
-    console.log("smth")
-    sendQuestion()
+    modalTitle.value = `Кейс: ${category === 1 ? "Государство" : category === 2 ? "Развлечения" : "Недвижимость"}`;
+    try {
+    const response = await authService.getRandomQuestion(category);
+    console.log('ppp');
+    console.log(response);
+    modalQuestionId.value = response.data['id'];
+    modalQuestionId.value = 1;
+    console.log(modalQuestionId.value);
+    modalQuestionType.value = response.data['type'];
+  } catch (error) {
+        console.error(error);
+  }
+    // console.log(modalQuestion.value);
+    sendQuestion();
     setTimeout(() => {
         modalVisible.value = true;
     }, 500);
 
   }
-};
-const openModalWithValues = (title, question) => {
+}
+
+
+const openModalWithValues = (title, questionId, questionType) => {
   modalTitle.value = title
-  modalQuestion.value = question
+  modalQuestionId.value = questionId
+  modalQuestionType.value = questionType
   setTimeout(() => {
         modalVisible.value = true;
     }, 500);
 }
 
+
 const closeModal = () => {
   modalVisible.value = false;
   modalChanceVisible.value = false;
-  sendCloseQuestion()
+  sendCloseQuestion();
 };
+
+
 const moveDot = (targetIndex) => {
   const steps = [];
   if (targetIndex > currentIndex.value) {
@@ -380,15 +407,17 @@ gameSocket.onmessage = (event) => {
           // eslint-disable-next-line no-case-declarations
             const title = info["title"]
           // eslint-disable-next-line no-case-declarations
-            const question = info["question"]
+            const questionId = info["questionId"]
+          // eslint-disable-next-line no-case-declarations
+            const questionType = info["questionType"]
             if (players[current_player_index] ===! store.state.playerID.toString())
             openModalWithValues(
-                title, question
+                title, questionId, questionType
             )
             break;
         case "on_question_close":
-            modalVisible.value = false
-            modalChanceVisible.value = false
+            modalVisible.value = false;
+            modalChanceVisible.value = false;
             break;
         case "notification_about_connect_to_game":
             players.push(info['player_id']);
@@ -417,7 +446,8 @@ function sendQuestion() {
     "type": "on_question_open",
     "info": {
       "title": modalTitle.value,
-      "question": modalQuestion.value
+      "questionId": modalQuestionId.value,
+      "questionType": modalQuestionType.value
     }
   }
   gameSocket.send(JSON.stringify(
@@ -441,8 +471,10 @@ function sendTurnCount(turn_count) {
 
 const generateAndSpin = () => {
   let rnd = Math.floor(Math.random() * 6 + 1);
-  sendTurnCount(rnd)
+  sendTurnCount(rnd);
 };
+
+
 function spin(rnd) {
   let x, y;
 
@@ -514,7 +546,7 @@ const startTurn = () => {
 <template>
 <!--  <QuizQuestion/>-->
   <Rules v-if="rulesVisible" @close="showRules"/>
-  <Question v-if="questionActive"/>
+<!--  <Question v-if="questionActive"/>-->
   <div id="callScreen" style="position: absolute; width: 0px; height: 0px; overflow:hidden;"></div>
 <div class="outer-container">
 <div class="transparent-container game-page" style="min-height: 98%; max-height: 98%; min-width: 96%; max-width: 96%;">
@@ -598,7 +630,7 @@ const startTurn = () => {
       @click="manualSpin">
       {{ spinButtonLabel }}
     </button>
-      <Question :questionId=5 :caseTitle= modalTitle  :questionText=modalQuestion :visible="modalVisible" :color="modalColor" @close="closeModal" />
+      <Question :questionId="modalQuestionId" :questionType="modalQuestionType" :caseTitle="modalTitle" :visible="modalVisible" :color="modalColor" @close="closeModal" />
       <Chance  :questionText=modalChance :visible="modalChanceVisible" @close="closeModal" />
     </div>
   <div class="column" style="width: 20%; min-height: 95vh; height: 95%; margin-left: 2%;">
