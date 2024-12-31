@@ -132,6 +132,8 @@ export default {
           if (response.status === 201) {
             this.openLogin();
             alert("User registered successfully!");
+            this.username = '';
+            this.password = '';
             this.password2 = '';
           }
         } catch (error) {
