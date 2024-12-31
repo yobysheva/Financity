@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, defineEmits, onMounted, onUnmounted } from 'vue';
+import {defineProps, defineEmits, onMounted, onUnmounted, defineExpose, computed} from 'vue';
 import store from "@/store";
 import {ref} from 'vue';
 import {authService} from "@/services/auth";
@@ -33,11 +33,49 @@ const props = defineProps({
   color: String,
 });
 
+const modalStyles = computed(() => ({
+  top: "35%",
+  width: "70%",
+  minHeight: "70%",
+  height: "80%",
+  overflow: "visible",
+  position: "fixed",
+  left: "50%",
+  transform: "translate(-50%, -35%)",
+  zIndex: 1000,
+  padding: 0,
+}));
+
+const containerStyles = computed(() => ({
+  backgroundColor: props.color || "white",
+  width: "100%",
+  height: "100%",
+  padding: "16px",
+  overflowY: "auto",
+ msOverflowStyle: "none",
+  scrollbarWidth: "none",
+  boxSizing: "border-box",
+  position: "relative",
+}));
+
+const contentStyles = computed(() => ({
+  padding: "16px",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "flex-start",
+  alignItems: "center",
+  gap: "2%",
+  width: "100%",
+  boxSizing: "border-box",
+  position: "relative",
+}));
+
+
 let question = ref({
   text : "",
 });
 
-// let answers = ref([])
+let answers = ref([])
 
 onMounted(() => {
   const textarea = document.querySelector('.input-custom');
@@ -55,38 +93,64 @@ onMounted(() => {
 });
 
 
-async function getQuestion() {
+async function getQuestion(id, type) {
   try {
     console.log(store.state.username);
-    const response = await authService.getQuestion(props.questionId);
+    const response = await authService.getQuestion(id);
     console.log(response);
+    console.log(props);
     question.value.text = response.data['text'];
-    question.value.type = response.data['type'];
+    // question.value.type = response.data['type'];
+    if(type === 2){
+      const response1 = await authService.getAnswers(id);
+      console.log(response1);
+      answers.value = [];
+      for(const answer of response1.data){
+        answers.value.push(answer);
+      }
+    }
   } catch (error) {
         console.error(error);
   }
 }
 
-getQuestion();
+defineExpose({ getQuestion });
 </script>
 
 <template>
-<div v-if="visible" class="modal" :style="{
-      top: '35%',
-      width: '70%',
-      minHeight: '60%',
-      height: 'auto',
-      overflow: 'visible'
-    }">
-  <div class="container modal-container" :style="{backgroundColor: color, width: '100%', minHeight: '100%'}">
-    <div class="column" >
-    <h3 style="width: 80%;">{{ caseTitle }} </h3>
-      <h3 style="width: 80%;">{{question.text}} </h3>
-      <textarea class="input-custom" style="min-height: 60%;"></textarea>
+  <div v-if="visible" class="modal" :style="modalStyles">
+    <div class="container modal-container" :style="containerStyles">
+      <div class="column" :style="contentStyles">
+        <h3 style="margin-bottom: 16px;">{{ caseTitle }}</h3>
+        <h3 style="margin-bottom: 16px;">{{ question.text }}</h3>
+        <textarea
+          v-if="questionType === 1"
+          class="input-custom"
+          style="min-height: 120px; width: 100%; padding: 8px; margin-bottom: 16px;"
+        ></textarea>
+        <div v-if="questionType === 2" class="answers">
+          <div
+            class="column"
+            style="margin-bottom: 8px; align-items: center; -ms-overflow-style: none; scrollbar-width: none;"
+          >
+            <label v-for="answer in answers"
+            :key="answer.id" style="color:black; ">
+              <input type="radio" name="answer" :value="answer.id" />
+              {{ answer.text }}
+            </label>
+          </div>
+        </div>
+      <button
+        class="button-33"
+        role="button"
+        style="margin-bottom: 16px;"
+        @click="$emit('close')"
+      >
+        Закрыть
+      </button>
+      </div>
     </div>
-    <button class="button-33" role="button" @click="emit('close')">Закрыть</button>
   </div>
-</div>
   <div v-if="visible" class="overlay"></div>
 </template>
 
@@ -128,5 +192,7 @@ getQuestion();
   align-items: center;
   justify-content: center;
 }
-
+h3{
+  width: 80%;
+}
 </style>

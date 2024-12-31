@@ -48,7 +48,7 @@ def getQuestion(request):
             }
             print(responseData)
             return JsonResponse(responseData)
-        except User.DoesNotExist:
+        except Question.DoesNotExist:
             return Response({"detail": "Question not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -56,16 +56,20 @@ api_view(['Get'])
 def getAnswers(request):
     if request.method == 'GET':
         id = request.GET.get('id', None)
+        if not id:
+            return Response({"detail": "Parameter 'id' is required"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            answer = Answer.objects.get(game=id)
-            responseData = {
-                "text": answer.text,
-                "type": answer.type
-            }
+            answers = Answer.objects.filter(question=id)
+            responseData = []
+            for answer in answers:
+                responseData.append({
+                    "id": answer.id,
+                    "text": answer.answer_text
+                })
             print(responseData)
-            return JsonResponse(responseData)
-        except User.DoesNotExist:
-            return Response({"detail": "Question not found"}, status=status.HTTP_404_NOT_FOUND)
+            return JsonResponse(responseData, safe=False)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 api_view(['Get'])
@@ -82,6 +86,6 @@ def getRandomQuestion(request):
             }
             print(responseData)
             return JsonResponse(responseData)
-        except User.DoesNotExist:
+        except Question.DoesNotExist:
             return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
 

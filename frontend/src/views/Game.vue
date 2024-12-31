@@ -244,6 +244,7 @@ const modalTitle = ref("");
 const modalQuestionId = ref(0);
 const modalQuestionType = ref(1);
 
+const questionComponent = ref(null);
 // async function getRandomQuestion(category) {
 //   try {
 //     const response = await authService.getRandomQuestion(category);
@@ -292,9 +293,10 @@ async function checkPositionAndShowModal (currentCoords){
     console.log('ppp');
     console.log(response);
     modalQuestionId.value = response.data['id'];
-    modalQuestionId.value = 1;
     console.log(modalQuestionId.value);
     modalQuestionType.value = response.data['type'];
+    console.log(modalQuestionType.value);
+    await questionComponent.value.getQuestion(response.data['id'], response.data['type']);
   } catch (error) {
         console.error(error);
   }
@@ -308,10 +310,11 @@ async function checkPositionAndShowModal (currentCoords){
 }
 
 
-const openModalWithValues = (title, questionId, questionType) => {
+async function openModalWithValues (title, questionId, questionType) {
   modalTitle.value = title
   modalQuestionId.value = questionId
   modalQuestionType.value = questionType
+  await questionComponent.value.getQuestion(questionId, questionType)
   setTimeout(() => {
         modalVisible.value = true;
     }, 500);
@@ -517,9 +520,11 @@ function spin(rnd) {
   spinButtonLabel.value = "Крутить";
 }
 
+
 const manualSpin = () => {
   clearTimeout(spinTimer);
   generateAndSpin();
+
 };
 
 const startTurn = () => {
@@ -630,7 +635,7 @@ const startTurn = () => {
       @click="manualSpin">
       {{ spinButtonLabel }}
     </button>
-      <Question :questionId="modalQuestionId" :questionType="modalQuestionType" :caseTitle="modalTitle" :visible="modalVisible" :color="modalColor" @close="closeModal" />
+      <Question ref="questionComponent" :questionId="modalQuestionId" :questionType="modalQuestionType" :caseTitle="modalTitle" :visible="modalVisible" :color="modalColor" @close="closeModal" />
       <Chance  :questionText=modalChance :visible="modalChanceVisible" @close="closeModal" />
     </div>
   <div class="column" style="width: 20%; min-height: 95vh; height: 95%; margin-left: 2%;">
@@ -640,7 +645,14 @@ const startTurn = () => {
     </div>
     <div class="container" style=" min-height: 80vh; max-height:80%; display:flex; flex-direction:column; align-items:center; justify-content: end; position: relative;">
     <div class="column" id="messageContainer" style="-ms-overflow-style: none;
-      scrollbar-width: none; align-items:center; justify-content:center; max-height: 50vh; height: 80%; width: 90%; overflow-y: scroll; display: flex; flex-direction: column;">
+      scrollbar-width: none;
+      align-items:center;
+      justify-content:center;
+      max-height: 50vh;
+      height: 80%;
+      width: 90%;
+      overflow-y: scroll;
+      display: flex; flex-direction: column;">
       <div v-for="message in messages" v-bind:key="message.id" style=" align-items:center; justify-content:center; word-break: break-word;">
           {{ message.msg }}
       </div>
