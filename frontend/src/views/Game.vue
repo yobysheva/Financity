@@ -38,10 +38,10 @@ const av5Src = av5;
 //   }
 // });
 
-let loggedUser = ref({
-  username: 'name',
-  uid: 0,
-});
+// let loggedUser = ref({
+//   username: 'name',
+//   uid: 0,
+// });
 
 let players = []
 let current_player_index = 0
@@ -59,20 +59,20 @@ let newMessage = ref("")
 
 let rulesVisible = ref(false)
 
-function getLoggedInUser() {
-      CometChat.getLoggedinUser().then(
-        user => {
-          loggedUser.value.username = user.name;
-          loggedUser.value.uid = user.uid;
-        },
-        error => {
-          this.$router.push({ name: "homepage" });
-          console.log(error);
-        }
-      );
-    }
+// function getLoggedInUser() {
+//       CometChat.getLoggedinUser().then(
+//         user => {
+//           loggedUser.value.username = user.name;
+//           loggedUser.value.uid = user.uid;
+//         },
+//         error => {
+//           this.$router.push({ name: "homepage" });
+//           console.log(error);
+//         }
+//       );
+//     }
 
-getLoggedInUser();
+// getLoggedInUser();
 
 function showRules() {
   rulesVisible.value = !rulesVisible.value;
@@ -120,56 +120,56 @@ function showRules() {
 // } else {
   // let globalContext = callInformation.value;
 
-    var listnerID = loggedUser.value.username;
-    CometChat.addCallListener(
-      listnerID,
-      new CometChat.CallListener({
-        onIncomingCallReceived(call) {
-          console.log("Incoming call:", call);
-          callInformation.value.incomingCall = true;
-          callInformation.value.session_id = call.sessionId;
-        },
-
-        onOutgoingCallAccepted(call) {
-          console.log("Outgoing call accepted:", call);
-          callInformation.value.ongoingCall = true;
-          CometChat.startCall(
-            call.sessionId,
-            document.getElementById("callScreen"),
-            new CometChat.OngoingCallListener({
-              onUserJoined: user => {
-                /* Notification received here if another user joins the call. */
-                console.log("User joined call:", user);
-                /* this method can be use to display message or perform any actions if someone joining the call */
-              },
-              onUserLeft: user => {
-                /* Notification received here if another user left the call. */
-                console.log("User left call:", user);
-                /* this method can be use to display message or perform any actions if someone leaving the call */
-              },
-              onCallEnded: call => {
-                callInformation.value.ongoingCall = false;
-                callInformation.value.incomingCall = false;
-                /* Notification received here if current ongoing call is ended. */
-                console.log("Call ended:", call);
-                /* hiding/closing the call screen can be done here. */
-              }
-            })
-          );
-          // Outgoing Call Accepted
-        },
-        onOutgoingCallRejected(call) {
-          console.log("Outgoing call rejected:", call);
-          this.incomingCall = false;
-          this.ongoingCall = false;
-          this.receiver_id = "";
-          // Outgoing Call Rejected
-        },
-        onIncomingCallCancelled(call) {
-          console.log("Incoming call calcelled:", call);
-        }
-      })
-    );
+    // var listnerID = loggedUser.value.username;
+    // CometChat.addCallListener(
+    //   listnerID,
+    //   new CometChat.CallListener({
+    //     onIncomingCallReceived(call) {
+    //       console.log("Incoming call:", call);
+    //       callInformation.value.incomingCall = true;
+    //       callInformation.value.session_id = call.sessionId;
+    //     },
+    //
+    //     onOutgoingCallAccepted(call) {
+    //       console.log("Outgoing call accepted:", call);
+    //       callInformation.value.ongoingCall = true;
+    //       CometChat.startCall(
+    //         call.sessionId,
+    //         document.getElementById("callScreen"),
+    //         new CometChat.OngoingCallListener({
+    //           onUserJoined: user => {
+    //             /* Notification received here if another user joins the call. */
+    //             console.log("User joined call:", user);
+    //             /* this method can be use to display message or perform any actions if someone joining the call */
+    //           },
+    //           onUserLeft: user => {
+    //             /* Notification received here if another user left the call. */
+    //             console.log("User left call:", user);
+    //             /* this method can be use to display message or perform any actions if someone leaving the call */
+    //           },
+    //           onCallEnded: call => {
+    //             callInformation.value.ongoingCall = false;
+    //             callInformation.value.incomingCall = false;
+    //             /* Notification received here if current ongoing call is ended. */
+    //             console.log("Call ended:", call);
+    //             /* hiding/closing the call screen can be done here. */
+    //           }
+    //         })
+    //       );
+    //       // Outgoing Call Accepted
+    //     },
+    //     onOutgoingCallRejected(call) {
+    //       console.log("Outgoing call rejected:", call);
+    //       this.incomingCall = false;
+    //       this.ongoingCall = false;
+    //       this.receiver_id = "";
+    //       // Outgoing Call Rejected
+    //     },
+    //     onIncomingCallCancelled(call) {
+    //       console.log("Incoming call calcelled:", call);
+    //     }
+    //   })
+    // );
 // }
 
 

@@ -33,62 +33,62 @@ export default {
   },
 
   created() {
-    // this.createWaitingRequestSocket()
+    this.createWaitingRequestSocket()
     this.createActiveGamesSocket()
     this.getLoggedInUser();
-    let globalContext = this;
-
-    var listnerID = this.user.username;
-    CometChat.addCallListener(
-      listnerID,
-      new CometChat.CallListener({
-        onIncomingCallReceived(call) {
-          console.log("Incoming call:", call);
-          globalContext.incomingCall = true;
-          globalContext.session_id = call.sessionId;
-        },
-
-        onOutgoingCallAccepted(call) {
-          console.log("Outgoing call accepted:", call);
-          globalContext.ongoingCall = true;
-          call.setSessionId(this.gameId);
-          CometChat.startCall(
-            call.sessionId,
-            document.getElementById("callScreen"),
-            new CometChat.OngoingCallListener({
-              onUserJoined: user => {
-                /* Notification received here if another user joins the call. */
-                console.log("User joined call:", user);
-                /* this method can be use to display message or perform any actions if someone joining the call */
-              },
-              onUserLeft: user => {
-                /* Notification received here if another user left the call. */
-                console.log("User left call:", user);
-                /* this method can be use to display message or perform any actions if someone leaving the call */
-              },
-              onCallEnded: call => {
-                globalContext.ongoingCall = false;
-                globalContext.incomingCall = false;
-                /* Notification received here if current ongoing call is ended. */
-                console.log("Call ended:", call);
-                /* hiding/closing the call screen can be done here. */
-              }
-            })
-          );
-          // Outgoing Call Accepted
-        },
-        onOutgoingCallRejected(call) {
-          console.log("Outgoing call rejected:", call);
-          this.incomingCall = false;
-          this.ongoingCall = false;
-          this.receiver_id = "";
-          // Outgoing Call Rejected
-        },
-        onIncomingCallCancelled(call) {
-          console.log("Incoming call calcelled:", call);
-        }
-      })
-    );
+    // let globalContext = this;
+    //
+    // var listnerID = this.user.username;
+    // CometChat.addCallListener(
+    //   listnerID,
+    //   new CometChat.CallListener({
+    //     onIncomingCallReceived(call) {
+    //       console.log("Incoming call:", call);
+    //       globalContext.incomingCall = true;
+    //       globalContext.session_id = call.sessionId;
+    //     },
+    //
+    //     onOutgoingCallAccepted(call) {
+    //       console.log("Outgoing call accepted:", call);
+    //       globalContext.ongoingCall = true;
+    //       call.setSessionId(this.gameId);
+    //       CometChat.startCall(
+    //         call.sessionId,
+    //         document.getElementById("callScreen"),
+    //         new CometChat.OngoingCallListener({
+    //           onUserJoined: user => {
+    //             /* Notification received here if another user joins the call. */
+    //             console.log("User joined call:", user);
+    //             /* this method can be use to display message or perform any actions if someone joining the call */
+    //           },
+    //           onUserLeft: user => {
+    //             /* Notification received here if another user left the call. */
+    //             console.log("User left call:", user);
+    //             /* this method can be use to display message or perform any actions if someone leaving the call */
+    //           },
+    //           onCallEnded: call => {
+    //             globalContext.ongoingCall = false;
+    //             globalContext.incomingCall = false;
+    //             /* Notification received here if current ongoing call is ended. */
+    //             console.log("Call ended:", call);
+    //             /* hiding/closing the call screen can be done here. */
+    //           }
+    //         })
+    //       );
+    //       // Outgoing Call Accepted
+    //     },
+    //     onOutgoingCallRejected(call) {
+    //       console.log("Outgoing call rejected:", call);
+    //       this.incomingCall = false;
+    //       this.ongoingCall = false;
+    //       this.receiver_id = "";
+    //       // Outgoing Call Rejected
+    //     },
+    //     onIncomingCallCancelled(call) {
+    //       console.log("Incoming call calcelled:", call);
+    //     }
+    //   })
+    // );
   },
 
   methods: {
@@ -112,54 +112,55 @@ export default {
       )
     },
 
-    // createWaitingRequestSocket() {
-    //   let username = store.state.username
-    //   this.waitingRequestSocket = new WebSocket(`ws://localhost:8000/ws/waiting_request/${username}/`)
-    //   this.waitingRequestSocket.onmessage = (event) => {
-    //       let text_data = JSON.parse(event.data)
-    //       // let user = store.state.username
-    //       // if (text_data['sender_name'] === user) {
-    //       //   return false
-    //       // }
-    //       console.log(1)
-    //       console.log(text_data)
-    //   }
-    // },
-    //
-    // sendWaitingRequestSocket(senderUsername, recipientUsername, gameID) {
-    //   let sendRequestSocket = new WebSocket(`ws://localhost:8000/ws/for_waiting_request/${recipientUsername}`)
-    //   let data = {
-    //     "sender_id": senderUsername,
-    //     "game_id": gameID
-    //   }
-    //   sendRequestSocket.send(
-    //       JSON.stringify(
-    //           data
-    //       )
-    //   )
-    //   // sendRequestSocket.close()
-    // },
+    createWaitingRequestSocket() {
+      let username = store.state.username
+      this.waitingRequestSocket = new WebSocket(`ws://localhost:8000/ws/waiting_request/${username}/`)
+      this.waitingRequestSocket.onmessage = (event) => {
+          let text_data = JSON.parse(event.data)
+          // let user = store.state.username
+          // if (text_data['sender_name'] === user) {
+          //   return false
+          // }
+          console.log(1)
+          console.log(text_data)
+      }
+    },
+
+    sendWaitingRequestSocket(senderUsername, recipientUsername, gameID) {
+      let sendRequestSocket = new WebSocket(`ws://localhost:8000/ws/for_waiting_request/${recipientUsername}/`)
+      let data = {
+        "sender_id": senderUsername,
+        "game_id": gameID
+      }
+      sendRequestSocket.send(
+          JSON.stringify(
+              data
+          )
+      )
+      sendRequestSocket.close()
+    },
 
     getLoggedInUser() {
       if(!store.state.username) {
         this.$router.push({ name: "login" });
-        return;
+        // return;
       }
-      CometChat.getLoggedinUser().then(
-        cometUser => {
-          this.user.username = cometUser.name;
-          this.user.uid = cometUser.uid;
-        },
-        error => {
-          // this.$router.push({ name: "login" });
-          console.log(error);
-        }
-      );
+      // CometChat.getLoggedinUser().then(
+      //   cometUser => {
+      //     this.user.username = cometUser.name;
+      //     this.user.uid = cometUser.uid;
+      //   },
+      //   error => {
+      //     // this.$router.push({ name: "login" });
+      //     console.log(error);
+      //   }
+      // );
     },
 
     addUserToGroup() {
       if (this.newUser && this.groupUsers.length < 5) {
         this.groupUsers.push(this.newUser);
+        console.log(this.newUser);
         this.newUser = '';
     } else if(this.groupUsers.length >= 5){
         alert('Максимальное число игорков: 6');
@@ -191,7 +192,7 @@ export default {
       throw error; // Пробрасываем ошибку для обработки в makeNewGame
     }
   ).finally(() => {
-    this.groupUsers = [];
+    // this.groupUsers = [];
   });
     },
 
@@ -217,13 +218,14 @@ export default {
       this.GameCreated = true;
     },
 
-    // sendInvitation(gameID) {
-    //   let senderUser = store.state.username
-    //   for (let user in this.groupUsers) {
-    //     console.log(user)
-    //     this.sendWaitingRequestSocket(senderUser, user, gameID)
-    //   }
-    // },
+    sendInvitation(gameID) {
+      let senderUser = store.state.username
+      console.log(this.groupUsers)
+      for (let user in this.groupUsers) {
+        console.log(this.groupUsers[user])
+        this.sendWaitingRequestSocket(senderUser, this.groupUsers[user], gameID)
+      }
+    },
 
     async makeNewGame() {
     try {
@@ -236,17 +238,18 @@ export default {
       await store.dispatch("updatePlayerID", response.data.playerID);
       this.sendMessageToActiveGamesSocket(response.data.gameId, response.data.playerID);
 
-      // this.$router.push({ name: "Game", query: { id: store.state.gameID } });
-      // this.$router.push({ name: "Game", query: { id: store.state.gameID } });
+      this.$router.push({ name: "Game", query: { id: store.state.gameID } });
 
       this.gameId = String(response.data.gameId);
       console.log(response.data.gameId);
-      const groupId = String(response.data.gameId);
+      // const groupId = String(response.data.gameId);
 
       try {
-        await this.makeGroup(groupId);
-        this.makeGroupCall(groupId);
-        // this.sendInvitation(this.gameId);
+        // await this.makeGroup(groupId);
+        // this.makeGroupCall(groupId);
+        this.sendInvitation(this.gameId);
+        console.log(this.groupUsers + ' ' + this.groupUsers[0]);
+        this.groupUsers = [];
         this.$router.push({ name: "Game", query: { id: response.data.gameId} });
       } catch (error) {
         console.error("Failed to create group or initiate call:", error);
@@ -264,73 +267,75 @@ export default {
 },
 
     acceptCall() {
-      let globalContext = this;
-      this.ongoingCall = true;
-      this.incomingCall = false;
-      var sessionID = this.session_id;
-      CometChat.acceptCall(sessionID).then(
-         async call => {
-          console.log("Call accepted successfully:", call);
-          let group = call.getCallReceiver();
-          let groupId = group.getGuid();
-          const response = await authService.createPlayer({
-            username: store.state.username,
-            id: groupId,
-          });
-          store.state.playerID = response.data.playerID;
-          this.$router.push({ name: "Game", query: { id: groupId} });
-          console.log("call accepted now....");
-          // start the call using the startCall() method
-          console.log(globalContext.ongoingCall);
-          console.log(this.sessionID);
-          console.log(call.sessionId);
-          CometChat.startCall(
-            call.sessionId,
-            document.getElementById("callScreen"),
-            new CometChat.OngoingCallListener({
-              onUserJoined: user => {
-                /* Notification received here if another user joins the call. */
-                console.log("User joined call:", user);
-                /* this method can be use to display message or perform any actions if someone joining the call */
-              },
-              onUserLeft: user => {
-                /* Notification received here if another user left the call. */
-                console.log("User left call:", user);
-                /* this method can be use to display message or perform any actions if someone leaving the call */
-              },
-              onCallEnded: call => {
-                /* Notification received here if current ongoing call is ended. */
-                console.log("Call ended:", call);
-                globalContext.ongoingCall = false;
-                globalContext.incomingCall = false;
-                /* hiding/closing the call screen can be done here. */
-              }
-            })
-          );
-        },
-        error => {
-          console.log("Call acceptance failed with error", error);
-          // handle exception
-        }
-      );
+      // this.$router.push({ name: "Game", query: { id: groupId} });
+      // let globalContext = this;
+      // this.ongoingCall = true;
+      // this.incomingCall = false;
+      // var sessionID = this.session_id;
+      // CometChat.acceptCall(sessionID).then(
+      //    async call => {
+      //     console.log("Call accepted successfully:", call);
+      //     let group = call.getCallReceiver();
+      //     let groupId = group.getGuid();
+      //     const response = await authService.createPlayer({
+      //       username: store.state.username,
+      //       id: groupId,
+      //     });
+      //     store.state.playerID = response.data.playerID;
+      //     this.$router.push({ name: "Game", query: { id: groupId} });
+      //     console.log("call accepted now....");
+      //     // start the call using the startCall() method
+      //     console.log(globalContext.ongoingCall);
+      //     console.log(this.sessionID);
+      //     console.log(call.sessionId);
+      //     CometChat.startCall(
+      //       call.sessionId,
+      //       document.getElementById("callScreen"),
+      //       new CometChat.OngoingCallListener({
+      //         onUserJoined: user => {
+      //           /* Notification received here if another user joins the call. */
+      //           console.log("User joined call:", user);
+      //           /* this method can be use to display message or perform any actions if someone joining the call */
+      //         },
+      //         onUserLeft: user => {
+      //           /* Notification received here if another user left the call. */
+      //           console.log("User left call:", user);
+      //           /* this method can be use to display message or perform any actions if someone leaving the call */
+      //         },
+      //         onCallEnded: call => {
+      //           /* Notification received here if current ongoing call is ended. */
+      //           console.log("Call ended:", call);
+      //           globalContext.ongoingCall = false;
+      //           globalContext.incomingCall = false;
+      //           /* hiding/closing the call screen can be done here. */
+      //         }
+      //       })
+      //     );
+      //   },
+      //   error => {
+      //     console.log("Call acceptance failed with error", error);
+      //     // handle exception
+      //   }
+      // );
     },
 
     rejectCall() {
-      var sessionID = this.session_id;
-      var globalContext = this;
-      var status = CometChat.CALL_STATUS.REJECTED;
-
-      CometChat.rejectCall(sessionID, status).then(
-        call => {
-          console.log("Call rejected successfully", call);
-          globalContext.incomingCall = false;
-          globalContext.ongoingCall = false;
-          globalContext.receiver_id = "";
-        },
-        error => {
-          console.log("Call rejection failed with error:", error);
-        }
-      );
+      this.$router.push({ name: "home" });
+      // var sessionID = this.session_id;
+      // var globalContext = this;
+      // var status = CometChat.CALL_STATUS.REJECTED;
+      //
+      // CometChat.rejectCall(sessionID, status).then(
+      //   call => {
+      //     console.log("Call rejected successfully", call);
+      //     globalContext.incomingCall = false;
+      //     globalContext.ongoingCall = false;
+      //     globalContext.receiver_id = "";
+      //   },
+      //   error => {
+      //     console.log("Call rejection failed with error:", error);
+      //   }
+      // );
     }
   }
 };
