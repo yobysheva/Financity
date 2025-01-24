@@ -41,7 +41,7 @@ let images = ref([
 //   uid: 0,
 // });
 
-let players = []
+let players = ref([])
 let current_player_index = 0
 
 // async function getProfession(){
@@ -62,6 +62,13 @@ let current_player_index = 0
 //       incomingCall: false,
 //       ongoingCall: false,
 // })
+
+authService.getInfoAboutGame(
+      store.state.gameID
+).then((response) => {
+    players.value = response.data['players'];
+})
+
 
 let newMessage = ref("")
 
@@ -297,12 +304,8 @@ async function checkPositionAndShowModal (currentCoords){
     modalTitle.value = `Шанс`;
     try {
     const response = await authService.getRandomChance();
-    console.log('ccc');
-    console.log(response);
     modalQuestionId.value = response.data['id'];
-    console.log(modalQuestionId.value);
     modalQuestionType.value = 3;
-    console.log(modalQuestionType.value);
     await questionComponent.value.getQuestion(response.data['id'], 3);
   } catch (error) {
         console.error(error);
@@ -313,23 +316,17 @@ async function checkPositionAndShowModal (currentCoords){
         modalVisible.value = true;
     }, 500);
   }
-
-  console.log(store.state.playerID.toString(), players);
+  console.log(store.state.playerID.toString());
   if (category && players[current_player_index] === store.state.playerID.toString()) {
     modalTitle.value = `Кейс: ${category === 1 ? "Государство" : category === 2 ? "Развлечения" : "Недвижимость"}`;
     try {
     const response = await authService.getRandomQuestion(category);
-    console.log('ppp');
-    console.log(response);
     modalQuestionId.value = response.data['id'];
-    console.log(modalQuestionId.value);
     modalQuestionType.value = response.data['type'];
-    console.log(modalQuestionType.value);
     await questionComponent.value.getQuestion(response.data['id'], response.data['type']);
   } catch (error) {
         console.error(error);
   }
-    // console.log(modalQuestion.value);
     sendQuestion();
     setTimeout(() => {
         modalVisible.value = true;
@@ -339,6 +336,7 @@ async function checkPositionAndShowModal (currentCoords){
 
 
 async function openModalWithValues (title, questionId, questionType) {
+  console.log(123)
   modalTitle.value = title
   modalQuestionId.value = questionId
   modalQuestionType.value = questionType
@@ -384,8 +382,7 @@ const moveDot = (targetIndex) => {
         const [currentX, currentY] = positions[currentIndex.value];
         checkPositionAndShowModal([currentX, currentY]);
       }
-
-      setTimeout(moveNext, 300);
+      else setTimeout(moveNext, 300);
     }
   };
 
@@ -396,7 +393,6 @@ const moveDot = (targetIndex) => {
 const messages = ref([
 ])
 
-console.log(window.location.host)
 const gameId = new URLSearchParams(window.location.search).get('id');
 const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${gameId}/`);
 chatSocket.onmessage = function (event) {
@@ -419,7 +415,7 @@ function sendMessage() {
       }))
 }
 
-
+console.log(store.state.playerID)
 const gameSocket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/${store.state.playerID}/`);
 gameSocket.onmessage = (event) => {
     let text_data = JSON.parse(event.data);
@@ -441,29 +437,31 @@ gameSocket.onmessage = (event) => {
             const questionId = info["questionId"]
           // eslint-disable-next-line no-case-declarations
             const questionType = info["questionType"]
-            if (players[current_player_index] ===! store.state.playerID.toString())
-            openModalWithValues(
-                title, questionId, questionType
-            )
+            if (players[current_player_index] ===! store.state.playerID.toString()) {
+                openModalWithValues(
+                    title, questionId, questionType
+                )
+            }
             break;
         case "on_question_close":
             modalVisible.value = false;
             // modalChanceVisible.value = false;
             break;
         case "notification_about_connect_to_game":
-            players.push(info['player_id']);
+            console.log(players.value)
+            players.value.push(Number(info['player_id']));
             break;
 
     }
-    console.log(text_data);
+    // console.log(text_data);
 };
 
 function sendCloseQuestion() {
-    current_player_index++
+    current_player_index = (current_player_index + 1) % players.value.length
     const info = {
         "type": "on_question_close",
         "info": {
-            "player_index": current_player_index %= players.length,
+            "player_index": current_player_index %= players.value.length,
             "result": false
         }
     }
@@ -481,6 +479,7 @@ function sendQuestion() {
       "questionType": modalQuestionType.value
     }
   }
+  console.log(info)
   gameSocket.send(JSON.stringify(
       info
   ))
