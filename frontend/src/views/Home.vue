@@ -43,13 +43,11 @@ export default {
     //   listnerID,
     //   new CometChat.CallListener({
     //     onIncomingCallReceived(call) {
-    //       console.log("Incoming call:", call);
     //       globalContext.incomingCall = true;
     //       globalContext.session_id = call.sessionId;
     //     },
     //
     //     onOutgoingCallAccepted(call) {
-    //       console.log("Outgoing call accepted:", call);
     //       globalContext.ongoingCall = true;
     //       call.setSessionId(this.gameId);
     //       CometChat.startCall(
@@ -58,19 +56,16 @@ export default {
     //         new CometChat.OngoingCallListener({
     //           onUserJoined: user => {
     //             /* Notification received here if another user joins the call. */
-    //             console.log("User joined call:", user);
     //             /* this method can be use to display message or perform any actions if someone joining the call */
     //           },
     //           onUserLeft: user => {
     //             /* Notification received here if another user left the call. */
-    //             console.log("User left call:", user);
     //             /* this method can be use to display message or perform any actions if someone leaving the call */
     //           },
     //           onCallEnded: call => {
     //             globalContext.ongoingCall = false;
     //             globalContext.incomingCall = false;
     //             /* Notification received here if current ongoing call is ended. */
-    //             console.log("Call ended:", call);
     //             /* hiding/closing the call screen can be done here. */
     //           }
     //         })
@@ -78,14 +73,12 @@ export default {
     //       // Outgoing Call Accepted
     //     },
     //     onOutgoingCallRejected(call) {
-    //       console.log("Outgoing call rejected:", call);
     //       this.incomingCall = false;
     //       this.ongoingCall = false;
     //       this.receiver_id = "";
     //       // Outgoing Call Rejected
     //     },
     //     onIncomingCallCancelled(call) {
-    //       console.log("Incoming call calcelled:", call);
     //     }
     //   })
     // );
@@ -112,32 +105,46 @@ export default {
       )
     },
 
+
     createWaitingRequestSocket() {
-      let username = store.state.username
-      this.waitingRequestSocket = new WebSocket(`ws://localhost:8000/ws/waiting_request/${username}/`)
-      this.waitingRequestSocket.onmessage = (event) => {
-          let text_data = JSON.parse(event.data)
-          // let user = store.state.username
-          // if (text_data['sender_name'] === user) {
-          //   return false
-          // }
-          console.log(1)
-          console.log(text_data)
+      let username = store.state.username;
+      this.waitingRequestSocket = new WebSocket(`ws://localhost:8000/ws/waiting_request/${username}/`);
+
+
+      this.waitingRequestSocket.onmessage = async (event) => {
+        let data = JSON.parse(event.data);
+        if (data.type === "game_invitation") {
+          const response = await authService.connectToGame({
+            username: store.state.username,
+            game_id: data.game_id,
+          });
+          alert(`Вас пригласил ${data.sender_id} в игру ${data.game_id}`);
+          if (response.status === 200) {
+            await store.dispatch("updateGameID", response.data.gameId);
+            await store.dispatch("updatePlayerID", response.data.playerID);
+          this.$router.push({name: "Game", query: {id: data.game_id}});
+        }
+      }
+      }
+      this.waitingRequestSocket.onerror = (error) => {
+        console.error("WebSocket error:", error)
       }
     },
-
     sendWaitingRequestSocket(senderUsername, recipientUsername, gameID) {
-      let sendRequestSocket = new WebSocket(`ws://localhost:8000/ws/for_waiting_request/${recipientUsername}/`)
-      let data = {
-        "sender_id": senderUsername,
-        "game_id": gameID
-      }
-      sendRequestSocket.send(
-          JSON.stringify(
-              data
-          )
-      )
-      sendRequestSocket.close()
+      let sendRequestSocket = new WebSocket(`ws://localhost:8000/ws/waiting_request/${recipientUsername}/`);
+
+      sendRequestSocket.onopen = () => {
+        let data = {
+          "sender_id": senderUsername,
+          "game_id": gameID
+        };
+        sendRequestSocket.send(JSON.stringify(data));
+        // sendRequestSocket.close();
+      };
+
+      sendRequestSocket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
     },
 
     getLoggedInUser() {
@@ -160,7 +167,6 @@ export default {
     addUserToGroup() {
       if (this.newUser && this.groupUsers.length < 5) {
         this.groupUsers.push(this.newUser);
-        console.log(this.newUser);
         this.newUser = '';
     } else if(this.groupUsers.length >= 5){
         alert('Максимальное число игорков: 6');
@@ -170,7 +176,6 @@ export default {
     makeGroup(gameId) {
       let GUID = gameId;
       let UID = this.user.username;
-      console.log(UID);
       let groupName = gameId;
       let groupType = CometChat.GROUP_TYPE.PUBLIC;
 
@@ -178,7 +183,6 @@ export default {
       let members = [
         new CometChat.GroupMember(UID, CometChat.GROUP_MEMBER_SCOPE.PARTICIPANT)
       ];
-      console.log(this.groupUsers)
       for(let user of this.groupUsers){
         members.push(new CometChat.GroupMember(user, CometChat.GROUP_MEMBER_SCOPE.PARTICIPANT))
       }
@@ -220,9 +224,7 @@ export default {
 
     sendInvitation(gameID) {
       let senderUser = store.state.username
-      console.log(this.groupUsers)
       for (let user in this.groupUsers) {
-        console.log(this.groupUsers[user])
         this.sendWaitingRequestSocket(senderUser, this.groupUsers[user], gameID)
       }
     },
@@ -232,7 +234,6 @@ export default {
     const response = await authService.createGame({
       username: store.state.username,
     });
-    console.log(store.state.username, response.status)
     if (response.status === 200) {
       await store.dispatch("updateGameID", response.data.gameId);
       await store.dispatch("updatePlayerID", response.data.playerID);
@@ -241,14 +242,12 @@ export default {
       this.$router.push({ name: "Game", query: { id: store.state.gameID } });
 
       this.gameId = String(response.data.gameId);
-      console.log(response.data.gameId);
       // const groupId = String(response.data.gameId);
 
       try {
         // await this.makeGroup(groupId);
         // this.makeGroupCall(groupId);
         this.sendInvitation(this.gameId);
-        console.log(this.groupUsers + ' ' + this.groupUsers[0]);
         this.groupUsers = [];
         this.$router.push({ name: "Game", query: { id: response.data.gameId} });
       } catch (error) {

@@ -9,6 +9,12 @@ export const authService = {
     login(userData) {
         return axios.post(`${apiUrl}user/login/`, userData);
     },
+    getInfoAboutGame(gameId) {
+        return axios.get(`${apiUrl}gameApp/getInfoAboutGame/`, {params : {gameId: gameId}});
+    },
+    connectToGame(userData){
+        return axios.post(`${apiUrl}gameApp/connectToGame/`, userData);
+    },
     createGame(userData) {
         return axios.post(`${apiUrl}gameApp/createGame/`, userData);
     },

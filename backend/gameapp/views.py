@@ -35,7 +35,7 @@ def createPlayer(request):
             return JsonResponse({"detail": "User or game not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
-api_view(['Get'])
+api_view(['GET'])
 def getQuestion(request):
     if request.method == 'GET':
         id = request.GET.get('id', None)
@@ -89,3 +89,30 @@ def getRandomQuestion(request):
         except Question.DoesNotExist:
             return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
 
+
+@api_view(['POST'])
+def connectToGame(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode())
+        try:
+            user = User.objects.get(username=data['username'])
+            player = Player.objects.create(user=user)
+            game = Game.objects.get(id=data["game_id"])
+            game.players.add(player)
+            print(game.players.all())
+            return JsonResponse({'gameId': game.id, 'playerID': player.id})
+        except User.DoesNotExist:
+            return JsonResponse({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+def getInfoAboutGame(request):
+     if request.method == 'GET':
+         game_id = request.GET.get('gameId', None)
+         try:
+             game = Game.objects.get(id=game_id)
+             players = list(game.players.all())
+             print(list(players))
+             return JsonResponse({'players': [player.id for player in players]})
+         except Game.DoesNotExist:
+             return JsonResponse({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)

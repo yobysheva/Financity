@@ -92,10 +92,47 @@ class ShowActiveGamesConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps(data))
 
 
+# class SendGameRequestConsumer(WebsocketConsumer):
+#     def connect(self):
+#         self.username = self.scope["url_route"]["kwargs"]["username"]
+#         self.room_group_name = f'user_{self.username}_waiting_request'
+#         async_to_sync(self.channel_layer.group_add)(
+#             self.room_group_name,
+#             self.channel_name
+#         )
+#
+#         self.accept()
+#
+#     def receive(self, text_data=None, bytes_data=None):
+#         text_data_json = json.loads(text_data)
+#         sender_id = text_data_json["sender_id"]
+#         game_id = text_data_json["game_id"]
+#         print(sender_id, self.username)
+#         async_to_sync(self.channel_layer.group_send)(
+#             self.room_group_name,
+#             {
+#                 'type': 'send_game_request_handler',
+#                 'data': {
+#                     'sender_id': sender_id,
+#                     'recipient_id': self.username,
+#                     'game_id': game_id
+#                 }
+#             }
+#         )
+#
+#     def disconnect(self, close_code):
+#         async_to_sync(self.channel_layer.group_discard)(self.room_group_name, self.channel_name)
+#
+#     def send_game_request_handler(self, event):
+#         data = event['data']
+#
+#         self.send(text_data=json.dumps(data))
+
 class SendGameRequestConsumer(WebsocketConsumer):
     def connect(self):
         self.username = self.scope["url_route"]["kwargs"]["username"]
-        self.room_group_name = f'user_{self.username}_waiting_request'
+        self.room_group_name = f'waiting_request_{self.username}'
+        print("CONNECT " + self.username)
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name,
             self.channel_name
@@ -103,27 +140,35 @@ class SendGameRequestConsumer(WebsocketConsumer):
 
         self.accept()
 
+    def disconnect(self, close_code):
+        async_to_sync(self.channel_layer.group_discard)(
+            self.room_group_name,
+            self.channel_name
+        )
+
     def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
-        sender_id = text_data_json["sender_id"]
-        game_id = text_data_json["game_id"]
-        print(sender_id, self.username)
+        sender_id = text_data_json['sender_id']
+        game_id = text_data_json['game_id']
+        print(f"Received data: sender_id={sender_id}, game_id={game_id}")
+
+        # Отправляем сообщение в группу
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
-                'type': 'send_game_request_handler',
-                'data': {
-                    'sender_id': sender_id,
-                    'recipient_id': self.username,
-                    'game_id': game_id
-                }
+                'type': 'send_game_invitation',
+                'sender_id': sender_id,
+                'game_id': game_id
             }
         )
 
-    def disconnect(self, close_code):
-        async_to_sync(self.channel_layer.group_discard)(self.room_group_name, self.channel_name)
+    # Обработчик для отправки данных клиенту
+    def send_game_invitation(self, event):
+        sender_id = event['sender_id']
+        game_id = event['game_id']
 
-    def send_game_request_handler(self, event):
-        data = event['data']
-
-        self.send(text_data=json.dumps(data))
+        self.send(text_data=json.dumps({
+            'type': 'game_invitation',
+            'sender_id': sender_id,
+            'game_id': game_id
+        }))
