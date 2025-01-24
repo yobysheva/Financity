@@ -36,7 +36,8 @@ const props = defineProps({
 const modalStyles = computed(() => ({
   top: "35%",
   width: "70%",
-  minHeight: "70%",
+  minHeight: "30%",
+  maxHeight: "90%",
   height: "80%",
   overflow: "visible",
   position: "fixed",
@@ -96,6 +97,13 @@ onMounted(() => {
 async function getQuestion(id, type) {
   try {
     console.log(store.state.username);
+    if(type === 3){
+      const response = await authService.getChance(id);
+    console.log(response);
+    console.log(props);
+    question.value.text = response.data['text'];
+    return;
+    }
     const response = await authService.getQuestion(id);
     console.log(response);
     console.log(props);
@@ -126,7 +134,7 @@ defineExpose({ getQuestion });
         <textarea
           v-if="questionType === 1"
           class="input-custom"
-          style="min-height: 120px; width: 100%; padding: 8px; margin-bottom: 16px;"
+          style="min-height: 120px; height:40%; width: 100%; padding: 25px; margin-bottom: 16px;"
         ></textarea>
         <div v-if="questionType === 2" class="answers">
           <div
@@ -176,6 +184,8 @@ defineExpose({ getQuestion });
   display: flex;
   align-items: center;
   justify-content: center;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .column{

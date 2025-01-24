@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
 import json
-from .models import Player, Game, User, Question, Answer
+from .models import Player, Game, User, Question, Answer, Chance, Professions
 
 
 @api_view(['POST'])
@@ -35,7 +35,7 @@ def createPlayer(request):
             return JsonResponse({"detail": "User or game not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
-api_view(['Get'])
+@api_view(['Get'])
 def getQuestion(request):
     if request.method == 'GET':
         id = request.GET.get('id', None)
@@ -52,7 +52,7 @@ def getQuestion(request):
             return Response({"detail": "Question not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
-api_view(['Get'])
+@api_view(['Get'])
 def getAnswers(request):
     if request.method == 'GET':
         id = request.GET.get('id', None)
@@ -72,7 +72,7 @@ def getAnswers(request):
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-api_view(['Get'])
+@api_view(['Get'])
 def getRandomQuestion(request):
     if request.method == 'GET':
         category_id = request.GET.get('category_id', None)
@@ -89,3 +89,54 @@ def getRandomQuestion(request):
         except Question.DoesNotExist:
             return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
 
+
+@api_view(['Get'])
+def getRandomChance(request):
+    if request.method == 'GET':
+        try:
+            chance = Chance.objects.order_by('?').first()
+            responseData = {
+                "id" : chance.id,
+                # "text": chance.text,
+            }
+            print(responseData)
+            return JsonResponse(responseData)
+        except Chance.DoesNotExist:
+            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['Get'])
+def getChance(request):
+    if request.method == 'GET':
+        id = request.GET.get('id', None)
+        try:
+            chance = Chance.objects.get(id=id)
+            responseData = {
+                # "category": chance.category,
+                "text": chance.text
+            }
+            print(responseData)
+            return JsonResponse(responseData)
+        except Chance.DoesNotExist:
+            return Response({"detail": "Chance not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['Get'])
+def getRandomProfession(request):
+    if request.method == 'GET':
+        player_id = request.GET.get('player_id', None)
+        try:
+            profession = Professions.objects.order_by('?').first()
+            player = Player.objects.get(id=player_id)
+            player.profession = profession
+            player.save()
+            responseData = {
+                "id" : profession.id,
+                "name": profession.name,
+                "salary": profession.salary,
+                # "text": chance.text,
+            }
+            print(responseData)
+            return JsonResponse(responseData)
+        except Professions.DoesNotExist:
+            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)

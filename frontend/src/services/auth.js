@@ -32,5 +32,14 @@ export const authService = {
     },
     getRandomQuestion(category_id){
         return axios.get(`${apiUrl}gameApp/getRandomQuestion/`, {params: {category_id : category_id}})
+    },
+    getChance(id){
+        return axios.get(`${apiUrl}gameApp/getChance/`, {params: {id: id}})
+    },
+    getRandomChance(){
+        return axios.get(`${apiUrl}gameApp/getRandomChance/`)
+    },
+    getRandomProfession(player_id){
+        return axios.get(`${apiUrl}gameApp/getRandomCProfession/`, {params: {player_id: player_id}})
     }
 };

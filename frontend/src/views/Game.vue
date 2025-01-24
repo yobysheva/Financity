@@ -4,25 +4,23 @@ import Player from "@/views/user/Player.vue";
 // import Fields from "@/views/Fields.vue";
   import Question from "@/views/Question.vue";
   import Rules from "@/views/children/Rules.vue"
-  import Chance from "@/views/children/Chance.vue";
+  // import Chance from "@/views/children/Chance.vue";
   import { authService } from "@/services/auth";
 // import QuizQuestion from "@/views/QuizQuestion.vue";
 import {ref} from 'vue';
 // import { getCurrentInstance } from 'vue';
-import {CometChat} from "@cometchat-pro/chat";
-import av1 from '@/assets/av1.png';
-const av1Src = av1;
-import av2 from '@/assets/av2.png';
-const av2Src = av2;
-import av3 from '@/assets/av3.png';
-const av3Src = av3;
-import av4 from '@/assets/av4.png';
-const av4Src = av4;
-import av5 from '@/assets/av5.png';
+// import {CometChat} from "@cometchat-pro/chat";
 import store from "@/store";
-const av5Src = av5;
-// import av6 from '@/assets/av6.png';
-// const av6Src = av6;
+
+let images = ref([
+  require('@/assets/av1.png'),
+  require('@/assets/av2.png'),
+  require('@/assets/av3.png'),
+  require('@/assets/av4.png'),
+  require('@/assets/av5.png'),
+  require('@/assets/av6.png')
+]);
+
 // const props = defineProps({
 //   id: {
 //     type: String,
@@ -46,14 +44,24 @@ const av5Src = av5;
 let players = []
 let current_player_index = 0
 
-let callInformation = ref({
-      session_id: "",
-      receiver_id: null,
-      GameCreated: false,
-      IsGameRequested: false,
-      incomingCall: false,
-      ongoingCall: false,
-})
+// async function getProfession(){
+//     const response = await authService.getRandomProfession();
+//
+//   }
+
+// onMounted(() => {
+//   // getProfession();
+//
+// })
+
+// let callInformation = ref({
+//       session_id: "",
+//       receiver_id: null,
+//       GameCreated: false,
+//       IsGameRequested: false,
+//       incomingCall: false,
+//       ongoingCall: false,
+// })
 
 let newMessage = ref("")
 
@@ -173,15 +181,15 @@ function showRules() {
 // }
 
 
-function leaveCall() {
-  CometChat.endCall(callInformation.value.session_id).then(
-      call => {
-        console.log('call ended', call);
-      }, error => {
-        console.log('error', error);
-      }
-    );
-}
+// function leaveCall() {
+//   CometChat.endCall(callInformation.value.session_id).then(
+//       call => {
+//         console.log('call ended', call);
+//       }, error => {
+//         console.log('error', error);
+//       }
+//     );
+// }
 
 let global_id = 0;
 const positions = [
@@ -214,27 +222,27 @@ const spinButtonLabel = ref("Крутить");
 let spinTimer = null;
 
 
-const chances = ["chance1", "chance2", "chanse3"]
+// const chances = ["chance1", "chance2", "chanse3"]
 const modalVisible = ref(false);
-const modalChance = ref("");
-const modalChanceVisible = ref(false);
+// const modalChance = ref("");
+// const modalChanceVisible = ref(false);
 
 const jobs = [["медсестра", 30000], ["архитектор", 90000], ["веб-разработчик", 190000], ["адвокат", 90000] ]
 const job1 = jobs[Math.floor(Math.random() * jobs.length)];
 const job1Name = job1[0]
 const job1Payment= job1[1]
-const job2 = jobs[Math.floor(Math.random() * jobs.length)];
-const job2Name = job2[0]
-const job2Payment= job2[1]
-const job3 = jobs[Math.floor(Math.random() * jobs.length)];
-const job3Name = job3[0]
-const job3Payment= job3[1]
-const job4 = jobs[Math.floor(Math.random() * jobs.length)];
-const job4Name = job4[0]
-const job4Payment= job4[1]
-const job5 = jobs[Math.floor(Math.random() * jobs.length)];
-const job5Name = job5[0]
-const job5Payment= job5[1]
+// const job2 = jobs[Math.floor(Math.random() * jobs.length)];
+// const job2Name = job2[0]
+// const job2Payment= job2[1]
+// const job3 = jobs[Math.floor(Math.random() * jobs.length)];
+// const job3Name = job3[0]
+// const job3Payment= job3[1]
+// const job4 = jobs[Math.floor(Math.random() * jobs.length)];
+// const job4Name = job4[0]
+// const job4Payment= job4[1]
+// const job5 = jobs[Math.floor(Math.random() * jobs.length)];
+// const job5Name = job5[0]
+// const job5Payment= job5[1]
 // const job6 = jobs[Math.floor(Math.random() * jobs.length)];
 // const job6Name = job6[0]
 // const job6Payment= job6[1]
@@ -242,6 +250,7 @@ const job5Payment= job5[1]
 const modalTitle = ref("");
 // const modalQuestion = ref("");
 const modalQuestionId = ref(0);
+// const modalChanceId = ref(0);
 const modalQuestionType = ref(1);
 
 const questionComponent = ref(null);
@@ -264,7 +273,7 @@ async function checkPositionAndShowModal (currentCoords){
   const entertainmentCoords = [[56.7, 8], [67.7, 8], [79, 8], [88.3, 22], [88.3, 35.5]];
   const realEstateCoords = [[88.3, 56], [88.3, 69], [78.7, 83], [67.7, 83], [56.7, 83]];
   const allCasesCoords = [[37.3, 84], [26.3, 84], [15.3, 84], [5.3, 70], [5.3, 56]];
-  const ChanceCoords = [[47, 9], [89, 8], [88.3, 83], [47.3, 83], [4.3, 86]];
+  const ChanceCoords = [[47, 9], [89, 8], [5.3, 8], [88.3, 83], [47.3, 83], [4.3, 86]];
   let category = null;
 
   if (stateCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
@@ -280,11 +289,31 @@ async function checkPositionAndShowModal (currentCoords){
     category = [1, 2, 3][Math.floor(Math.random() * 3)];
     modalColor.value = "#E7FC93"; // Желтый
   }else if (ChanceCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
-    modalChance.value = chances[Math.floor(Math.random() * chances.length)];
+    // modalChance.value = chances[Math.floor(Math.random() * chances.length)];
+    // setTimeout(() => {
+    //   modalChanceVisible.value = true;
+    // }, 500);
+    modalColor.value = "white";
+    modalTitle.value = `Шанс`;
+    try {
+    const response = await authService.getRandomChance();
+    console.log('ccc');
+    console.log(response);
+    modalQuestionId.value = response.data['id'];
+    console.log(modalQuestionId.value);
+    modalQuestionType.value = 3;
+    console.log(modalQuestionType.value);
+    await questionComponent.value.getQuestion(response.data['id'], 3);
+  } catch (error) {
+        console.error(error);
+  }
+    // console.log(modalQuestion.value);
+    sendQuestion();
     setTimeout(() => {
-      modalChanceVisible.value = true;
+        modalVisible.value = true;
     }, 500);
   }
+
   console.log(store.state.playerID.toString(), players);
   if (category && players[current_player_index] === store.state.playerID.toString()) {
     modalTitle.value = `Кейс: ${category === 1 ? "Государство" : category === 2 ? "Развлечения" : "Недвижимость"}`;
@@ -305,7 +334,6 @@ async function checkPositionAndShowModal (currentCoords){
     setTimeout(() => {
         modalVisible.value = true;
     }, 500);
-
   }
 }
 
@@ -323,7 +351,7 @@ async function openModalWithValues (title, questionId, questionType) {
 
 const closeModal = () => {
   modalVisible.value = false;
-  modalChanceVisible.value = false;
+  // modalChanceVisible.value = false;
   sendCloseQuestion();
 };
 
@@ -420,7 +448,7 @@ gameSocket.onmessage = (event) => {
             break;
         case "on_question_close":
             modalVisible.value = false;
-            modalChanceVisible.value = false;
+            // modalChanceVisible.value = false;
             break;
         case "notification_about_connect_to_game":
             players.push(info['player_id']);
@@ -557,11 +585,11 @@ const startTurn = () => {
 <div class="transparent-container game-page" style="min-height: 98%; max-height: 98%; min-width: 96%; max-width: 96%;">
   <div class="row" style="height: 100%; width: 100%;">
     <div class="column" style="height: 85%; width: 10%;">
-      <Player :jobName= job1Name  :jobPayment=job1Payment :av="av1Src"/>
-      <Player :jobName= job2Name  :jobPayment=job2Payment :av="av2Src"/>
-      <Player :jobName= job3Name  :jobPayment=job3Payment :av="av3Src"/>
-      <Player :jobName= job4Name  :jobPayment=job4Payment :av="av4Src"/>
-      <Player :jobName= job5Name  :jobPayment=job5Payment :av="av5Src"/>
+      <Player :jobName= job1Name  :jobPayment=job1Payment :av="images[0]"/>
+<!--      <Player :jobName= job2Name  :jobPayment=job2Payment :av="av2Src"/>-->
+<!--      <Player :jobName= job3Name  :jobPayment=job3Payment :av="av3Src"/>-->
+<!--      <Player :jobName= job4Name  :jobPayment=job4Payment :av="av4Src"/>-->
+<!--      <Player :jobName= job5Name  :jobPayment=job5Payment :av="av5Src"/>-->
     </div>
     <div class="column" style="height: 100%; width: 60%; margin-left: 2%;">
       <div class="container" style="width: 100%; height: 100%; position: relative">
@@ -570,7 +598,7 @@ const startTurn = () => {
 <!--        <img src="../assets/kletki.svg" style="position:absolute; top: 0px; left: 0px; width: 100%; height: 100%">-->
          <img
             v-if="dotVisible"
-            :src="av1Src"
+            :src="images[0]"
             :style="dotStyle"
             alt="dot"
           />
@@ -636,7 +664,7 @@ const startTurn = () => {
       {{ spinButtonLabel }}
     </button>
       <Question ref="questionComponent" :questionId="modalQuestionId" :questionType="modalQuestionType" :caseTitle="modalTitle" :visible="modalVisible" :color="modalColor" @close="closeModal" />
-      <Chance  :questionText=modalChance :visible="modalChanceVisible" @close="closeModal" />
+<!--      <Chance ref="chanceComponent" :chanceText=modalChance :chanceId="modalQuestionId" :visible="modalChanceVisible" @close="closeModal" />-->
     </div>
   <div class="column" style="width: 20%; min-height: 95vh; height: 95%; margin-left: 2%;">
     <div class="row buttons">
