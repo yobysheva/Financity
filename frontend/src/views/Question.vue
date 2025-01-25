@@ -99,19 +99,19 @@ async function getQuestion(id, type) {
     console.log(store.state.username);
     if(type === 3){
       const response = await authService.getChance(id);
-    console.log(response);
+    console.log("3. ", response);
     console.log(props);
     question.value.text = response.data['text'];
     return;
     }
     const response = await authService.getQuestion(id);
-    console.log(response);
+    console.log("3. ", response);
     console.log(props);
     question.value.text = response.data['text'];
     // question.value.type = response.data['type'];
     if(type === 2){
       const response1 = await authService.getAnswers(id);
-      console.log(response1);
+      console.log("3. ", response1);
       answers.value = [];
       for(const answer of response1.data){
         answers.value.push(answer);

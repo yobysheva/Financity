@@ -316,8 +316,8 @@ async function checkPositionAndShowModal (currentCoords){
         modalVisible.value = true;
     }, 500);
   }
-  console.log(store.state.playerID.toString());
-  if (category && players[current_player_index] === store.state.playerID.toString()) {
+  console.log(store.state.playerID, players.value[current_player_index]);
+  if (players.value[current_player_index] === store.state.playerID) {
     modalTitle.value = `Кейс: ${category === 1 ? "Государство" : category === 2 ? "Развлечения" : "Недвижимость"}`;
     try {
     const response = await authService.getRandomQuestion(category);
@@ -336,7 +336,6 @@ async function checkPositionAndShowModal (currentCoords){
 
 
 async function openModalWithValues (title, questionId, questionType) {
-  console.log(123)
   modalTitle.value = title
   modalQuestionId.value = questionId
   modalQuestionType.value = questionType
@@ -426,7 +425,6 @@ gameSocket.onmessage = (event) => {
         case "on_turn_start":
           // eslint-disable-next-line no-case-declarations
             const turn_count = info["turn_count"];
-            console.log("?")
             totalSum.value += turn_count;
             spin(turn_count);
             break;
@@ -437,7 +435,8 @@ gameSocket.onmessage = (event) => {
             const questionId = info["questionId"]
           // eslint-disable-next-line no-case-declarations
             const questionType = info["questionType"]
-            if (players[current_player_index] ===! store.state.playerID.toString()) {
+            console.log(players.value[current_player_index] !== store.state.playerID, players.value[current_player_index] ===  store.state.playerID,  players.value[current_player_index], store.state.playerID)
+            if (players.value[current_player_index] !== store.state.playerID) {
                 openModalWithValues(
                     title, questionId, questionType
                 )
@@ -448,6 +447,7 @@ gameSocket.onmessage = (event) => {
             // modalChanceVisible.value = false;
             break;
         case "notification_about_connect_to_game":
+            if (Number(info['player_id']) === store.state.playerID) break;
             console.log(players.value)
             players.value.push(Number(info['player_id']));
             break;
@@ -476,7 +476,7 @@ function sendQuestion() {
     "info": {
       "title": modalTitle.value,
       "questionId": modalQuestionId.value,
-      "questionType": modalQuestionType.value
+      "questionType": modalQuestionType.value,
     }
   }
   console.log(info)
