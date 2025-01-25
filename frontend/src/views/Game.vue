@@ -9,8 +9,8 @@ import Player from "@/views/user/Player.vue";
 // import QuizQuestion from "@/views/QuizQuestion.vue";
 import {ref} from 'vue';
 // import { getCurrentInstance } from 'vue';
-// import {CometChat} from "@cometchat-pro/chat";
 import store from "@/store";
+import routes from "../router/index.js";
 
 let images = ref([
   require('@/assets/av1.png'),
@@ -54,15 +54,6 @@ let current_player_index = 0
 //
 // })
 
-// let callInformation = ref({
-//       session_id: "",
-//       receiver_id: null,
-//       GameCreated: false,
-//       IsGameRequested: false,
-//       incomingCall: false,
-//       ongoingCall: false,
-// })
-
 authService.getInfoAboutGame(
       store.state.gameID
 ).then((response) => {
@@ -74,21 +65,6 @@ let newMessage = ref("")
 
 let rulesVisible = ref(false)
 
-// function getLoggedInUser() {
-//       CometChat.getLoggedinUser().then(
-//         user => {
-//           loggedUser.value.username = user.name;
-//           loggedUser.value.uid = user.uid;
-//         },
-//         error => {
-//           this.$router.push({ name: "homepage" });
-//           console.log(error);
-//         }
-//       );
-//     }
-
-// getLoggedInUser();
-
 function showRules() {
   rulesVisible.value = !rulesVisible.value;
 }
@@ -96,107 +72,6 @@ function showRules() {
 //
 // if(!props.userType){
   // let sessionID = props.sessionId;
-
-// CometChat.acceptCall(props.sessionId).then(
-//         call => {
-//           console.log("Call accepted successfully:", call);
-//           console.log("call accepted now....");
-//           // start the call using the startCall() method
-//           console.log(callInformation.value.ongoingCall);
-//           CometChat.startCall(
-//             call.sessionId,
-//             document.getElementById("callScreen"),
-//             new CometChat.OngoingCallListener({
-//               onUserJoined: user => {
-//                 /* Notification received here if another user joins the call. */
-//                 console.log("User joined call:", user);
-//                 /* this method can be use to display message or perform any actions if someone joining the call */
-//               },
-//               onUserLeft: user => {
-//                 /* Notification received here if another user left the call. */
-//                 console.log("User left call:", user);
-//                 /* this method can be use to display message or perform any actions if someone leaving the call */
-//               },
-//               onCallEnded: call => {
-//                 /* Notification received here if current ongoing call is ended. */
-//                 console.log("Call ended:", call);
-//                 callInformation.value.ongoingCall = false;
-//                 callInformation.value.incomingCall = false;
-//                 /* hiding/closing the call screen can be done here. */
-//               }
-//             })
-//           );
-//         },
-//         error => {
-//           console.log("Call acceptance failed with error", error);
-//           // handle exception
-//         }
-//       );
-// } else {
-  // let globalContext = callInformation.value;
-
-    // var listnerID = loggedUser.value.username;
-    // CometChat.addCallListener(
-    //   listnerID,
-    //   new CometChat.CallListener({
-    //     onIncomingCallReceived(call) {
-    //       console.log("Incoming call:", call);
-    //       callInformation.value.incomingCall = true;
-    //       callInformation.value.session_id = call.sessionId;
-    //     },
-    //
-    //     onOutgoingCallAccepted(call) {
-    //       console.log("Outgoing call accepted:", call);
-    //       callInformation.value.ongoingCall = true;
-    //       CometChat.startCall(
-    //         call.sessionId,
-    //         document.getElementById("callScreen"),
-    //         new CometChat.OngoingCallListener({
-    //           onUserJoined: user => {
-    //             /* Notification received here if another user joins the call. */
-    //             console.log("User joined call:", user);
-    //             /* this method can be use to display message or perform any actions if someone joining the call */
-    //           },
-    //           onUserLeft: user => {
-    //             /* Notification received here if another user left the call. */
-    //             console.log("User left call:", user);
-    //             /* this method can be use to display message or perform any actions if someone leaving the call */
-    //           },
-    //           onCallEnded: call => {
-    //             callInformation.value.ongoingCall = false;
-    //             callInformation.value.incomingCall = false;
-    //             /* Notification received here if current ongoing call is ended. */
-    //             console.log("Call ended:", call);
-    //             /* hiding/closing the call screen can be done here. */
-    //           }
-    //         })
-    //       );
-    //       // Outgoing Call Accepted
-    //     },
-    //     onOutgoingCallRejected(call) {
-    //       console.log("Outgoing call rejected:", call);
-    //       this.incomingCall = false;
-    //       this.ongoingCall = false;
-    //       this.receiver_id = "";
-    //       // Outgoing Call Rejected
-    //     },
-    //     onIncomingCallCancelled(call) {
-    //       console.log("Incoming call calcelled:", call);
-    //     }
-    //   })
-    // );
-// }
-
-
-// function leaveCall() {
-//   CometChat.endCall(callInformation.value.session_id).then(
-//       call => {
-//         console.log('call ended', call);
-//       }, error => {
-//         console.log('error', error);
-//       }
-//     );
-// }
 
 let global_id = 0;
 const positions = [
@@ -236,7 +111,7 @@ const modalVisible = ref(false);
 
 const jobs = [["медсестра", 30000], ["архитектор", 90000], ["веб-разработчик", 190000], ["адвокат", 90000] ]
 const job1 = jobs[Math.floor(Math.random() * jobs.length)];
-const job1Name = job1[0]
+// const job1Name = job1[0]
 const job1Payment= job1[1]
 // const job2 = jobs[Math.floor(Math.random() * jobs.length)];
 // const job2Name = job2[0]
@@ -261,17 +136,6 @@ const modalQuestionId = ref(0);
 const modalQuestionType = ref(1);
 
 const questionComponent = ref(null);
-// async function getRandomQuestion(category) {
-//   try {
-//     const response = await authService.getRandomQuestion(category);
-//     console.log('ppp');
-//     console.log(response);
-//     modalQuestion.value.id = response["id"];
-//     modalQuestion.value.type = response["type"];
-//   } catch (error) {
-//         console.error(error);
-//   }
-// }
 
 
 const modalColor = ref("")
@@ -316,8 +180,8 @@ async function checkPositionAndShowModal (currentCoords){
         modalVisible.value = true;
     }, 500);
   }
-  console.log(store.state.playerID.toString());
-  if (category && players[current_player_index] === store.state.playerID.toString()) {
+  console.log(store.state.playerID, players.value[current_player_index]);
+  if (players.value[current_player_index] === store.state.playerID) {
     modalTitle.value = `Кейс: ${category === 1 ? "Государство" : category === 2 ? "Развлечения" : "Недвижимость"}`;
     try {
     const response = await authService.getRandomQuestion(category);
@@ -336,7 +200,6 @@ async function checkPositionAndShowModal (currentCoords){
 
 
 async function openModalWithValues (title, questionId, questionType) {
-  console.log(123)
   modalTitle.value = title
   modalQuestionId.value = questionId
   modalQuestionType.value = questionType
@@ -399,11 +262,9 @@ chatSocket.onmessage = function (event) {
     let data = JSON.parse(event.data)
     messages.value.push({
       id: global_id += 1,
-      player_id: data["player_id"],
+      username: data["username"],
       msg: data["message"].toString()
     })
-
-    console.log(messages)
 }
 
 function sendMessage() {
@@ -411,11 +272,10 @@ function sendMessage() {
     newMessage.value = ""
     chatSocket.send(JSON.stringify({
         "message": input,
-        "player_id": store.state.playerID
+        "username": store.state.username
       }))
 }
 
-console.log(store.state.playerID)
 const gameSocket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/${store.state.playerID}/`);
 gameSocket.onmessage = (event) => {
     let text_data = JSON.parse(event.data);
@@ -426,7 +286,6 @@ gameSocket.onmessage = (event) => {
         case "on_turn_start":
           // eslint-disable-next-line no-case-declarations
             const turn_count = info["turn_count"];
-            console.log("?")
             totalSum.value += turn_count;
             spin(turn_count);
             break;
@@ -437,31 +296,31 @@ gameSocket.onmessage = (event) => {
             const questionId = info["questionId"]
           // eslint-disable-next-line no-case-declarations
             const questionType = info["questionType"]
-            if (players[current_player_index] ===! store.state.playerID.toString()) {
+            console.log(players.value[current_player_index] !== store.state.playerID, players.value[current_player_index] ===  store.state.playerID,  players.value[current_player_index], store.state.playerID)
+            if (players.value[current_player_index] !== store.state.playerID) {
                 openModalWithValues(
                     title, questionId, questionType
                 )
             }
             break;
         case "on_question_close":
+            current_player_index = (current_player_index + 1) % players.value.length;
             modalVisible.value = false;
-            // modalChanceVisible.value = false;
             break;
         case "notification_about_connect_to_game":
+            if (Number(info['player_id']) === store.state.playerID) break;
             console.log(players.value)
             players.value.push(Number(info['player_id']));
             break;
 
     }
-    // console.log(text_data);
 };
 
 function sendCloseQuestion() {
-    current_player_index = (current_player_index + 1) % players.value.length
     const info = {
         "type": "on_question_close",
         "info": {
-            "player_index": current_player_index %= players.value.length,
+            "player_index": (current_player_index + 1) % players.value.length,
             "result": false
         }
     }
@@ -476,7 +335,7 @@ function sendQuestion() {
     "info": {
       "title": modalTitle.value,
       "questionId": modalQuestionId.value,
-      "questionType": modalQuestionType.value
+      "questionType": modalQuestionType.value,
     }
   }
   console.log(info)
@@ -490,7 +349,6 @@ function sendTurnCount(turn_count) {
         "type": "on_turn_start",
         "info": {
           "turn_count": turn_count,
-          // "player_id": player_id
         }
     }
     gameSocket.send(JSON.stringify(
@@ -504,6 +362,10 @@ const generateAndSpin = () => {
   sendTurnCount(rnd);
 };
 
+function leaveCall() {
+  // this.$router.push({ name: "home" });
+  routes.push({ name: "home" });
+}
 
 function spin(rnd) {
   let x, y;
@@ -550,9 +412,13 @@ function spin(rnd) {
 
 const manualSpin = () => {
   clearTimeout(spinTimer);
+  if (players.value[current_player_index] === store.state.playerID)
   generateAndSpin();
-
 };
+
+function isMyMessage(message) {
+  return message.username === store.state.username;
+}
 
 const startTurn = () => {
   isSpinDisabled.value = false;
@@ -564,6 +430,7 @@ const startTurn = () => {
       spinButtonLabel.value = `Крутить (${countdown--} сек)`;
       spinTimer = setTimeout(updateLabel, 1000);
     } else {
+      if (players.value[current_player_index] === store.state.playerID)
       generateAndSpin();
     }
   };
@@ -584,7 +451,7 @@ const startTurn = () => {
 <div class="transparent-container game-page" style="min-height: 98%; max-height: 98%; min-width: 96%; max-width: 96%;">
   <div class="row" style="height: 100%; width: 100%;">
     <div class="column" style="height: 85%; width: 10%;">
-      <Player :jobName= job1Name  :jobPayment=job1Payment :av="images[0]"/>
+      <Player :jobName= store.state.playerID  :jobPayment=job1Payment :av="images[0]"/>
 <!--      <Player :jobName= job2Name  :jobPayment=job2Payment :av="av2Src"/>-->
 <!--      <Player :jobName= job3Name  :jobPayment=job3Payment :av="av3Src"/>-->
 <!--      <Player :jobName= job4Name  :jobPayment=job4Payment :av="av4Src"/>-->
@@ -677,11 +544,17 @@ const startTurn = () => {
       justify-content:center;
       max-height: 50vh;
       height: 80%;
-      width: 90%;
+      width: 100%;
+      padding: 0px;
       overflow-y: scroll;
       display: flex; flex-direction: column;">
-      <div v-for="message in messages" v-bind:key="message.id" style=" align-items:center; justify-content:center; word-break: break-word;">
-          {{ message.msg }}
+      <div style = "min-width: 100%">
+        <div v-for="message in messages"
+             :key="message.id"
+             :class="{'my-message': isMyMessage(message), 'other-message': !isMyMessage(message)}"
+             class="message">
+          {{ message.username }}: {{ message.msg }}
+        </div>
       </div>
     </div>
     <input class="input-custom" id="123" v-model="newMessage" style="width: 80%;" @keydown.enter="sendMessage">
@@ -710,6 +583,10 @@ const startTurn = () => {
 .game-page{
   justify-content: center;
   align-items: center;
+}
+
+.column {
+  padding: 20px;
 }
 
 .row {
@@ -867,5 +744,30 @@ const startTurn = () => {
 
 .button-33:disabled {
   cursor: not-allowed;
+}
+
+.message {
+  word-break: break-word;
+  margin: 15px 0;
+  padding: 15px;
+  border-radius: 10px;
+  max-width: 100%;
+  min-width: 100%;
+}
+
+.my-message {
+  background-color: #d1f7d6;
+  align-self: flex-end;
+  text-align: right;
+  margin-left: auto;
+  margin-bottom: 10px;
+}
+
+.other-message {
+  background-color: #f1f1f1;
+  align-self: flex-start;
+  text-align: left;
+  margin-right: auto;
+  margin-bottom: 10px;
 }
 </style>

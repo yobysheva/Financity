@@ -26,7 +26,7 @@ export default {
       newUser: '',
       GameCreated: false,
       IsGameRequested: false,
-      incomingCall: false,
+      incomingInvite: false,
       ongoingCall: false,
       gameId: null
     };
@@ -42,8 +42,8 @@ export default {
     // CometChat.addCallListener(
     //   listnerID,
     //   new CometChat.CallListener({
-    //     onIncomingCallReceived(call) {
-    //       globalContext.incomingCall = true;
+    //     onincomingInviteReceived(call) {
+    //       globalContext.incomingInvite = true;
     //       globalContext.session_id = call.sessionId;
     //     },
     //
@@ -64,7 +64,7 @@ export default {
     //           },
     //           onCallEnded: call => {
     //             globalContext.ongoingCall = false;
-    //             globalContext.incomingCall = false;
+    //             globalContext.incomingInvite = false;
     //             /* Notification received here if current ongoing call is ended. */
     //             /* hiding/closing the call screen can be done here. */
     //           }
@@ -73,12 +73,12 @@ export default {
     //       // Outgoing Call Accepted
     //     },
     //     onOutgoingCallRejected(call) {
-    //       this.incomingCall = false;
+    //       this.incomingInvite = false;
     //       this.ongoingCall = false;
     //       this.receiver_id = "";
     //       // Outgoing Call Rejected
     //     },
-    //     onIncomingCallCancelled(call) {
+    //     onincomingInviteCancelled(call) {
     //     }
     //   })
     // );
@@ -118,11 +118,11 @@ export default {
             username: store.state.username,
             game_id: data.game_id,
           });
-          alert(`Вас пригласил ${data.sender_id} в игру ${data.game_id}`);
           if (response.status === 200) {
             await store.dispatch("updateGameID", response.data.gameId);
             await store.dispatch("updatePlayerID", response.data.playerID);
-          this.$router.push({name: "Game", query: {id: data.game_id}});
+          this.incomingInvite = true
+          // this.$router.push({name: "Game", query: {id: data.game_id}});
         }
       }
       }
@@ -266,10 +266,11 @@ export default {
 },
 
     acceptCall() {
+      this.$router.push({name: "Game", query: {id: store.state.gameID}});
       // this.$router.push({ name: "Game", query: { id: groupId} });
       // let globalContext = this;
       // this.ongoingCall = true;
-      // this.incomingCall = false;
+      // this.incomingInvite = false;
       // var sessionID = this.session_id;
       // CometChat.acceptCall(sessionID).then(
       //    async call => {
@@ -305,7 +306,7 @@ export default {
       //           /* Notification received here if current ongoing call is ended. */
       //           console.log("Call ended:", call);
       //           globalContext.ongoingCall = false;
-      //           globalContext.incomingCall = false;
+      //           globalContext.incomingInvite = false;
       //           /* hiding/closing the call screen can be done here. */
       //         }
       //       })
@@ -320,6 +321,7 @@ export default {
 
     rejectCall() {
       this.$router.push({ name: "home" });
+      this.incomingInvite = false
       // var sessionID = this.session_id;
       // var globalContext = this;
       // var status = CometChat.CALL_STATUS.REJECTED;
@@ -327,7 +329,7 @@ export default {
       // CometChat.rejectCall(sessionID, status).then(
       //   call => {
       //     console.log("Call rejected successfully", call);
-      //     globalContext.incomingCall = false;
+      //     globalContext.incomingInvite = false;
       //     globalContext.ongoingCall = false;
       //     globalContext.receiver_id = "";
       //   },
@@ -369,7 +371,7 @@ export default {
       <div class="row game-row">
         <h3>Присоединись к этим играм!</h3>
       </div>
-       <div v-if="incomingCall">
+       <div v-if="incomingInvite">
 <!--          <button class="btn btn-success" @click="acceptCall">Accept Call</button>-->
 <!--          <button class="btn btn-success" @click="rejectCall">Reject Call</button>-->
          <div class="modal" style="top: 35%; width: 60%; min-height: 30%; height: auto; overflow: visible;">
