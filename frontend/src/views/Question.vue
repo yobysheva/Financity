@@ -93,7 +93,14 @@ onMounted(() => {
   }
 });
 
+function setTextInTextArea(text) {
+  const textarea = document.querySelector('.input-custom');
+  textarea.value = text
+}
 
+function getTextInTextArea() {
+  return document.querySelector('.input-custom').value
+}
 async function getQuestion(id, type) {
   try {
     console.log(store.state.username);
@@ -122,7 +129,7 @@ async function getQuestion(id, type) {
   }
 }
 
-defineExpose({ getQuestion });
+defineExpose({ getQuestion , setTextInTextArea , getTextInTextArea});
 </script>
 
 <template>
@@ -132,7 +139,6 @@ defineExpose({ getQuestion });
         <h3 style="margin-bottom: 16px;">{{ caseTitle }}</h3>
         <h3 style="margin-bottom: 16px;">{{ question.text }}</h3>
         <textarea
-          id="text_area"
           v-if="questionType === 1"
           class="input-custom"
           style="min-height: 120px; height:40%; width: 100%; padding: 25px; margin-bottom: 16px;"
@@ -144,7 +150,7 @@ defineExpose({ getQuestion });
           >
             <label v-for="answer in answers"
             :key="answer.id" style="color:black; ">
-              <input type="radio" name="answer" :value="answer.id" />
+              <input type="radio" id="{{ answer.id }}" name="answer" :value="answer.id" />
               {{ answer.text }}
             </label>
           </div>

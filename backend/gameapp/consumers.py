@@ -34,13 +34,11 @@ class GameConsumer(WebsocketConsumer):
             }
         )
 
-        print(f"Connected to game {self.game_id}")
         self.accept()
 
     def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
         info = text_data_json
-        print(info)
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
@@ -120,7 +118,6 @@ class SendGameRequestConsumer(WebsocketConsumer):
         text_data_json = json.loads(text_data)
         sender_id = text_data_json['sender_id']
         game_id = text_data_json['game_id']
-        print(f"Received data: sender_id={sender_id}, game_id={game_id}")
 
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,

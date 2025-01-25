@@ -62,10 +62,9 @@ authService.getInfoAboutGame(
       store.state.gameID
 ).then((response) => {
     players.value = response.data['players'];
-    console.log(players.value)
 })
 
-console.log(players.value)
+
 let newMessage = ref("")
 
 let rulesVisible = ref(false)
@@ -193,7 +192,8 @@ async function checkPositionAndShowModal (currentCoords){
     modalQuestionId.value = response.data['id'];
     modalQuestionType.value = response.data['type'];
     await questionComponent.value.getQuestion(response.data['id'], response.data['type']);
-    need_to_share_text_answer = response.data['type'] === '2'
+    need_to_share_text_answer = response.data['type'] === 1
+    console.log(response.data['type'])
   } catch (error) {
         console.error(error);
   }
@@ -201,9 +201,8 @@ async function checkPositionAndShowModal (currentCoords){
     setTimeout(() => {
         modalVisible.value = true;
     }, 500);
-    setTimeout(() => {
-        textAnswerTranslate()
-    }, 1000)
+    setTimeout(
+        textAnswerTranslate, 1000)
   }
 }
 
@@ -296,7 +295,7 @@ answerSocket.onmessage = (event) => {
             if (players[current_player_index] === store.state.playerID) break
           // eslint-disable-next-line no-case-declarations
             let text = content['text']
-            questionComponent.value.getElementById("text_area").value = text
+            questionComponent.value.setTextInTextArea(text)
             break;
     }
 }
@@ -304,14 +303,14 @@ answerSocket.onmessage = (event) => {
 function textAnswerTranslate() {
     console.log(123)
     if (!need_to_share_text_answer) return;
-    const input = questionComponent.value.getElementById("text_area").value
+    const input = questionComponent.value.getTextInTextArea()
     answerSocket.send(JSON.stringify({
         "text": input,
     }))
 
-    setTimeout(() => {
-        textAnswerTranslate()
-    }, 1000)
+    setTimeout(
+        textAnswerTranslate
+    , 1000)
 }
 
 const gameSocket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/${store.state.playerID}/`);
