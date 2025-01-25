@@ -110,7 +110,7 @@ const modalVisible = ref(false);
 
 const jobs = [["медсестра", 30000], ["архитектор", 90000], ["веб-разработчик", 190000], ["адвокат", 90000] ]
 const job1 = jobs[Math.floor(Math.random() * jobs.length)];
-const job1Name = job1[0]
+// const job1Name = job1[0]
 const job1Payment= job1[1]
 // const job2 = jobs[Math.floor(Math.random() * jobs.length)];
 // const job2Name = job2[0]
@@ -410,8 +410,8 @@ function spin(rnd) {
 
 const manualSpin = () => {
   clearTimeout(spinTimer);
+  if (players.value[current_player_index] === store.state.playerID)
   generateAndSpin();
-
 };
 
 const startTurn = () => {
@@ -424,7 +424,8 @@ const startTurn = () => {
       spinButtonLabel.value = `Крутить (${countdown--} сек)`;
       spinTimer = setTimeout(updateLabel, 1000);
     } else {
-      generateAndSpin();
+
+      manualSpin();
     }
   };
 
@@ -444,7 +445,7 @@ const startTurn = () => {
 <div class="transparent-container game-page" style="min-height: 98%; max-height: 98%; min-width: 96%; max-width: 96%;">
   <div class="row" style="height: 100%; width: 100%;">
     <div class="column" style="height: 85%; width: 10%;">
-      <Player :jobName= job1Name  :jobPayment=job1Payment :av="images[0]"/>
+      <Player :jobName= store.state.playerID  :jobPayment=job1Payment :av="images[0]"/>
 <!--      <Player :jobName= job2Name  :jobPayment=job2Payment :av="av2Src"/>-->
 <!--      <Player :jobName= job3Name  :jobPayment=job3Payment :av="av3Src"/>-->
 <!--      <Player :jobName= job4Name  :jobPayment=job4Payment :av="av4Src"/>-->
