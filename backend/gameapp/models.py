@@ -58,7 +58,6 @@ class Answer(models.Model):
     period = models.IntegerField()
     scip = models.BooleanField(default=False)
     action_text = models.TextField()
-
     def __str__(self):
         return f"Answer {self.id} for Question {self.question.id}"
 
@@ -68,7 +67,7 @@ class Action(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='actions')
     sum = models.FloatField()
     period = models.IntegerField()
-
+    scip = models.BooleanField(default=False)
     def __str__(self):
         return f"Action {self.id} by Player {self.player.id}"
 

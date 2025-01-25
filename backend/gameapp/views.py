@@ -4,8 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
 import json
-from .models import Player, Game, User, Question, Answer, Chance, Professions
-
+from .models import Player, Game, User, Question, Answer, Chance, Professions, Action
 
 @api_view(['POST'])
 def createGame(request):
@@ -33,6 +32,93 @@ def createPlayer(request):
             return JsonResponse({'gameId': game.id, 'playerID': player.id})
         except User.DoesNotExist:
             return JsonResponse({"detail": "User or game not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+def changePlayer(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode())
+        try:
+            player = Player.objects.get(id=data['player_id'])
+            if data['profession']:
+                profession = Professions.objects.get(id = data['profession'])
+                player.profession = profession
+                player.save()
+            return JsonResponse({'playerID': player.id, 'balance': player.balance, 'profession': player.profession})
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+def addActionAnswer(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode())
+        try:
+            player = Player.objects.get(id=data['player_id'])
+            answer = Answer.objects.get(id=data['answer_id'])
+            player.balance -= answer.sum_now
+            if answer.sum_later or answer.scip:
+                action = Action.objects.create(player=player, sum=answer.sum_later, period=answer.period, scip = answer.scip)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+def addActionChance(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode())
+        try:
+            player = Player.objects.get(id=data['player_id'])
+            chance = Chance.objects.get(id=data['chance_id'])
+            if chance.period == 0:
+                player.balance -= chance.sum
+            if chance.period or chance.scip:
+                action = Action.objects.create(player=player, sum=chance.sum, period=chance.period, scip = chance.scip)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+def checkScip(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode())
+        try:
+            player = Player.objects.get(id=data['player_id'])
+            actions = Action.objects.filter(player=player, scip=True)
+            for action in actions:
+                action.scip = False
+                action.save()
+            if actions:
+                return JsonResponse({'scip': True})
+            else:
+                return JsonResponse({'scip': False})
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+def changeBalance(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode())
+        try:
+            player = Player.objects.get(id=data['player_id'])
+            player.balance += player.profession.salary
+            actions = Action.objects.filter(player=player)
+            income = 0
+            outcome = 0
+            for action in actions:
+                if action.period > 0:
+                    player.balance += action.sum
+                    action.period -= 1
+                    action.save()
+                    if action.sum > 0:
+                        income += action.sum
+                    else:
+                        outcome -= action.sum
+            player.save()
+            return JsonResponse({'balance': player.balance, 'salary': player.profession.salary, 'income': income, 'outcome': outcome})
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 api_view(['GET'])
@@ -68,6 +154,20 @@ def getAnswers(request):
                 })
             print(responseData)
             return JsonResponse(responseData, safe=False)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def getAnswerOutcome(request):
+    if request.method == 'GET':
+        answer_id = request.GET.get('answer_id', None)
+        if not answer_id:
+            return Response({"detail": "Parameter 'id' is required"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            answer = Answer.objects.get(id=answer_id)
+            outcome = answer.action_text
+            return JsonResponse({"outcome": outcome})
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -155,15 +255,16 @@ def getRandomProfession(request):
         try:
             profession = Professions.objects.order_by('?').first()
             player = Player.objects.get(id=player_id)
-            player.profession = profession
-            player.save()
-            responseData = {
-                "id" : profession.id,
-                "name": profession.name,
-                "salary": profession.salary,
-                # "text": chance.text,
-            }
-            print(responseData)
-            return JsonResponse(responseData)
+            if not player.profession:
+                player.profession = profession
+                player.save()
+                responseData = {
+                    "id" : profession.id,
+                    "name": profession.name,
+                    "salary": profession.salary,
+                }
+                print(responseData)
+                return JsonResponse(responseData)
+            return JsonResponse({"detail": "player already has profession"})
         except Professions.DoesNotExist:
             return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)

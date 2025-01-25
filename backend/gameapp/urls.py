@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import createGame, createPlayer, getAnswers, getQuestion, getRandomQuestion, getRandomChance, getChance, \
-    getRandomProfession, connectToGame, getInfoAboutGame
+from .views import (createGame, createPlayer, getAnswers, getQuestion, getRandomQuestion, getRandomChance, getChance, \
+    getRandomProfession, connectToGame, getInfoAboutGame, changePlayer, addActionAnswer, addActionChance, getAnswerOutcome, \
+                    changeBalance, checkScip)
 
 urlpatterns = [
     path('createGame/', createGame, name='createGame'),
@@ -13,4 +14,10 @@ urlpatterns = [
     path('getRandomChance/', getRandomChance, name='get_random_chance'),
     path('getChance/', getChance, name='get_chance'),
     path('getRandomProfession/', getRandomProfession, name='get_random_profession'),
+    path('changePlayer/', changePlayer, name='change_player'),
+    path('addActionAnswer/', addActionAnswer, name='add_action_answer'),
+    path('addActionChance/', addActionChance, name='add_action_chance'),
+    path('changeBalance/', changeBalance, name='change_balance'),
+    path('checkScip/', checkScip, name='check_scip'),
+    path('getAnswerOutcome/', getAnswerOutcome, name='get_answer_outcome'),
 ]
