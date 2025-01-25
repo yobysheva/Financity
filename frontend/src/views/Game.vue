@@ -351,7 +351,6 @@ function sendTurnCount(turn_count) {
         "type": "on_turn_start",
         "info": {
           "turn_count": turn_count,
-          // "player_id": player_id
         }
     }
     gameSocket.send(JSON.stringify(
