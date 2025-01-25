@@ -1,8 +1,10 @@
 <script setup>
 import {defineProps} from 'vue';
 defineProps({
+  name: String,
   jobName: String,
   jobPayment: Number,
+  balance: Number,
   av: String
 });
 
@@ -11,12 +13,12 @@ defineProps({
 <template>
 <div class="player-container" style="height: 10%;">
   <div class="column">
-    <div class="photo" ><img :src="av" style="width: 100%; /* Заполняет ширину блока */
-  height: auto; /* Сохраняет пропорции изображения */
+    <div class="photo" ><img :src="av" style="width: 100%;
+  height: auto;
   display: block; "/></div>
-<!--        <p>Пользователь1234</p>-->
-        <p>Профессия: {{jobName}}</p>
-        <p>{{jobPayment}}₽</p>
+    <p>{{name}}</p>
+        <p>{{jobName}} {{jobPayment}}₽</p>
+    <p>{{balance}}</p>
   </div>
 </div>
 </template>

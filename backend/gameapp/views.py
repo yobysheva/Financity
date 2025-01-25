@@ -220,6 +220,7 @@ def getInfoAboutGame(request):
              return JsonResponse({'players': [
                      {
                         'id': player.id,
+                        'name': player.user.username,
                         'profession': player.profession.name,
                         'balance': player.balance,
                         'salary': player.profession.salary

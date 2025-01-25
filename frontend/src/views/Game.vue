@@ -7,7 +7,7 @@ import Player from "@/views/user/Player.vue";
   // import Chance from "@/views/children/Chance.vue";
   import { authService } from "@/services/auth";
 // import QuizQuestion from "@/views/QuizQuestion.vue";
-import {ref} from 'vue';
+import {onMounted, ref} from 'vue';
 // import { getCurrentInstance } from 'vue';
 import store from "@/store";
 import routes from "../router/index.js";
@@ -42,6 +42,11 @@ let images = ref([
 // });
 
 let players = ref([])
+console.log("created")
+onMounted(() => {
+  players.value = []
+  console.log("cleared")
+})
 let current_player_index = 0
 
 // async function getProfession(){
@@ -56,9 +61,10 @@ authService.getInfoAboutGame(
       store.state.gameID
 ).then((response) => {
     players.value = response.data['players'];
+    console.log(players.value)
 })
 
-
+console.log(players.value)
 let newMessage = ref("")
 
 let rulesVisible = ref(false)
@@ -107,10 +113,10 @@ const modalVisible = ref(false);
 // const modalChance = ref("");
 // const modalChanceVisible = ref(false);
 
-const jobs = [["медсестра", 30000], ["архитектор", 90000], ["веб-разработчик", 190000], ["адвокат", 90000] ]
-const job1 = jobs[Math.floor(Math.random() * jobs.length)];
+// const jobs = [["медсестра", 30000], ["архитектор", 90000], ["веб-разработчик", 190000], ["адвокат", 90000] ]
+// const job1 = jobs[Math.floor(Math.random() * jobs.length)];
 // const job1Name = job1[0]
-const job1Payment= job1[1]
+// const job1Payment= job1[1]
 // const job2 = jobs[Math.floor(Math.random() * jobs.length)];
 // const job2Name = job2[0]
 // const job2Payment= job2[1]
@@ -307,11 +313,10 @@ gameSocket.onmessage = (event) => {
             modalVisible.value = false;
             break;
         case "notification_about_connect_to_game":
-            if (Number(info['player_id']) === store.state.playerID) break;
+            if (Number(info['id']) === store.state.playerID) break;
             console.log(info)
-            players.value.push(Number(info['player_id']));
+            players.value.push(info);
             break;
-
     }
 };
 
@@ -411,7 +416,7 @@ function spin(rnd) {
 
 const manualSpin = () => {
   clearTimeout(spinTimer);
-   spinButtonLabel.value = "Крутить ХАХАХАХАХ"
+   spinButtonLabel.value = "Крутить"
   if (players.value[current_player_index] === store.state.playerID)
   generateAndSpin();
 };
@@ -446,12 +451,17 @@ const startTurn = () => {
 <!--  <QuizQuestion/>-->
   <Rules v-if="rulesVisible" @close="showRules"/>
 <!--  <Question v-if="questionActive"/>-->
-  <div id="callScreen" style="position: absolute; width: 0px; height: 0px; overflow:hidden;"></div>
 <div class="outer-container">
 <div class="transparent-container game-page" style="min-height: 98%; max-height: 98%; min-width: 96%; max-width: 96%;">
   <div class="row" style="height: 100%; width: 100%;">
-    <div class="column" style="height: 85%; width: 10%;">
-      <Player :jobName= store.state.playerID  :jobPayment=job1Payment :av="images[0]"/>
+    <div class="column" style="height: 85%; width: 15%;">
+      <Player v-for="(player, index) in players"
+             :key="index"
+              :name = player.name
+              :jobName = player.profession
+              :balance = player.balance
+              :jobPayment = player.salary
+              :av="images[index]"/>
 <!--      <Player :jobName= job2Name  :jobPayment=job2Payment :av="av2Src"/>-->
 <!--      <Player :jobName= job3Name  :jobPayment=job3Payment :av="av3Src"/>-->
 <!--      <Player :jobName= job4Name  :jobPayment=job4Payment :av="av4Src"/>-->

@@ -19,17 +19,14 @@ class GameConsumer(WebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-
-        profession = Professions.objects.order_by('?').first()
         player = Player.objects.get(id=self.player_id)
-        player.profession = profession
-        player.save()
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
                 'type': 'notification_about_connect_to_game_handler',
                 'info': {
-                    'player_id': player.id,
+                    'id': player.id,
+                    'name': player.user.username,
                     'profession': player.profession.name,
                     'balance': player.balance,
                     'salary': player.profession.salary
