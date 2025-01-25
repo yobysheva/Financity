@@ -132,6 +132,7 @@ defineExpose({ getQuestion });
         <h3 style="margin-bottom: 16px;">{{ caseTitle }}</h3>
         <h3 style="margin-bottom: 16px;">{{ question.text }}</h3>
         <textarea
+          id="text_area"
           v-if="questionType === 1"
           class="input-custom"
           style="min-height: 120px; height:40%; width: 100%; padding: 25px; margin-bottom: 16px;"

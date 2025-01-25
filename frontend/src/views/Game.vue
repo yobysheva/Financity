@@ -43,6 +43,7 @@ let images = ref([
 
 let players = ref([])
 let current_player_index = 0
+let need_to_share_text_answer = false
 
 // async function getProfession(){
 //   await authService.getRandomProfession(store.state.playerID);
@@ -179,14 +180,14 @@ async function checkPositionAndShowModal (currentCoords){
     }, 500);
     return;
   }
-  console.log(store.state.playerID, players.value[current_player_index]);
-  if (players.value[current_player_index] === store.state.playerID) {
+  if (players.value[current_player_index].id === store.state.playerID) {
     modalTitle.value = `Кейс: ${category === 1 ? "Государство" : category === 2 ? "Развлечения" : "Недвижимость"}`;
     try {
     const response = await authService.getRandomQuestion(category);
     modalQuestionId.value = response.data['id'];
     modalQuestionType.value = response.data['type'];
     await questionComponent.value.getQuestion(response.data['id'], response.data['type']);
+    need_to_share_text_answer = response.data['type'] === '2'
   } catch (error) {
         console.error(error);
   }
@@ -194,6 +195,9 @@ async function checkPositionAndShowModal (currentCoords){
     setTimeout(() => {
         modalVisible.value = true;
     }, 500);
+    setTimeout(() => {
+        textAnswerTranslate()
+    }, 1000)
   }
 }
 
@@ -275,6 +279,35 @@ function sendMessage() {
       }))
 }
 
+const answerSocket = new WebSocket(`ws://localhost:8000/ws/game_answer/${gameId}/`);
+answerSocket.onmessage = (event) => {
+    let text_data = JSON.parse(event.data);
+    text_data = text_data["info"];
+    let type = text_data['type']
+    let content = text_data['content']
+    switch (type) {
+        case 'change_text_answer':
+            if (players[current_player_index] === store.state.playerID) break
+          // eslint-disable-next-line no-case-declarations
+            let text = content['text']
+            questionComponent.value.getElementById("text_area").value = text
+            break;
+    }
+}
+
+function textAnswerTranslate() {
+    console.log(123)
+    if (!need_to_share_text_answer) return;
+    const input = questionComponent.value.getElementById("text_area").value
+    answerSocket.send(JSON.stringify({
+        "text": input,
+    }))
+
+    setTimeout(() => {
+        textAnswerTranslate()
+    }, 1000)
+}
+
 const gameSocket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/${store.state.playerID}/`);
 gameSocket.onmessage = (event) => {
     let text_data = JSON.parse(event.data);
@@ -295,14 +328,14 @@ gameSocket.onmessage = (event) => {
             const questionId = info["questionId"]
           // eslint-disable-next-line no-case-declarations
             const questionType = info["questionType"]
-            console.log(players.value[current_player_index] !== store.state.playerID, players.value[current_player_index] ===  store.state.playerID,  players.value[current_player_index], store.state.playerID)
-            if (players.value[current_player_index] !== store.state.playerID) {
+            if (players.value[current_player_index].id !== store.state.playerID) {
                 openModalWithValues(
                     title, questionId, questionType
                 )
             }
             break;
         case "on_question_close":
+            need_to_share_text_answer = false
             current_player_index = (current_player_index + 1) % players.value.length;
             modalVisible.value = false;
             break;
@@ -412,7 +445,7 @@ function spin(rnd) {
 const manualSpin = () => {
   clearTimeout(spinTimer);
    spinButtonLabel.value = "Крутить ХАХАХАХАХ"
-  if (players.value[current_player_index] === store.state.playerID)
+  if (players.value[current_player_index].id === store.state.playerID)
   generateAndSpin();
 };
 
@@ -430,7 +463,7 @@ const startTurn = () => {
       spinButtonLabel.value = `Крутить (${countdown--} сек)`;
       spinTimer = setTimeout(updateLabel, 1000);
     } else {
-      if (players.value[current_player_index] === store.state.playerID)
+      if (players.value[current_player_index].id === store.state.playerID)
       generateAndSpin();
     }
   };
