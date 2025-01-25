@@ -277,7 +277,6 @@ function sendMessage() {
       }))
 }
 
-console.log(store.state.playerID)
 const gameSocket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/${store.state.playerID}/`);
 gameSocket.onmessage = (event) => {
     let text_data = JSON.parse(event.data);
@@ -306,6 +305,7 @@ gameSocket.onmessage = (event) => {
             }
             break;
         case "on_question_close":
+            current_player_index = (current_player_index + 1) % players.value.length;
             modalVisible.value = false;
             break;
         case "notification_about_connect_to_game":
@@ -318,11 +318,10 @@ gameSocket.onmessage = (event) => {
 };
 
 function sendCloseQuestion() {
-    current_player_index = (current_player_index + 1) % players.value.length
     const info = {
         "type": "on_question_close",
         "info": {
-            "player_index": current_player_index %= players.value.length,
+            "player_index": (current_player_index + 1) % players.value.length,
             "result": false
         }
     }
@@ -424,8 +423,8 @@ const startTurn = () => {
       spinButtonLabel.value = `Крутить (${countdown--} сек)`;
       spinTimer = setTimeout(updateLabel, 1000);
     } else {
-
-      manualSpin();
+      if (players.value[current_player_index] === store.state.playerID)
+      generateAndSpin();
     }
   };
 
