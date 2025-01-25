@@ -48,6 +48,7 @@ onMounted(() => {
   console.log("cleared")
 })
 let current_player_index = 0
+let shine = ref([])
 let need_to_share_text_answer = false
 
 // async function getProfession(){
@@ -62,6 +63,23 @@ authService.getInfoAboutGame(
       store.state.gameID
 ).then((response) => {
     players.value = response.data['players'];
+    players.value.forEach(
+        function() {
+          dotStyleMassive.value.push({
+              width: "auto",
+              height: "8%",
+              position: "absolute",
+              left: `${positions[0][0]}%`,
+              top: `${positions[0][1]}%`,
+              transition: "all 0.3s ease"
+            });
+            lastXmassive.value.push(0);
+            lastYmassive.value.push(0);
+            currentIndexMassive.value.push(0);
+            totalSumMassive.value.push(0);
+            shine.value.push(false)
+        }
+    )
 })
 
 
@@ -73,7 +91,6 @@ function showRules() {
   rulesVisible.value = !rulesVisible.value;
 }
 
-//
 // if(!props.userType){
   // let sessionID = props.sessionId;
 
@@ -86,22 +103,34 @@ const positions = [
   [5.3, 22]
 ];
 
-const dotStyle = ref({
+// const dotStyle = ref({
+//   width: "auto",
+//   height: "8%",
+//   position: "absolute",
+//   left: `${positions[0][0]}%`,
+//   top: `${positions[0][1]}%`,
+//   transition: "all 0.3s ease"
+// });
+const dotStyleMassive = ref([{
   width: "auto",
   height: "8%",
   position: "absolute",
   left: `${positions[0][0]}%`,
   top: `${positions[0][1]}%`,
   transition: "all 0.3s ease"
-});
+}]);
 
-const dotVisible = ref(true);
+// const dotVisible = ref(true);
 const result = ref("");
 const diceStyle = ref({});
-const totalSum = ref(0);
+// const totalSum = ref(0);
+let totalSumMassive = ref([0]);
 const currentIndex = ref(0);
+let currentIndexMassive = ref([0]);
 const lastRoll = ref(null);
 const lastX = ref(0);
+let lastXmassive = ref([0]);
+let lastYmassive = ref([0]);
 const lastY = ref(0);
 const isSpinDisabled = ref(true);
 const spinButtonLabel = ref("Крутить");
@@ -150,7 +179,6 @@ async function checkPositionAndShowModal (currentCoords){
   const allCasesCoords = [[37.3, 84], [26.3, 84], [15.3, 84], [5.3, 70], [5.3, 56]];
   const ChanceCoords = [[47, 9], [89, 8], [5.3, 8], [88.3, 83], [47.3, 83], [4.3, 86]];
   let category = null;
-
   if (stateCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
     category = 1;
     modalColor.value = "#ADA1F6"; // Фиолетовый
@@ -170,8 +198,10 @@ async function checkPositionAndShowModal (currentCoords){
     // }, 500);
     modalColor.value = "white";
     modalTitle.value = `Шанс`;
-    try {
+    if (players.value[current_player_index].id === store.state.playerID){
+      try {
     const response = await authService.getRandomChance();
+    console.log("chance")
     modalQuestionId.value = response.data['id'];
     modalQuestionType.value = 3;
     await questionComponent.value.getQuestion(response.data['id'], 3);
@@ -184,6 +214,7 @@ async function checkPositionAndShowModal (currentCoords){
         modalVisible.value = true;
     }, 500);
     return;
+    }
   }
   if (players.value[current_player_index].id === store.state.playerID) {
     modalTitle.value = `Кейс: ${category === 1 ? "Государство" : category === 2 ? "Развлечения" : "Недвижимость"}`;
@@ -208,6 +239,7 @@ async function checkPositionAndShowModal (currentCoords){
 
 
 async function openModalWithValues (title, questionId, questionType) {
+  console.log(questionId)
   modalTitle.value = title
   modalQuestionId.value = questionId
   modalQuestionType.value = questionType
@@ -227,15 +259,18 @@ const closeModal = () => {
 
 const moveDot = (targetIndex) => {
   const steps = [];
-  if (targetIndex > currentIndex.value) {
-    for (let i = currentIndex.value + 1; i <= targetIndex; i++) {
+  if (targetIndex > currentIndexMassive.value[current_player_index]) {
+    for (let i = currentIndexMassive.value[current_player_index] + 1; i <= targetIndex; i++) {
+      console.log('first')
       steps.push(i);
     }
   } else {
-    for (let i = currentIndex.value + 1; i < positions.length; i++) {
+    for (let i = currentIndexMassive.value[current_player_index] + 1; i < positions.length; i++) {
+      console.log('second')
       steps.push(i);
     }
     for (let i = 0; i <= targetIndex; i++) {
+      console.log('third')
       steps.push(i);
     }
   }
@@ -244,19 +279,21 @@ const moveDot = (targetIndex) => {
   const moveNext = () => {
     if (stepIndex < steps.length) {
       const [leftPercent, topPercent] = positions[steps[stepIndex]];
-      dotStyle.value.left = `${leftPercent}%`;
-      dotStyle.value.top = `${topPercent}%`;
+      // dotStyle.value.left = `${leftPercent}%`;
+      dotStyleMassive.value[current_player_index].left = `${leftPercent}%`;
+      // dotStyle.value.top = `${topPercent}%`;
+      dotStyleMassive.value[current_player_index].top = `${topPercent}%`;
       currentIndex.value = steps[stepIndex];
+      currentIndexMassive.value[current_player_index] = steps[stepIndex];
       stepIndex++;
 
       if (stepIndex === steps.length) {
-        const [currentX, currentY] = positions[currentIndex.value];
+        const [currentX, currentY] = positions[currentIndexMassive.value[current_player_index]];
         checkPositionAndShowModal([currentX, currentY]);
       }
       else setTimeout(moveNext, 300);
     }
   };
-
   moveNext();
 };
 
@@ -319,11 +356,16 @@ gameSocket.onmessage = (event) => {
     text_data = text_data["info"];
     let info = text_data["info"];
     let type = text_data['type'];
+    players.value.forEach((player, index) => {
+            shine.value[index] = player.id === players.value[current_player_index].id;
+          });
     switch (type) {
         case "on_turn_start":
+
           // eslint-disable-next-line no-case-declarations
             const turn_count = info["turn_count"];
-            totalSum.value += turn_count;
+            // totalSum.value += turn_count;
+            totalSumMassive.value[current_player_index] += turn_count;
             spin(turn_count);
             break;
         case "on_question_open":
@@ -342,12 +384,27 @@ gameSocket.onmessage = (event) => {
         case "on_question_close":
             need_to_share_text_answer = false
             current_player_index = (current_player_index + 1) % players.value.length;
+            players.value.forEach((player, index) => {
+              shine.value[index] = player.id === players.value[current_player_index].id;
+            });
             modalVisible.value = false;
             break;
         case "notification_about_connect_to_game":
             if (Number(info['id']) === store.state.playerID) break;
             console.log(info)
             players.value.push(info);
+            dotStyleMassive.value.push({
+              width: "auto",
+              height: "8%",
+              position: "absolute",
+              left: `${positions[0][0]}%`,
+              top: `${positions[0][1]}%`,
+              transition: "all 0.3s ease"
+            });
+            lastXmassive.value.push(0);
+            lastYmassive.value.push(0);
+            currentIndexMassive.value.push(0);
+            totalSumMassive.value.push(0);
             break;
     }
 };
@@ -366,6 +423,7 @@ function sendCloseQuestion() {
 }
 
 function sendQuestion() {
+  console.log(modalQuestionId.value)
   const info = {
     "type": "on_question_open",
     "info": {
@@ -407,8 +465,8 @@ function spin(rnd) {
   let x, y;
 
   if (lastRoll.value === rnd) {
-    x = lastX.value + 360;
-    y = lastY.value + 360;
+    x = lastXmassive.value[current_player_index] + 360;
+    y = lastYmassive.value[current_player_index] + 360;
   } else {
     switch (rnd) {
       case 1:
@@ -431,11 +489,13 @@ function spin(rnd) {
   };
 
   lastX.value = x;
+  lastXmassive.value[current_player_index] = x;
+  lastYmassive.value[current_player_index] = y;
   lastY.value = y;
   lastRoll.value = rnd;
 
   setTimeout(() => {
-    let targetIndex = totalSum.value % 26;
+    let targetIndex = totalSumMassive.value[current_player_index] % 26;
     if (targetIndex < 0) targetIndex += 26;
     moveDot(targetIndex);
   }, 1200);
@@ -493,7 +553,9 @@ const startTurn = () => {
               :jobName = player.profession
               :balance = player.balance
               :jobPayment = player.salary
-              :av="images[index]"/>
+              :av="images[index]"
+              :shine="shine[index]"
+      />
 <!--      <Player :jobName= job2Name  :jobPayment=job2Payment :av="av2Src"/>-->
 <!--      <Player :jobName= job3Name  :jobPayment=job3Payment :av="av3Src"/>-->
 <!--      <Player :jobName= job4Name  :jobPayment=job4Payment :av="av4Src"/>-->
@@ -505,9 +567,10 @@ const startTurn = () => {
 <!--        <Fields/>-->
 <!--        <img src="../assets/kletki.svg" style="position:absolute; top: 0px; left: 0px; width: 100%; height: 100%">-->
          <img
-            v-if="dotVisible"
-            :src="images[0]"
-            :style="dotStyle"
+             v-for="(player, index) in players"
+             :key="index"
+            :src="images[index]"
+            :style="dotStyleMassive[index]"
             alt="dot"
           />
         <div class="panel">

@@ -105,18 +105,21 @@ async function getQuestion(id, type) {
   try {
     console.log(store.state.username);
     if(type === 3){
+      console.log(1);
       const response = await authService.getChance(id);
-    console.log("3. ", response);
-    console.log(props);
-    question.value.text = response.data['text'];
-    return;
+      console.log("3. ", response);
+      console.log(props);
+      question.value.text = response.data['text'];
+      return;
     }
+    console.log(2);
     const response = await authService.getQuestion(id);
     console.log("3. ", response);
     console.log(props);
     question.value.text = response.data['text'];
     // question.value.type = response.data['type'];
     if(type === 2){
+      console.log(3);
       const response1 = await authService.getAnswers(id);
       console.log("3. ", response1);
       answers.value = [];
@@ -141,7 +144,7 @@ defineExpose({ getQuestion , setTextInTextArea , getTextInTextArea});
         <textarea
           v-if="questionType === 1"
           class="input-custom"
-          style="min-height: 120px; height:40%; width: 100%; padding: 25px; margin-bottom: 16px;"
+          style="min-height: 120px; height:40%; width: 100%; padding: 40px; margin-bottom: 16px;"
         ></textarea>
         <div v-if="questionType === 2" class="answers">
           <div
@@ -155,7 +158,7 @@ defineExpose({ getQuestion , setTextInTextArea , getTextInTextArea});
             </label>
           </div>
         </div>
-      <button
+      <button  v-if="questionType !== 1"
         class="button-33"
         role="button"
         style="margin-bottom: 16px;"
@@ -163,6 +166,25 @@ defineExpose({ getQuestion , setTextInTextArea , getTextInTextArea});
       >
         Закрыть
       </button>
+        <div class="row" v-if="questionType === 1">
+          <button
+        class="button-33"
+        role="button"
+        style="margin-bottom: 16px;"
+        @click="$emit('close')"
+      >
+        +
+      </button>
+              <button
+        class="button-33"
+        role="button"
+        style="margin-bottom: 16px;"
+        @click="$emit('close')"
+      >
+        -
+      </button>
+        </div>
+
       </div>
     </div>
   </div>

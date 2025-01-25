@@ -23,7 +23,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-<div class="modal" style="top: 35%; width: 70%;  min-height: 80%; overflow: visible; height: 100%;">
+<div class="modal" style="top: 35%; width: 70%;  min-height: 80%; overflow: visible; height: 70%;">
   <div class="container modal-container" style="width: 100%; min-height: 100%; padding: 20px; overflow: auto;-ms-overflow-style: none;
       scrollbar-width: none;">
     <div class="column">

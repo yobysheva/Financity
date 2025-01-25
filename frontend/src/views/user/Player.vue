@@ -5,20 +5,26 @@ defineProps({
   jobName: String,
   jobPayment: Number,
   balance: Number,
-  av: String
+  av: String,
+  shine: Boolean
 });
 
 </script>
 
 <template>
-<div class="player-container" style="height: 10%;">
+<div class="player-container"
+     :class="{ active: shine }"
+      :style="{
+      height: '10%',
+      backgroundColor: shine ? '#defcea' : 'white'
+    }">
   <div class="column">
     <div class="photo" ><img :src="av" style="width: 100%;
   height: auto;
   display: block; "/></div>
     <p>{{name}}</p>
         <p>{{jobName}} {{jobPayment}}₽</p>
-    <p>{{balance}}</p>
+    <p>Баланс: {{balance}}₽</p>
   </div>
 </div>
 </template>
@@ -39,6 +45,12 @@ defineProps({
   width: 100%;
   height: 10%;
   margin: 10px;
+}
+
+.active{
+  outline: none;
+  border-color: rgba(44, 187, 99, .6);
+  box-shadow: rgba(44, 187, 99, .35) 0 0 5px;
 }
 
 .column{
