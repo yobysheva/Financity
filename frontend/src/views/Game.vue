@@ -10,6 +10,7 @@ import Player from "@/views/user/Player.vue";
 import {ref} from 'vue';
 // import { getCurrentInstance } from 'vue';
 import store from "@/store";
+import routes from "../router/index.js";
 
 let images = ref([
   require('@/assets/av1.png'),
@@ -261,11 +262,9 @@ chatSocket.onmessage = function (event) {
     let data = JSON.parse(event.data)
     messages.value.push({
       id: global_id += 1,
-      player_id: data["player_id"],
+      username: data["username"],
       msg: data["message"].toString()
     })
-
-    console.log(messages)
 }
 
 function sendMessage() {
@@ -273,7 +272,7 @@ function sendMessage() {
     newMessage.value = ""
     chatSocket.send(JSON.stringify({
         "message": input,
-        "player_id": store.state.playerID
+        "username": store.state.username
       }))
 }
 
@@ -363,6 +362,10 @@ const generateAndSpin = () => {
   sendTurnCount(rnd);
 };
 
+function leaveCall() {
+  // this.$router.push({ name: "home" });
+  routes.push({ name: "home" });
+}
 
 function spin(rnd) {
   let x, y;
@@ -412,6 +415,10 @@ const manualSpin = () => {
   if (players.value[current_player_index] === store.state.playerID)
   generateAndSpin();
 };
+
+function isMyMessage(message) {
+  return message.username === store.state.username;
+}
 
 const startTurn = () => {
   isSpinDisabled.value = false;
@@ -537,11 +544,17 @@ const startTurn = () => {
       justify-content:center;
       max-height: 50vh;
       height: 80%;
-      width: 90%;
+      width: 100%;
+      padding: 0px;
       overflow-y: scroll;
       display: flex; flex-direction: column;">
-      <div v-for="message in messages" v-bind:key="message.id" style=" align-items:center; justify-content:center; word-break: break-word;">
-          {{ message.msg }}
+      <div style = "min-width: 100%">
+        <div v-for="message in messages"
+             :key="message.id"
+             :class="{'my-message': isMyMessage(message), 'other-message': !isMyMessage(message)}"
+             class="message">
+          {{ message.username }}: {{ message.msg }}
+        </div>
       </div>
     </div>
     <input class="input-custom" id="123" v-model="newMessage" style="width: 80%;" @keydown.enter="sendMessage">
@@ -570,6 +583,10 @@ const startTurn = () => {
 .game-page{
   justify-content: center;
   align-items: center;
+}
+
+.column {
+  padding: 20px;
 }
 
 .row {
@@ -727,5 +744,30 @@ const startTurn = () => {
 
 .button-33:disabled {
   cursor: not-allowed;
+}
+
+.message {
+  word-break: break-word;
+  margin: 15px 0;
+  padding: 15px;
+  border-radius: 10px;
+  max-width: 100%;
+  min-width: 100%;
+}
+
+.my-message {
+  background-color: #d1f7d6;
+  align-self: flex-end;
+  text-align: right;
+  margin-left: auto;
+  margin-bottom: 10px;
+}
+
+.other-message {
+  background-color: #f1f1f1;
+  align-self: flex-start;
+  text-align: left;
+  margin-right: auto;
+  margin-bottom: 10px;
 }
 </style>
