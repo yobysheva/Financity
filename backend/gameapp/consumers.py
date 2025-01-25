@@ -153,22 +153,41 @@ class QuestionConsumer(WebsocketConsumer):
 
     def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
-        text = text_data_json['text']
+        print(text_data_json)
+        type_ = text_data_json['type']
+        match type_:
+            case "textAnswer":
+                text = text_data_json['text']
 
-        async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name,
-            {
-                'type': 'change_text_answer_handler',
-                'info': {
-                    'type': 'change_text_answer',
-                    'content': {
-                        'text': text
-                    },
-                }
-            }
-        )
+                async_to_sync(self.channel_layer.group_send)(
+                    self.room_group_name,
+                    {
+                        'type': 'default_handler',
+                        'info': {
+                            'type': 'change_text_answer',
+                            'content': {
+                                'text': text
+                            },
+                        }
+                    }
+                )
 
-    def change_text_answer_handler(self, event):
+            case "radioButtonAnswer":
+                buttonId = text_data_json['button_id']
+
+                async_to_sync(self.channel_layer.group_send)(
+                    self.room_group_name,
+                    {
+                        'type': 'default_handler',
+                        'info': {
+                            'type': 'radio_button_answer',
+                            'content': {
+                                'button_id': buttonId
+                            },
+                        }
+                    }
+                )
+    def  default_handler(self, event):
         info = event['info']
 
         self.send(text_data=json.dumps({
