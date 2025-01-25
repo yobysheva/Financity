@@ -766,6 +766,11 @@ const startTurn = () => {
     justify-content: center;
 }
 
+.games{
+  overflow-y: scroll;
+  max-height: 45vh;
+}
+
 .six {
   border-radius: 10px;
     transform: rotateX(90deg) translateZ(33.33px);

@@ -6,14 +6,15 @@ import GameField from "@/views/children/GameField.vue";
 
 <template>
 <div class="container games">
-  <GameField/>
-  <GameField/>
-  <GameField/>
-  <GameField/>
-  <GameField/>
-  <GameField/>
-  <GameField/>
-  <GameField/>
+  <div v-for="game in this.activeGame"
+       :key="game.game_id">
+    <div class="row">
+      <p>1</p>
+      <div class="photo"></div>
+      <p>{{ game.username }}</p>
+      <p>Создана игра: {{game.game_id}}</p>
+    </div>
+  </div>
 </div>
 </template>
 

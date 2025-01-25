@@ -1,7 +1,7 @@
 <script>
 import Rating from "@/views/children/Rating.vue";
 import Profile from "@/views/user/Profile.vue";
-import CurrentGames from "@/views/children/CurrentGames.vue";
+// import CurrentGames from "@/views/children/CurrentGames.vue";
 import { authService } from "@/services/auth";
 import store from "../store.js";
 import { CometChat } from "@cometchat-pro/chat";
@@ -10,7 +10,7 @@ export default {
   components: {
     Rating,
     Profile,
-    CurrentGames,
+    // CurrentGames,
   },
 
   data() {
@@ -28,7 +28,8 @@ export default {
       IsGameRequested: false,
       incomingInvite: false,
       ongoingCall: false,
-      gameId: null
+      gameId: null,
+      activeGame: [],
     };
   },
 
@@ -89,14 +90,15 @@ export default {
         this.activeGamesSocket = new WebSocket(`ws://localhost:8000/ws/home/`);
         this.activeGamesSocket.onmessage = (event) => {
         let text_data = JSON.parse(event.data)
-        console.log(text_data)
+        this.activeGame.push(text_data)
       }
     },
 
     sendMessageToActiveGamesSocket(gameId, playerId) {
       let data = {
         "player_id": playerId,
-        "game_id": gameId
+        "game_id": gameId,
+        "username": store.state.username,
       }
       this.activeGamesSocket.send(
           JSON.stringify(
@@ -114,17 +116,10 @@ export default {
       this.waitingRequestSocket.onmessage = async (event) => {
         let data = JSON.parse(event.data);
         if (data.type === "game_invitation") {
-          const response = await authService.connectToGame({
-            username: store.state.username,
-            game_id: data.game_id,
-          });
-          if (response.status === 200) {
-            await store.dispatch("updateGameID", response.data.gameId);
-            await store.dispatch("updatePlayerID", response.data.playerID);
+          await store.dispatch("updateGameID", data.game_id);
           this.incomingInvite = true
           // this.$router.push({name: "Game", query: {id: data.game_id}});
         }
-      }
       }
       this.waitingRequestSocket.onerror = (error) => {
         console.error("WebSocket error:", error)
@@ -264,69 +259,37 @@ export default {
     }
   }
 },
-
-    acceptCall() {
-      this.$router.push({name: "Game", query: {id: store.state.gameID}});
-      // this.$router.push({ name: "Game", query: { id: groupId} });
-      // let globalContext = this;
-      // this.ongoingCall = true;
-      // this.incomingInvite = false;
-      // var sessionID = this.session_id;
-      // CometChat.acceptCall(sessionID).then(
-      //    async call => {
-      //     console.log("Call accepted successfully:", call);
-      //     let group = call.getCallReceiver();
-      //     let groupId = group.getGuid();
-      //     const response = await authService.createPlayer({
-      //       username: store.state.username,
-      //       id: groupId,
-      //     });
-      //     store.state.playerID = response.data.playerID;
-      //     this.$router.push({ name: "Game", query: { id: groupId} });
-      //     console.log("call accepted now....");
-      //     // start the call using the startCall() method
-      //     console.log(globalContext.ongoingCall);
-      //     console.log(this.sessionID);
-      //     console.log(call.sessionId);
-      //     CometChat.startCall(
-      //       call.sessionId,
-      //       document.getElementById("callScreen"),
-      //       new CometChat.OngoingCallListener({
-      //         onUserJoined: user => {
-      //           /* Notification received here if another user joins the call. */
-      //           console.log("User joined call:", user);
-      //           /* this method can be use to display message or perform any actions if someone joining the call */
-      //         },
-      //         onUserLeft: user => {
-      //           /* Notification received here if another user left the call. */
-      //           console.log("User left call:", user);
-      //           /* this method can be use to display message or perform any actions if someone leaving the call */
-      //         },
-      //         onCallEnded: call => {
-      //           /* Notification received here if current ongoing call is ended. */
-      //           console.log("Call ended:", call);
-      //           globalContext.ongoingCall = false;
-      //           globalContext.incomingInvite = false;
-      //           /* hiding/closing the call screen can be done here. */
-      //         }
-      //       })
-      //     );
-      //   },
-      //   error => {
-      //     console.log("Call acceptance failed with error", error);
-      //     // handle exception
-      //   }
-      // );
+    async joinToGame(gameID) {
+      const response = await authService.connectToGame({
+        username: store.state.username,
+        game_id: gameID,
+      });
+      if (response.status === 200) {
+        await store.dispatch("updateGameID", response.data.gameId);
+        await store.dispatch("updatePlayerID", response.data.playerID);
+        this.$router.push({name: "Game", query: {id: store.state.gameID}});
+      }
     },
 
-    rejectCall() {
+    async acceptInvite() {
+      const response = await authService.connectToGame({
+        username: store.state.username,
+        game_id: store.state.gameID,
+      });
+      if (response.status === 200) {
+        await store.dispatch("updatePlayerID", response.data.playerID);
+      this.$router.push({name: "Game", query: {id: store.state.gameID}});
+      }
+    },
+
+    rejectInvite() {
       this.$router.push({ name: "home" });
       this.incomingInvite = false
       // var sessionID = this.session_id;
       // var globalContext = this;
       // var status = CometChat.CALL_STATUS.REJECTED;
       //
-      // CometChat.rejectCall(sessionID, status).then(
+      // CometChat.rejectInvite(sessionID, status).then(
       //   call => {
       //     console.log("Call rejected successfully", call);
       //     globalContext.incomingInvite = false;
@@ -372,8 +335,8 @@ export default {
         <h3>Присоединись к этим играм!</h3>
       </div>
        <div v-if="incomingInvite">
-<!--          <button class="btn btn-success" @click="acceptCall">Accept Call</button>-->
-<!--          <button class="btn btn-success" @click="rejectCall">Reject Call</button>-->
+<!--          <button class="btn btn-success" @click="acceptInvite">Accept Call</button>-->
+<!--          <button class="btn btn-success" @click="rejectInvite">Reject Call</button>-->
          <div class="modal" style="top: 35%; width: 60%; min-height: 30%; height: auto; overflow: visible;">
             <div class="container modal-container" style="width: 100%; min-height: 100%; padding: 5%;  align-items: center; justify-content: center;">
                 <h3>Приглашение в игру</h3>
@@ -381,8 +344,8 @@ export default {
                 <p>Вас приглашают присоединиться к игре</p>
               </div>
                 <div class="row" style=" align-items: center; justify-content: center;">
-                <button class="button-33" role="button" @click="acceptCall">Принять приглашение</button>
-                <button class="button-33" role="button" @click="rejectCall">Отклонить приглашение</button>
+                <button class="button-33" role="button" @click="acceptInvite">Принять приглашение</button>
+                <button class="button-33" role="button" @click="rejectInvite">Отклонить приглашение</button>
                 </div>
             </div>
           </div>
@@ -393,7 +356,26 @@ export default {
 <!--          <button class="btn btn-secondary"> Ongoing Call ... </button>-->
 <!--        </div>-->
 
-      <CurrentGames/>
+<!--      <CurrentGames/>-->
+
+      <div class="container games" style="max-height: 50vh; overflow-y: scroll;">
+        <div v-for="game in this.activeGame"
+             :key="game.game_id">
+          <div class="row" style="justify-content: flex-start;">
+          <div class="row" style="margin-left: 4%; margin-right: 4%;">
+            <p>1</p>
+            <div class="photo"></div>
+            </div>
+            <div class="row" style="justify-content: space-between; padding: 10px;">
+            <p>{{ game.username }}</p>
+            <p>Создана игра: {{game.game_id}}</p>
+          </div>
+            <div style="justify-content: flex-end;">
+              <button class="button-33" role="button" style="font-size: 12px;" @click="joinToGame(game.game_id)">Присоединиться к игре</button>
+            </div>
+          </div>            
+        </div>
+      </div>
       <div id="callScreen" style="position: absolute; width: 0px; height: 0px; overflow:hidden;"></div>
     </div>
 
@@ -431,7 +413,11 @@ export default {
   justify-content: space-between;
   align-items: center;
 }
-
+p{
+  font-size: 12px;
+  font-weight: bold;
+  margin: 15px;
+}
 .column {
   justify-content: space-between;
 }
@@ -442,5 +428,37 @@ export default {
 
 h3 {
   font-weight: bold;
+}
+.photo{
+  width: 40px;
+  height: 40px;
+  margin: 10px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: rgba(44, 187, 99, .1) 0 2px 4px, rgba(44, 187, 99, .05) 0 1px 2px;
+  color: #333;
+  /*font-family: CerebriSans-Regular, -apple-system, system-ui, Roboto, sans-serif;*/
+  padding: 10px 15px;
+  font-size: 16px;
+  border: 2px solid rgba(44, 187, 99, .3);
+  transition: all 250ms;
+}
+
+.photo:focus {
+  outline: none;
+  border-color: rgba(44, 187, 99, .6);
+  box-shadow: rgba(44, 187, 99, .35) 0 0 5px;
+}
+
+.photo::placeholder {
+  color: #aaa;
+  opacity: 0.8;
+}
+
+.photo:hover {
+  //background-color: rgba(100, 255, 200, .9);
+  outline: none;
+  border-color: rgba(44, 187, 99, .6);
+  box-shadow: rgba(44, 187, 99, .35) 0 0 5px;
 }
 </style>
