@@ -46,7 +46,7 @@ export const authService = {
         return axios.get(`${apiUrl}gameApp/getRandomChance/`)
     },
     getRandomProfession(player_id){
-        return axios.get(`${apiUrl}gameApp/getRandomCProfession/`, {params: {player_id: player_id}})
+        return axios.get(`${apiUrl}gameApp/getRandomProfession/`, {params: {player_id: player_id}})
     },
     changePlayer(player_id, profession){
         return axios.get(`${apiUrl}gameApp/changePlayer/`,{params: {player_id: player_id, profession: profession}})

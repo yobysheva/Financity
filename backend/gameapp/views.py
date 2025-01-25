@@ -13,6 +13,10 @@ def createGame(request):
         try:
             user = User.objects.get(username=data['username'])
             player = Player.objects.create(user=user)
+            profession = Professions.objects.order_by('?').first()
+            player.profession = profession
+            player.balance = profession.salary
+            player.save()
             game = Game.objects.create(status='newGame')
             game.players.add(player)
             return JsonResponse({'gameId': game.id, 'playerID': player.id})
@@ -132,7 +136,6 @@ def getQuestion(request):
                 "text": question.text,
                 "type": question.type
             }
-            print(responseData)
             return JsonResponse(responseData)
         except Question.DoesNotExist:
             return Response({"detail": "Question not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -152,7 +155,6 @@ def getAnswers(request):
                     "id": answer.id,
                     "text": answer.answer_text
                 })
-            print(responseData)
             return JsonResponse(responseData, safe=False)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -184,7 +186,6 @@ def getRandomQuestion(request):
                 # "text": question.text,
                 "type": question.type
             }
-            print(responseData)
             return JsonResponse(responseData)
         except Question.DoesNotExist:
             return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -197,6 +198,10 @@ def connectToGame(request):
         try:
             user = User.objects.get(username=data['username'])
             player = Player.objects.create(user=user)
+            profession = Professions.objects.order_by('?').first()
+            player.profession = profession
+            player.balance = profession.salary
+            player.save()
             game = Game.objects.get(id=data["game_id"])
             game.players.add(player)
             print(game.players.all())
@@ -212,8 +217,15 @@ def getInfoAboutGame(request):
          try:
              game = Game.objects.get(id=game_id)
              players = list(game.players.all())
-             print(list(players))
-             return JsonResponse({'players': [player.id for player in players]})
+             return JsonResponse({'players': [
+                     {
+                        'id': player.id,
+                        'profession': player.profession.name,
+                        'balance': player.balance,
+                        'salary': player.profession.salary
+                     } for player in players
+                ]
+             })
          except Game.DoesNotExist:
              return JsonResponse({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 

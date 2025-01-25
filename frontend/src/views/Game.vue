@@ -45,13 +45,11 @@ let players = ref([])
 let current_player_index = 0
 
 // async function getProfession(){
-//     const response = await authService.getRandomProfession();
+//   await authService.getRandomProfession(store.state.playerID);
+// }
 //
-//   }
-
 // onMounted(() => {
-//   // getProfession();
-//
+//   getProfession();
 // })
 
 authService.getInfoAboutGame(
@@ -179,6 +177,7 @@ async function checkPositionAndShowModal (currentCoords){
     setTimeout(() => {
         modalVisible.value = true;
     }, 500);
+    return;
   }
   console.log(store.state.playerID, players.value[current_player_index]);
   if (players.value[current_player_index] === store.state.playerID) {
@@ -309,7 +308,7 @@ gameSocket.onmessage = (event) => {
             break;
         case "notification_about_connect_to_game":
             if (Number(info['player_id']) === store.state.playerID) break;
-            console.log(players.value)
+            console.log(info)
             players.value.push(Number(info['player_id']));
             break;
 
@@ -412,6 +411,7 @@ function spin(rnd) {
 
 const manualSpin = () => {
   clearTimeout(spinTimer);
+   spinButtonLabel.value = "Крутить ХАХАХАХАХ"
   if (players.value[current_player_index] === store.state.playerID)
   generateAndSpin();
 };

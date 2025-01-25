@@ -2,6 +2,9 @@ import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 
+from gameapp.models import Player, Professions
+
+
 class GameConsumer(WebsocketConsumer):
     HANDLERS = {
         "turn": 'turn_handler'
@@ -17,12 +20,19 @@ class GameConsumer(WebsocketConsumer):
             self.channel_name
         )
 
+        profession = Professions.objects.order_by('?').first()
+        player = Player.objects.get(id=self.player_id)
+        player.profession = profession
+        player.save()
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
                 'type': 'notification_about_connect_to_game_handler',
                 'info': {
-                    'player_id': self.player_id,
+                    'player_id': player.id,
+                    'profession': player.profession.name,
+                    'balance': player.balance,
+                    'salary': player.profession.salary
                 }
             }
         )
