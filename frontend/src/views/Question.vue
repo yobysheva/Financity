@@ -101,6 +101,27 @@ function setTextInTextArea(text) {
 function getTextInTextArea() {
   return document.querySelector('.input-custom').value
 }
+
+function getIdOfActiveRadioButton() {
+    let rates = document.getElementsByName('answer');
+    console.log(rates)
+    for(let i = 0; i < rates.length; i++){
+        console.log(rates[i].checked)
+        if(rates[i].checked){
+            return i
+        }
+    }
+    return -1
+}
+
+function setActiveRadioButtonForId(id) {
+    let rates = document.getElementsByName('answer');
+        for(let i = 0; i < rates.length; i++){
+            rates[i].checked = false
+        }
+        if (Number(id) !== -1) rates[id].checked = true
+  }
+
 async function getQuestion(id, type) {
   try {
     console.log(store.state.username);
@@ -132,7 +153,13 @@ async function getQuestion(id, type) {
   }
 }
 
-defineExpose({ getQuestion , setTextInTextArea , getTextInTextArea});
+defineExpose({
+    getQuestion ,
+    setTextInTextArea ,
+    getTextInTextArea ,
+    getIdOfActiveRadioButton ,
+    setActiveRadioButtonForId
+});
 </script>
 
 <template>
@@ -153,7 +180,7 @@ defineExpose({ getQuestion , setTextInTextArea , getTextInTextArea});
           >
             <label v-for="answer in answers"
             :key="answer.id" style="color:black; ">
-              <input type="radio" id="{{ answer.id }}" name="answer" :value="answer.id" />
+              <input type="radio" name="answer" :value="answer.id" />
               {{ answer.text }}
             </label>
           </div>

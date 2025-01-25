@@ -50,6 +50,7 @@ onMounted(() => {
 let current_player_index = 0
 let shine = ref([])
 let need_to_share_text_answer = false
+let need_to_share_radio_button_answer = false
 
 // async function getProfession(){
 //   await authService.getRandomProfession(store.state.playerID);
@@ -224,6 +225,7 @@ async function checkPositionAndShowModal (currentCoords){
     modalQuestionType.value = response.data['type'];
     await questionComponent.value.getQuestion(response.data['id'], response.data['type']);
     need_to_share_text_answer = response.data['type'] === 1
+    need_to_share_radio_button_answer = response.data['type'] === 2
     console.log(response.data['type'])
   } catch (error) {
         console.error(error);
@@ -232,8 +234,8 @@ async function checkPositionAndShowModal (currentCoords){
     setTimeout(() => {
         modalVisible.value = true;
     }, 500);
-    setTimeout(
-        textAnswerTranslate, 1000)
+    setTimeout(textAnswerTranslate, 1000)
+    setTimeout(radioButtonAnswerTranslate, 1000)
   }
 }
 
@@ -330,23 +332,43 @@ answerSocket.onmessage = (event) => {
     switch (type) {
         case 'change_text_answer':
             if (players[current_player_index] === store.state.playerID) break
-          // eslint-disable-next-line no-case-declarations
+            // eslint-disable-next-line no-case-declarations
             let text = content['text']
             questionComponent.value.setTextInTextArea(text)
+            break;
+        case 'radio_button_answer':
+            if (players[current_player_index] === store.state.playerID) break
+            // eslint-disable-next-line no-case-declarations
+            let button_id = content['button_id']
+            questionComponent.value.setActiveRadioButtonForId(button_id)
             break;
     }
 }
 
 function textAnswerTranslate() {
-    console.log(123)
     if (!need_to_share_text_answer) return;
     const input = questionComponent.value.getTextInTextArea()
     answerSocket.send(JSON.stringify({
+        "type": "textAnswer",
         "text": input,
     }))
 
     setTimeout(
         textAnswerTranslate
+    , 1000)
+}
+
+function radioButtonAnswerTranslate() {
+    if (!need_to_share_radio_button_answer) return;
+    const input = questionComponent.value.getIdOfActiveRadioButton()
+    console.log(input)
+    answerSocket.send(JSON.stringify({
+        "type": "radioButtonAnswer",
+        "button_id": input.toString()
+    }))
+
+    setTimeout(
+        radioButtonAnswerTranslate
     , 1000)
 }
 
@@ -383,6 +405,7 @@ gameSocket.onmessage = (event) => {
             break;
         case "on_question_close":
             need_to_share_text_answer = false
+            need_to_share_radio_button_answer = false
             current_player_index = (current_player_index + 1) % players.value.length;
             players.value.forEach((player, index) => {
               shine.value[index] = player.id === players.value[current_player_index].id;
@@ -642,16 +665,17 @@ const startTurn = () => {
       <button class="button-33" role="button" @click="leaveCall">Выйти из игры</button>
       <button class="button-33" role="button" @click="showRules">?</button>
     </div>
-    <div class="container" style=" min-height: 80vh; max-height:80%; display:flex; flex-direction:column; align-items:center; justify-content: end; position: relative;">
+    <div class="container" style=" min-height: 82vh; max-height:82%; display:flex; flex-direction:column; align-items:center; justify-content: end; position: relative;">
     <div class="column" id="messageContainer" style="-ms-overflow-style: none;
       scrollbar-width: none;
       align-items:center;
       justify-content:center;
       max-height: 50vh;
-      height: 80%;
+      height: 88%;
       width: 100%;
       padding: 0px;
       overflow-y: scroll;
+      font-size: 12px;
       display: flex; flex-direction: column;">
       <div style = "min-width: 100%">
         <div v-for="message in messages"

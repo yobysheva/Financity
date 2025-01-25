@@ -71,7 +71,6 @@ def getData(request):
                 'countGames': user.countGames,
                 'winGames': user.winGames,
             }
-            print(responseData)
             return JsonResponse(responseData)
         except User.DoesNotExist:
             return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)

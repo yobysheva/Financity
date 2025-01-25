@@ -204,7 +204,6 @@ def connectToGame(request):
             player.save()
             game = Game.objects.get(id=data["game_id"])
             game.players.add(player)
-            print(game.players.all())
             return JsonResponse({'gameId': game.id, 'playerID': player.id})
         except User.DoesNotExist:
             return JsonResponse({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -239,7 +238,6 @@ def getRandomChance(request):
                 "id" : chance.id,
                 # "text": chance.text,
             }
-            print(responseData)
             return JsonResponse(responseData)
         except Chance.DoesNotExist:
             return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -255,7 +253,6 @@ def getChance(request):
                 # "category": chance.category,
                 "text": chance.text
             }
-            print(responseData)
             return JsonResponse(responseData)
         except Chance.DoesNotExist:
             return Response({"detail": "Chance not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -276,8 +273,25 @@ def getRandomProfession(request):
                     "name": profession.name,
                     "salary": profession.salary,
                 }
-                print(responseData)
                 return JsonResponse(responseData)
             return JsonResponse({"detail": "player already has profession"})
         except Professions.DoesNotExist:
             return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+def getActiveGames(request):
+    if request.method == 'GET':
+        print(1234567890)
+        try:
+            games = [game for game in Game.objects.filter(status='newGame')]
+            responseData = [{
+                'game_id': game.id,
+                'username': game.players.first().user.username if game.players.exists() else None,
+            } for game in games]
+            return JsonResponse(responseData, safe=False)
+        except Exception as e:
+            return Response(
+                {"detail": f"An error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
