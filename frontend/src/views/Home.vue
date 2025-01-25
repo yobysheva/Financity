@@ -37,6 +37,7 @@ export default {
     this.createWaitingRequestSocket()
     this.createActiveGamesSocket()
     this.getLoggedInUser();
+    this.getActiveGames();
     // let globalContext = this;
     //
     // var listnerID = this.user.username;
@@ -94,9 +95,8 @@ export default {
       }
     },
 
-    sendMessageToActiveGamesSocket(gameId, playerId) {
+    sendMessageToActiveGamesSocket(gameId) {
       let data = {
-        "player_id": playerId,
         "game_id": gameId,
         "username": store.state.username,
       }
@@ -107,6 +107,23 @@ export default {
       )
     },
 
+    async getActiveGames() {
+      try {
+        const response = await authService.getActiveGames();
+        console.log(',smdfkmasfpdgaswkp')
+        for(let r in response.data) {
+          this.activeGame.push(response.data[r]);
+        }
+      } catch (error) {
+        if (error.response) {
+          alert("Login failed: " + error.response.data || "Unknown error");
+        } else if (error.request) {
+          alert("No response from server. Please try again later.");
+        } else {
+          alert("Error setting up request: " + error.message);
+        }
+      }
+    },
 
     createWaitingRequestSocket() {
       let username = store.state.username;
@@ -358,7 +375,7 @@ export default {
 
 <!--      <CurrentGames/>-->
 
-      <div class="container games" style="max-height: 50vh; overflow-y: scroll;">
+      <div class="container games" style="max-height: 50vh; min-height: 50vh; overflow-y: scroll;">
         <div v-for="game in this.activeGame"
              :key="game.game_id">
           <div class="row" style="justify-content: flex-start;">
@@ -461,4 +478,21 @@ h3 {
   border-color: rgba(44, 187, 99, .6);
   box-shadow: rgba(44, 187, 99, .35) 0 0 5px;
 }
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: 5px 5px 5px -5px rgba(34, 60, 80, 0.2) inset;
+  background-color: #a0c1c9;
+  border-radius: 10px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(185, 255, 185, .6), rgba(173, 255, 176, .6));
+}
+
 </style>
