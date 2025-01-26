@@ -54,7 +54,6 @@
 <script>
 import { authService } from "@/services/auth";
 import store from "../../store.js";
-// import { CometChat } from "@cometchat-pro/chat";
 
 export default {
   data() {
@@ -72,20 +71,6 @@ export default {
     },
   },
   methods: {
-    // authLoginUser() {
-    //   this.showSpinner = true;
-    //
-    //   CometChat.login(this.username, "127bc8520b38325a216041848a7bba2eaaa850e0").then(
-    //       () => {
-    //         this.showSpinner = false;
-    //         this.$router.push({ name: "home" });
-    //       },
-    //       (error) => {
-    //         this.showSpinner = false;
-    //         console.log("Login failed with error:", error.code);
-    //       }
-    //   );
-    // },
     sendUsername() {
       store.dispatch("updateUsername", this.username);
     },
@@ -107,7 +92,6 @@ export default {
         });
         if (response.status === 202) {
           this.sendUsername();
-          // this.authLoginUser();
           this.$router.push({ name: "home" });
           this.username = '';
           this.password = '';

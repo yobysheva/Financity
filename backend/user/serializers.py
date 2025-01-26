@@ -36,3 +36,15 @@ class UpdateData(serializers.ModelSerializer):
         instance.winGames = validated_data.get('winGames', instance.winGames)
         instance.save()
         return instance
+
+class UpdatePhoto(serializers.ModelSerializer):
+    indexPhoto = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'indexPhoto']
+
+    def update(self, instance, validated_data):
+        instance.indexPhoto = validated_data.get('indexPhoto', instance.indexPhoto)
+        instance.save()
+        return instance

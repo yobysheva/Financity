@@ -6,11 +6,16 @@ const store = createStore({
             username: '',
             gameID: '',
             playerID: '',
+            photo: 0,
         }
     },
     mutations: {
         setUsername(state, username) {
             state.username = username
+        },
+
+        setPhoto(state, photo) {
+            state.photo = photo
         },
 
         setDefault(state) {
@@ -30,6 +35,10 @@ const store = createStore({
     actions: {
         updateUsername({ commit }, username) {
             commit('setUsername', username);
+        },
+
+        updatePhoto({ commit }, photo) {
+            commit('setPhoto', photo);
         },
 
         logout({commit}) {

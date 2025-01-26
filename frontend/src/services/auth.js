@@ -3,6 +3,9 @@ import axios from 'axios';
 const apiUrl = 'http://localhost:8000/api/';
 
 export const authService = {
+    updateGameStatus(gameData) {
+        return axios.put(`${apiUrl}gameApp/updateGameStatus/`, gameData)
+    },
     register(userData) {
         return axios.post(`${apiUrl}user/register/`, userData);
     },
@@ -26,6 +29,9 @@ export const authService = {
     },
     updateData(userData) {
         return axios.put(`${apiUrl}user/updateData/`, userData);
+    },
+    updatePhoto(userData){
+        return axios.put(`${apiUrl}user/updatePhoto/`, userData);
     },
     getUsersStats(username){
         return axios.get(`${apiUrl}user/getStats/`, {params : {username : username}});
