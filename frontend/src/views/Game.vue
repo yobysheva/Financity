@@ -75,8 +75,6 @@ authService.getInfoAboutGame(
               top: `${positions[0][1]}%`,
               transition: "all 0.3s ease"
             });
-            lastXmassive.value.push(0);
-            lastYmassive.value.push(0);
             currentIndexMassive.value.push(0);
             totalSumMassive.value.push(0);
             shine.value.push(false)
@@ -127,13 +125,10 @@ const result = ref("");
 const diceStyle = ref({});
 // const totalSum = ref(0);
 let totalSumMassive = ref([0]);
-const currentIndex = ref(0);
 let currentIndexMassive = ref([0]);
 const lastRoll = ref(null);
-const lastX = ref(0);
-let lastXmassive = ref([0]);
-let lastYmassive = ref([0]);
-const lastY = ref(0);
+let lastX = ref(0);
+let lastY = ref(0);
 
 
 const isSpinDisabled = ref(false);
@@ -217,6 +212,7 @@ async function checkPositionAndShowModal (currentCoords){
     setTimeout(textAnswerTranslate, 1000)
     setTimeout(radioButtonAnswerTranslate, 1000)
   }
+  // isSpinDisabled.value = false;
 }
 
 
@@ -255,17 +251,16 @@ const moveDot = (targetIndex) => {
       console.log('third')
       steps.push(i);
     }
+    console.log(steps)
   }
 
   let stepIndex = 0;
   const moveNext = () => {
     if (stepIndex < steps.length) {
+      console.log('immoving', stepIndex, steps.length)
       const [leftPercent, topPercent] = positions[steps[stepIndex]];
-      // dotStyle.value.left = `${leftPercent}%`;
       dotStyleMassive.value[current_player_index].left = `${leftPercent}%`;
-      // dotStyle.value.top = `${topPercent}%`;
       dotStyleMassive.value[current_player_index].top = `${topPercent}%`;
-      currentIndex.value = steps[stepIndex];
       currentIndexMassive.value[current_player_index] = steps[stepIndex];
       stepIndex++;
 
@@ -364,7 +359,6 @@ gameSocket.onmessage = (event) => {
     isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
     switch (type) {
         case "on_turn_start":
-
           // eslint-disable-next-line no-case-declarations
             const turn_count = info["turn_count"];
             // totalSum.value += turn_count;
@@ -393,6 +387,7 @@ gameSocket.onmessage = (event) => {
             });
             isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
             modalVisible.value = false;
+            isSpinDisabled.value = false;
             break;
         case "notification_about_connect_to_game":
             if (Number(info['id']) === store.state.playerID) break;
@@ -406,8 +401,6 @@ gameSocket.onmessage = (event) => {
               top: `${positions[0][1]}%`,
               transition: "all 0.3s ease"
             });
-            lastXmassive.value.push(0);
-            lastYmassive.value.push(0);
             currentIndexMassive.value.push(0);
             totalSumMassive.value.push(0);
             break;
@@ -467,11 +460,15 @@ function leaveCall() {
 }
 
 function spin(rnd) {
+  isSpinDisabled.value = true;
   let x, y;
 
+  console.log(players.value[current_player_index].id);
+  console.log(rnd);
+
   if (lastRoll.value === rnd) {
-    x = lastXmassive.value[current_player_index] + 360;
-    y = lastYmassive.value[current_player_index] + 360;
+    x = lastX.value + 360;
+    y = lastY.value + 360;
   } else {
     switch (rnd) {
       case 1:
@@ -494,8 +491,6 @@ function spin(rnd) {
   };
 
   lastX.value = x;
-  lastXmassive.value[current_player_index] = x;
-  lastYmassive.value[current_player_index] = y;
   lastY.value = y;
   lastRoll.value = rnd;
 
@@ -513,9 +508,9 @@ function spin(rnd) {
 
 const manualSpin = () => {
   clearTimeout(spinTimer);
-   spinButtonLabel.value = "Крутить ХАХАХАХАХ"
+   // spinButtonLabel.value = "Крутить ХАХАХАХАХ"
   if (players.value[current_player_index].id === store.state.playerID)
-  generateAndSpin();
+    generateAndSpin();
 };
 
 function isMyMessage(message) {
@@ -635,7 +630,7 @@ function isMyMessage(message) {
 <!--    <button v-if="isMyTurn" class="button-33" @click="startTurn">Сделать ход</button>-->
     <button
       class="button-33"
-      :disabled="!isMyTurn"
+      :disabled="!isMyTurn || isSpinDisabled"
       @click="manualSpin">
       {{ spinButtonLabel }}
     </button>

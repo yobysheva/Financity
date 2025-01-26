@@ -1,6 +1,6 @@
 <script setup>
 import {defineProps, defineEmits, onMounted, onUnmounted, defineExpose, computed} from 'vue';
-import store from "@/store";
+// import store from "@/store";
 import {ref} from 'vue';
 import {authService} from "@/services/auth";
 
@@ -104,9 +104,7 @@ function getTextInTextArea() {
 
 function getIdOfActiveRadioButton() {
     let rates = document.getElementsByName('answer');
-    console.log(rates)
     for(let i = 0; i < rates.length; i++){
-        console.log(rates[i].checked)
         if(rates[i].checked){
             return i
         }
@@ -124,25 +122,16 @@ function setActiveRadioButtonForId(id) {
 
 async function getQuestion(id, type) {
   try {
-    console.log(store.state.username);
     if(type === 3){
-      console.log(1);
       const response = await authService.getChance(id);
-      console.log("3. ", response);
-      console.log(props);
       question.value.text = response.data['text'];
       return;
     }
-    console.log(2);
     const response = await authService.getQuestion(id);
-    console.log("3. ", response);
-    console.log(props);
     question.value.text = response.data['text'];
     // question.value.type = response.data['type'];
     if(type === 2){
-      console.log(3);
       const response1 = await authService.getAnswers(id);
-      console.log("3. ", response1);
       answers.value = [];
       for(const answer of response1.data){
         answers.value.push(answer);
