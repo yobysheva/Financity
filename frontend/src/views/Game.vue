@@ -160,6 +160,7 @@ const spinButtonLabel = ref("Крутить");
 let spinTimer = null;
 
 const modalVisible = ref(false);
+// const answerTextVisible = ref(false);
 
 
 const modalTitle = ref("");
@@ -177,7 +178,7 @@ async function checkPositionAndShowModal (currentCoords){
   const entertainmentCoords = [[56.7, 8], [67.7, 8], [79, 8], [88.3, 22], [88.3, 35.5]];
   const realEstateCoords = [[88.3, 56], [88.3, 69], [78.7, 83], [67.7, 83], [56.7, 83]];
   const allCasesCoords = [[37.3, 84], [26.3, 84], [15.3, 84], [5.3, 70], [5.3, 56]];
-  const ChanceCoords = [[47, 9], [89, 8], [5.3, 8], [88.3, 83], [47.3, 83], [4.3, 86]];
+  const ChanceCoords = [[47, 9], [89, 8], [5.3, 8], [88.3, 83], [47.3, 84], [4.3, 86]];
   let category = null;
   if (stateCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
     category = 1;
@@ -399,6 +400,7 @@ gameSocket.onmessage = async (event) => {
         case "on_question_close":
             need_to_share_text_answer = false
             need_to_share_radio_button_answer = false
+            players.value[info["player_index"]].balance = info["balance"];
             current_player_index = (current_player_index + 1) % players.value.length;
             players.value.forEach((player, index) => {
               shine.value[index] = player.id === players.value[current_player_index].id;
@@ -414,9 +416,9 @@ gameSocket.onmessage = async (event) => {
               }
               else{
                 scip = false;
+                isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
               }
             }
-
 
             isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
             modalVisible.value = false;
@@ -445,8 +447,9 @@ function sendCloseQuestion() {
     const info = {
         "type": "on_question_close",
         "info": {
-            "player_index": (current_player_index + 1) % players.value.length,
-            "result": false
+            "player_index": current_player_index,
+            "result": false,
+            "balance": players.value[current_player_index].balance
         }
     }
     gameSocket.send(JSON.stringify(
@@ -551,6 +554,15 @@ function isMyMessage(message) {
   return message.username === store.state.username;
 }
 
+
+const handleUpdateBalance = (newBalance, player_id) => {
+  players.value.forEach((element) => {
+    if (element.id === player_id) {
+      element.balance = newBalance;
+    }
+  });
+};
+
 // const startTurn = () => {
 //   isSpinDisabled.value = false;
 //   spinButtonLabel.value = "Крутить (3 сек)";
@@ -575,14 +587,6 @@ function isMyMessage(message) {
 
 <template>
 <!--  <QuizQuestion/>-->
-  <button
-      class="button-33"
-      :hidden="isGameStarted"
-      :disabled="!isMyTurn"
-      @click="sendStartGame">
-
-      {{ spinButtonLabel }}
-    </button>
   <Rules v-if="rulesVisible" @close="showRules"/>
 <!--  <Question v-if="questionActive"/>-->
 <div class="outer-container">
@@ -598,12 +602,15 @@ function isMyMessage(message) {
               :av="images[index]"
               :shine="shine[index]"
       />
-<!--      <Player :jobName= job2Name  :jobPayment=job2Payment :av="av2Src"/>-->
-<!--      <Player :jobName= job3Name  :jobPayment=job3Payment :av="av3Src"/>-->
-<!--      <Player :jobName= job4Name  :jobPayment=job4Payment :av="av4Src"/>-->
-<!--      <Player :jobName= job5Name  :jobPayment=job5Payment :av="av5Src"/>-->
     </div>
     <div class="column" style="height: 100%; width: 60%; margin-left: 2%; padding: 5px;">
+      <button
+      class="button-33"
+      :hidden="isGameStarted"
+      :disabled="!isMyTurn"
+      @click="sendStartGame">
+      Начать игру
+    </button>
       <div class="container" style="width: 100%; height: 100%; position: relative">
         <img class="image" src="../assets/financity_pole.png" style="width: 100%; height: 100%">
 <!--        <Fields/>-->
@@ -676,9 +683,8 @@ function isMyMessage(message) {
       @click="manualSpin">
       {{ spinButtonLabel }}
     </button>
-      <Question ref="questionComponent" :questionId="modalQuestionId" :questionType="modalQuestionType" :caseTitle="modalTitle" :visible="modalVisible" :color="modalColor" :isMyTurn="isMyTurn" @close="closeModal" />
-<!--      <Chance ref="chanceComponent" :chanceText=modalChance :chanceId="modalQuestionId" :visible="modalChanceVisible" @close="closeModal" />-->
-    </div>
+      <Question ref="questionComponent" @update-balance="handleUpdateBalance" :questionId="modalQuestionId" :questionType="modalQuestionType" :caseTitle="modalTitle" :visible="modalVisible" :color="modalColor" :isMyTurn="isMyTurn" @close="closeModal" :answerTextVisible="false"/>
+  </div>
   <div class="column" style="width: 22%; min-height: 95vh; height: 95%; margin-left: 2%;">
     <div class="row buttons">
       <button class="button-33" role="button" @click="leaveCall">Выйти из игры</button>

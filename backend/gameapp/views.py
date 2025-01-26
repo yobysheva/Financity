@@ -57,12 +57,21 @@ def changePlayer(request):
 def addActionAnswer(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode())
+        player_id = data.get('player_id')
+        answer_id = data.get('answer_id')
+        if not player_id or not answer_id:
+            return Response(
+                {"detail": "player_id and answer_id are required", "text": "Действие будет иметь последствия"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         try:
-            player = Player.objects.get(id=data['player_id'])
-            answer = Answer.objects.get(id=data['answer_id'])
-            player.balance -= answer.sum_now
+            player = Player.objects.get(id=player_id)
+            answer = Answer.objects.get(id=answer_id)
+            player.balance += answer.sum_now
+            player.save()
             if answer.sum_later or answer.scip:
                 action = Action.objects.create(player=player, sum=answer.sum_later, period=answer.period, scip = answer.scip)
+            return JsonResponse({'text': answer.action_text, 'balance': player.balance})
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

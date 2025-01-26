@@ -1,13 +1,15 @@
 <script setup>
 import {defineProps, defineEmits, onMounted, onUnmounted, defineExpose, computed} from 'vue';
-// import store from "@/store";
 import {ref} from 'vue';
 import {authService} from "@/services/auth";
+import store from "@/store";
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'update-balance']);
+const answerText = ref("Ваше действие будет иметь последствия");
 
 const close = () => {
   emit('close');
+  answerTextVisible.value = false;
 };
 
 const handleKeyDown = (event) => {
@@ -33,6 +35,8 @@ const props = defineProps({
   color: String,
   isMyTurn: Boolean
 });
+
+let answerTextVisible = ref(false);
 
 const modalStyles = computed(() => ({
   top: "35%",
@@ -113,6 +117,20 @@ function getIdOfActiveRadioButton() {
     return -1
 }
 
+async function addAnswer() {
+  let rates = document.getElementsByName('answer');
+  for (let ans of rates) {
+    if (ans.checked) {
+      let answerId = ans.value;
+      let response = await authService.addActionAnswer(store.state.playerID, answerId);
+      answerText.value = response.data['text'];
+      answerTextVisible.value = true;
+      let newBalance = response.data['balance'];
+      emit('update-balance', newBalance, store.state.playerID);
+    }
+  }
+}
+
 function setActiveRadioButtonForId(id) {
     let rates = document.getElementsByName('answer');
         for(let i = 0; i < rates.length; i++){
@@ -153,10 +171,10 @@ defineExpose({
 </script>
 
 <template>
-  <div v-if="visible" class="modal" :style="modalStyles">
+  <div v-if="visible && !answerTextVisible" class="modal" :style="modalStyles">
     <div class="container modal-container" :style="containerStyles">
       <div class="column" :style="contentStyles">
-        <h3 style="margin-bottom: 16px;">{{ caseTitle }}</h3>
+        <h1 style="margin-bottom: 16px;">{{ caseTitle }}</h1>
         <h3 style="margin-bottom: 16px;">{{ question.text }}</h3>
         <textarea
           v-if="questionType === 1"
@@ -177,8 +195,15 @@ defineExpose({
             </label>
           </div>
         </div>
-
-      <button v-if="questionType !== 1 && isMyTurn"
+        <button v-if="questionType === 2 && isMyTurn"
+        class="button-33"
+        role="button"
+        style="margin-bottom: 16px;"
+        @click="addAnswer"
+      >
+        Ответить
+      </button>
+      <button v-if="questionType === 3 && isMyTurn"
         class="button-33"
         role="button"
         style="margin-bottom: 16px;"
@@ -204,7 +229,23 @@ defineExpose({
         -
       </button>
         </div>
-
+      </div>
+    </div>
+  </div>
+  <div v-if="visible && answerTextVisible" class="modal" :style="modalStyles">
+    <div class="container modal-container" :style="containerStyles">
+      <div class="column" style="justify-content: center; align-items: center; padding: 5%;" :style="contentStyles">
+        <div v-if="questionType === 2">
+          <h1>{{ answerText }}</h1>
+        </div>
+        <button v-if="isMyTurn"
+        class="button-33"
+        role="button"
+        style="margin-bottom: 16px;"
+        @click="close"
+      >
+        Закрыть
+      </button>
       </div>
     </div>
   </div>
