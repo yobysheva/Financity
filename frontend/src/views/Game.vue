@@ -284,6 +284,14 @@ function checkPlayerLeave(id) {
     return -1
 }
 
+function setVotingTimer() {
+    gameSocket.send(
+      JSON.stringify({
+        'type': 'start_voting',
+      })
+  )
+}
+
 function getWinner() {
     let winner = 0
     let min = -1
@@ -549,6 +557,8 @@ gameSocket.onmessage = async (event) => {
             }
             console.log(players.value)
             break;
+        case "start_voting":
+            questionComponent.value.setVotingTimer()
     }
 };
 
@@ -703,13 +713,8 @@ const handleUpdateBalance = (newBalance, player_id) => {
 </script>
 
 <template>
-<!--  <QuizQuestion/>-->
   <Rules v-if="rulesVisible" @close="showRules"/>
-<!--  <Question v-if="questionActive"/>-->
-<div v-if="!isGameEnded" class="modal" style="width: 100%; height: 100%">
-  {{winner.id}}
-  {{winner.balance}}
-</div>
+
 <div class="outer-container">
 <div class="transparent-container game-page" style="min-height: 98%; max-height: 98%; min-width: 100%; max-width: 100%; width: 100%;">
   <div class="row" style="height: 100%; width: 100%;">
@@ -804,7 +809,7 @@ const handleUpdateBalance = (newBalance, player_id) => {
       @click="manualSpin">
       {{ spinButtonLabel }}
     </button>
-      <Question ref="questionComponent" @update-balance="handleUpdateBalance" :questionId="modalQuestionId" :questionType="modalQuestionType" :caseTitle="modalTitle" :visible="modalVisible" :color="modalColor" :isMyTurn="isMyTurn" @close="closeModal" @minus="sendMinus" @plus="sendPlus" :answerTextVisible="false"/>
+      <Question ref="questionComponent" @update-balance="handleUpdateBalance" :questionId="modalQuestionId" :questionType="modalQuestionType" :caseTitle="modalTitle" :visible="modalVisible" :color="modalColor" :isMyTurn="isMyTurn" @setVotingTimer="setVotingTimer" @close="closeModal" @minus="sendMinus" @plus="sendPlus" :answerTextVisible="false"/>
     </div>
   <div class="column" style="width: 22%; min-height: 95vh; height: 95%; margin-left: 2%;">
     <div class="row buttons">
