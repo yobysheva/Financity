@@ -4,7 +4,7 @@ import {ref} from 'vue';
 import {authService} from "@/services/auth";
 import store from "@/store";
 
-const emit = defineEmits(['close', 'update-balance', 'plus', 'minus']);
+const emit = defineEmits(['close', 'update-balance', 'plus', 'minus', 'setVotingTimer']);
 const answerText = ref("Ваше действие будет иметь последствия");
 
 const close = () => {
@@ -175,6 +175,18 @@ function setTimerThenClose() {
     }
 }
 
+function setVotingTimer() {
+    stopAnswering.value = true
+    if (timeBeforeClose.value > 0) {
+        console.log(`${timeBeforeClose.value--} осталось`)
+        setTimeout(setTimerThenClose, 1000)
+    }
+    else {
+        stopAnswering.value = false
+        timeBeforeClose.value = 10
+    }
+}
+
 async function addAnswer() {
   let rates = document.getElementsByName('answer');
   for (let ans of rates) {
@@ -228,7 +240,8 @@ defineExpose({
     get_votes,
     get_stop_answering,
     set_stop_answering,
-    update_variables
+    update_variables,
+    setVotingTimer
 });
 </script>
 
@@ -298,7 +311,7 @@ defineExpose({
         role="button"
         :hidden="stopAnswering"
         style="margin-bottom: 16px;"
-        @click="setTimerThenClose"
+        @click="setTimerThenClose; $emit('setVotingTimer')"
       >
         Ответить
       </button>

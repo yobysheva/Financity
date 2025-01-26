@@ -255,6 +255,7 @@ async function openModalWithValues (title, questionId, questionType) {
 }
 
 async function endGame () {
+    console.log("я кончил")
     await authService.updateGameStatus({
         "game_id": store.state.gameID,
         "status": "finished"
@@ -262,7 +263,9 @@ async function endGame () {
 
     winner.value = getWinner()
     isGameEnded.value = true
-    modalVisible.value = true
+    await authService.addWinToGameWinner({
+        "player_id": winner.value.id
+    })
     console.log(winner.value)
 }
 
@@ -287,6 +290,14 @@ function checkPlayerLeave(id) {
         }
     }
     return -1
+}
+
+function setVotingTimer() {
+    gameSocket.send(
+      JSON.stringify({
+        'type': 'start_voting',
+      })
+  )
 }
 
 function getWinner() {
@@ -544,7 +555,7 @@ gameSocket.onmessage = async (event) => {
             startGame()
             break
 
-        case "player_living":
+        case "player_leaving":
             // eslint-disable-next-line no-case-declarations
             let index = checkPlayerLeave(Number(info['player_id']))
             console.log(index, Number(info['player_id']))
@@ -552,8 +563,13 @@ gameSocket.onmessage = async (event) => {
               console.log('DELETE')
               players.value.splice(index, 1)
             }
-            console.log(players.value)
+             if (checkToEnd()) {
+                await endGame()
+                return
+            }
             break;
+        case "start_voting":
+            questionComponent.value.setVotingTimer()
     }
 };
 
@@ -610,7 +626,7 @@ const generateAndSpin = () => {
 
 function leaveCall() {
   const info = {
-      "type": "player_living",
+      "type": "player_leaving",
       "info": {
           "player_id": store.state.playerID
       }
@@ -708,11 +724,10 @@ const handleUpdateBalance = (newBalance, player_id) => {
 </script>
 
 <template>
-<!--  <QuizQuestion/>-->
   <Rules v-if="rulesVisible" @close="showRules"/>
 <div v-if="isGameEnded" class="modal" style="width: 50%; height: 50%">
   <div class="container" style="width: 100%; height: 100%;">
-  <h1>Победитель: игрок {{winner.id}}</h1>
+  <h1 style="margin-top: 30px;">Победитель: игрок {{winner.name}}</h1>
   <h3>Победитель накопил наибольший капитал размером {{winner.balance}}₽</h3>
   <button class="button-33" style="margin-bottom: 30px;" @click="redirectToHome">Вернуться в меню</button>
   </div>
@@ -812,7 +827,7 @@ const handleUpdateBalance = (newBalance, player_id) => {
       @click="manualSpin">
       {{ spinButtonLabel }}
     </button>
-      <Question ref="questionComponent" @update-balance="handleUpdateBalance" :questionId="modalQuestionId" :questionType="modalQuestionType" :caseTitle="modalTitle" :visible="modalVisible" :color="modalColor" :isMyTurn="isMyTurn" @close="closeModal" @minus="sendMinus" @plus="sendPlus" :answerTextVisible="false"/>
+      <Question ref="questionComponent" @update-balance="handleUpdateBalance" :questionId="modalQuestionId" :questionType="modalQuestionType" :caseTitle="modalTitle" :visible="modalVisible" :color="modalColor" :isMyTurn="isMyTurn" @setVotingTimer="setVotingTimer" @close="closeModal" @minus="sendMinus" @plus="sendPlus" :answerTextVisible="false"/>
     </div>
   <div class="column" style="width: 22%; min-height: 95vh; height: 95%; margin-left: 2%;">
     <div class="row buttons">

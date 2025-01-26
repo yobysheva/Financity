@@ -15,6 +15,8 @@ def createGame(request):
         data = json.loads(request.body.decode())
         try:
             user = User.objects.get(username=data['username'])
+            user.countGames += 1
+            user.save()
             player = Player.objects.create(user=user)
             profession = Professions.objects.order_by('?').first()
             player.profession = profession
@@ -34,6 +36,8 @@ def createPlayer(request):
         try:
             user = User.objects.get(username=data['username'])
             player = Player.objects.create(user=user)
+            user.countGames += 1
+            user.save()
             game = Game.objects.get(id=data['id'])
             game.players.add(player)
             return JsonResponse({'gameId': game.id, 'playerID': player.id})
@@ -221,6 +225,8 @@ def connectToGame(request):
         data = json.loads(request.body.decode())
         try:
             user = User.objects.get(username=data['username'])
+            user.countGames += 1
+            user.save()
             player = Player.objects.create(user=user)
             profession = Professions.objects.order_by('?').first()
             player.profession = profession
@@ -354,6 +360,22 @@ def voteHandler(request):
             return JsonResponse({'status': 200, 'balance': player.balance}, status=status.HTTP_200_OK)
         except Exception as e:
             print(f"Error in voteHandler: {str(e)}")
+            return Response(
+                {"detail": f"An error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+@api_view(['PUT'])
+def addWinToGameWinner(request):
+    if request.method == 'PUT':
+        data = json.loads(request.body.decode())
+        try:
+            player = Player.objects.get(id=data['player_id'])
+            user = User.objects.get(player=player)
+            user.winGames += 1
+            user.save()
+            return JsonResponse({'status': 200, 'count_games': user.countGames, "win_games": user.winGames}, status=status.HTTP_200_OK)
+        except Exception as e:
             return Response(
                 {"detail": f"An error occurred: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
