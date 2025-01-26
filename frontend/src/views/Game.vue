@@ -57,6 +57,7 @@ let isGameEnded = ref(false)
 let need_to_share_text_answer = false
 let need_to_share_radio_button_answer = false
 let isMyTurn = ref(false)
+let winner = ref(false)
 
 // async function getProfession(){
 //   await authService.getRandomProfession(store.state.playerID);
@@ -258,7 +259,10 @@ async function endGame () {
         "game_id": store.state.gameID,
         "status": "finished"
     })
+
+    winner.value = getWinner()
     isGameEnded.value = true
+    console.log(winner.value)
 }
 
 function checkToEnd() {
@@ -278,6 +282,18 @@ function checkPlayerLeave(id) {
         }
     }
     return -1
+}
+
+function getWinner() {
+    let winner = 0
+    let min = -1
+    for (let i = 0; i < players.value.length; ++i) {
+        if (players.value[i].balance >= min) {
+            min = players.value[i].balance
+            winner = i
+        }
+    }
+    return players.value[winner]
 }
 
 const closeModal = () => {
@@ -687,6 +703,10 @@ const handleUpdateBalance = (newBalance, player_id) => {
 <!--  <QuizQuestion/>-->
   <Rules v-if="rulesVisible" @close="showRules"/>
 <!--  <Question v-if="questionActive"/>-->
+<div v-if="!isGameEnded" class="modal" style="width: 100%; height: 100%">
+  {{winner.id}}
+  {{winner.balance}}
+</div>
 <div class="outer-container">
   <button
       class="button-33"
