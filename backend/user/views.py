@@ -102,7 +102,7 @@ def getStats(request):
             user_position = list(users).index(user) + 1
             top_users = users[:10]
             user_data = [
-                {"index": i + 1, "username": u.username, "winGames": u.winGames, "countGames": u.countGames}
+                {"index": i + 1, "username": u.username, "winGames": u.winGames, "countGames": u.countGames, 'indexPhoto': u.indexPhoto}
                 for i, u in enumerate(top_users)
             ]
             if user_position > 10:
