@@ -51,6 +51,7 @@ let current_player_index = 0
 let shine = ref([])
 let need_to_share_text_answer = false
 let need_to_share_radio_button_answer = false
+let isMyTurn = ref(false)
 
 // async function getProfession(){
 //   await authService.getRandomProfession(store.state.playerID);
@@ -133,35 +134,14 @@ const lastX = ref(0);
 let lastXmassive = ref([0]);
 let lastYmassive = ref([0]);
 const lastY = ref(0);
-const isSpinDisabled = ref(true);
+
+
+const isSpinDisabled = ref(false);
 const spinButtonLabel = ref("Крутить");
 let spinTimer = null;
 
-
-// const chances = ["chance1", "chance2", "chanse3"]
 const modalVisible = ref(false);
-// const modalChance = ref("");
-// const modalChanceVisible = ref(false);
 
-// const jobs = [["медсестра", 30000], ["архитектор", 90000], ["веб-разработчик", 190000], ["адвокат", 90000] ]
-// const job1 = jobs[Math.floor(Math.random() * jobs.length)];
-// const job1Name = job1[0]
-// const job1Payment= job1[1]
-// const job2 = jobs[Math.floor(Math.random() * jobs.length)];
-// const job2Name = job2[0]
-// const job2Payment= job2[1]
-// const job3 = jobs[Math.floor(Math.random() * jobs.length)];
-// const job3Name = job3[0]
-// const job3Payment= job3[1]
-// const job4 = jobs[Math.floor(Math.random() * jobs.length)];
-// const job4Name = job4[0]
-// const job4Payment= job4[1]
-// const job5 = jobs[Math.floor(Math.random() * jobs.length)];
-// const job5Name = job5[0]
-// const job5Payment= job5[1]
-// const job6 = jobs[Math.floor(Math.random() * jobs.length)];
-// const job6Name = job6[0]
-// const job6Payment= job6[1]
 
 const modalTitle = ref("");
 // const modalQuestion = ref("");
@@ -381,6 +361,7 @@ gameSocket.onmessage = (event) => {
     players.value.forEach((player, index) => {
             shine.value[index] = player.id === players.value[current_player_index].id;
           });
+    isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
     switch (type) {
         case "on_turn_start":
 
@@ -410,6 +391,7 @@ gameSocket.onmessage = (event) => {
             players.value.forEach((player, index) => {
               shine.value[index] = player.id === players.value[current_player_index].id;
             });
+            isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
             modalVisible.value = false;
             break;
         case "notification_about_connect_to_game":
@@ -540,23 +522,23 @@ function isMyMessage(message) {
   return message.username === store.state.username;
 }
 
-const startTurn = () => {
-  isSpinDisabled.value = false;
-  spinButtonLabel.value = "Крутить (3 сек)";
-  let countdown = 3;
-
-  const updateLabel = () => {
-    if (countdown > 0) {
-      spinButtonLabel.value = `Крутить (${countdown--} сек)`;
-      spinTimer = setTimeout(updateLabel, 1000);
-    } else {
-      if (players.value[current_player_index].id === store.state.playerID)
-      generateAndSpin();
-    }
-  };
-
-  updateLabel();
-};
+// const startTurn = () => {
+//   isSpinDisabled.value = false;
+//   spinButtonLabel.value = "Крутить (3 сек)";
+//   let countdown = 3;
+//
+//   const updateLabel = () => {
+//     if (countdown > 0) {
+//       spinButtonLabel.value = `Крутить (${countdown--} сек)`;
+//       spinTimer = setTimeout(updateLabel, 1000);
+//     } else {
+//       if (players.value[current_player_index].id === store.state.playerID)
+//       generateAndSpin();
+//     }
+//   };
+//
+//   updateLabel();
+// };
 
 
 // getLoggedInUser();
@@ -567,9 +549,9 @@ const startTurn = () => {
   <Rules v-if="rulesVisible" @close="showRules"/>
 <!--  <Question v-if="questionActive"/>-->
 <div class="outer-container">
-<div class="transparent-container game-page" style="min-height: 98%; max-height: 98%; min-width: 96%; max-width: 96%;">
+<div class="transparent-container game-page" style="min-height: 98%; max-height: 98%; min-width: 100%; max-width: 100%; width: 100%;">
   <div class="row" style="height: 100%; width: 100%;">
-    <div class="column" style="height: 85%; width: 15%;">
+    <div class="column" style="height: 85%; width: 13%; padding: 5px;">
       <Player v-for="(player, index) in players"
              :key="index"
               :name = player.name
@@ -584,7 +566,7 @@ const startTurn = () => {
 <!--      <Player :jobName= job4Name  :jobPayment=job4Payment :av="av4Src"/>-->
 <!--      <Player :jobName= job5Name  :jobPayment=job5Payment :av="av5Src"/>-->
     </div>
-    <div class="column" style="height: 100%; width: 60%; margin-left: 2%;">
+    <div class="column" style="height: 100%; width: 60%; margin-left: 2%; padding: 5px;">
       <div class="container" style="width: 100%; height: 100%; position: relative">
         <img class="image" src="../assets/financity_pole.png" style="width: 100%; height: 100%">
 <!--        <Fields/>-->
@@ -650,34 +632,41 @@ const startTurn = () => {
     </div>
 </div>
     </div>
-    <button class="button-33" @click="startTurn">Сделать ход</button>
+<!--    <button v-if="isMyTurn" class="button-33" @click="startTurn">Сделать ход</button>-->
     <button
       class="button-33"
-      :disabled="isSpinDisabled"
+      :disabled="!isMyTurn"
       @click="manualSpin">
       {{ spinButtonLabel }}
     </button>
       <Question ref="questionComponent" :questionId="modalQuestionId" :questionType="modalQuestionType" :caseTitle="modalTitle" :visible="modalVisible" :color="modalColor" @close="closeModal" />
 <!--      <Chance ref="chanceComponent" :chanceText=modalChance :chanceId="modalQuestionId" :visible="modalChanceVisible" @close="closeModal" />-->
     </div>
-  <div class="column" style="width: 20%; min-height: 95vh; height: 95%; margin-left: 2%;">
+  <div class="column" style="width: 22%; min-height: 95vh; height: 95%; margin-left: 2%;">
     <div class="row buttons">
       <button class="button-33" role="button" @click="leaveCall">Выйти из игры</button>
       <button class="button-33" role="button" @click="showRules">?</button>
     </div>
-    <div class="container" style=" min-height: 82vh; max-height:82%; display:flex; flex-direction:column; align-items:center; justify-content: end; position: relative;">
-    <div class="column" id="messageContainer" style="-ms-overflow-style: none;
+    <div class="container" style="padding: 5px; min-height: 82vh; max-height:82%; display:flex; flex-direction:column; align-items:center; justify-content: end; position: relative;">
+    <div class="column message-container" id="messageContainer" style="
+    -ms-overflow-style: none;
       scrollbar-width: none;
       align-items:center;
       justify-content:center;
-      max-height: 50vh;
+      max-height: 58vh;
       height: 88%;
       width: 100%;
       padding: 0px;
       overflow-y: scroll;
       font-size: 12px;
-      display: flex; flex-direction: column;">
-      <div style = "min-width: 100%">
+      display: flex;
+      flex-direction: column;
+      "
+    :style="{
+      'mask-image': 'linear-gradient(to top, black 0%, black 20%, black 80%, transparent 100%)',
+      '-webkit-mask-image': 'linear-gradient(to top, black 0%, black 20%, black 80%, transparent 100%)'
+    }">
+      <div style = "min-width: 90%">
         <div v-for="message in messages"
              :key="message.id"
              :class="{'my-message': isMyMessage(message), 'other-message': !isMyMessage(message)}"
@@ -686,8 +675,8 @@ const startTurn = () => {
         </div>
       </div>
     </div>
-    <input class="input-custom" id="123" v-model="newMessage" style="width: 80%;" @keydown.enter="sendMessage">
-    <button class="button-33" role="button" @click="sendMessage" style="width: 80%;">
+    <input class="input-custom" id="123" v-model="newMessage" style="width: 90%;" @keydown.enter="sendMessage">
+    <button class="button-33" role="button" @click="sendMessage" style="width: 90%; margin-bottom: 15px;">
       send message
     </button>
 </div>
@@ -695,7 +684,6 @@ const startTurn = () => {
   </div>
 </div>
 </div>
-  <div id="callScreen" style="position: absolute; width: 0px; height: 0px;"></div>
 </template>
 
 <style scoped>
@@ -715,7 +703,7 @@ const startTurn = () => {
 }
 
 .column {
-  padding: 20px;
+  padding: 15px;
 }
 
 .row {
@@ -887,6 +875,28 @@ const startTurn = () => {
   border-radius: 10px;
   max-width: 100%;
   min-width: 100%;
+  transition: opacity 0.3s ease;
+}
+
+.message-container {
+  position: relative;
+  overflow-y: scroll;
+}
+
+/* Для более плавного эффекта можно добавить псевдоэлемент */
+.message-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 33%;
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,1) 0%,
+    rgba(255,255,255,0) 100%
+  );
+  pointer-events: none;
 }
 
 .my-message {
@@ -904,4 +914,6 @@ const startTurn = () => {
   margin-right: auto;
   margin-bottom: 10px;
 }
+
+
 </style>

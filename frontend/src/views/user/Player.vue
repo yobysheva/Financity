@@ -35,7 +35,7 @@ defineProps({
   border-radius: 30px;
   box-shadow: rgba(44, 187, 99, .1) 0 2px 4px, rgba(44, 187, 99, .05) 0 1px 2px;
   color: #333;
-  padding: 5px;
+  padding: 1px;
   /*margin: 20px;*/
   font-size: 8px;
   border: 2px solid rgba(44, 187, 99, .3);
@@ -44,7 +44,7 @@ defineProps({
   justify-content: center;
   width: 100%;
   height: 10%;
-  margin: 10px;
+  margin: 5px;
 }
 
 .active{
