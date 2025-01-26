@@ -634,7 +634,7 @@ function isMyMessage(message) {
       @click="manualSpin">
       {{ spinButtonLabel }}
     </button>
-      <Question ref="questionComponent" :questionId="modalQuestionId" :questionType="modalQuestionType" :caseTitle="modalTitle" :visible="modalVisible" :color="modalColor" @close="closeModal" />
+      <Question ref="questionComponent" :questionId="modalQuestionId" :questionType="modalQuestionType" :caseTitle="modalTitle" :visible="modalVisible" :color="modalColor" :isMyTurn="isMyTurn" @close="closeModal" />
 <!--      <Chance ref="chanceComponent" :chanceText=modalChance :chanceId="modalQuestionId" :visible="modalChanceVisible" @close="closeModal" />-->
     </div>
   <div class="column" style="width: 22%; min-height: 95vh; height: 95%; margin-left: 2%;">
