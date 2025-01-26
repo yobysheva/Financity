@@ -636,6 +636,14 @@ const handleUpdateBalance = (newBalance, player_id) => {
   <Rules v-if="rulesVisible" @close="showRules"/>
 <!--  <Question v-if="questionActive"/>-->
 <div class="outer-container">
+  <button
+      class="button-33"
+      :hidden="isGameStarted"
+      :disabled="!isMyTurn"
+      @click="sendStartGame">
+      Начать игру
+    </button>
+
 <div class="transparent-container game-page" style="min-height: 98%; max-height: 98%; min-width: 100%; max-width: 100%; width: 100%;">
   <div class="row" style="height: 100%; width: 100%;">
     <div class="column" style="height: 85%; width: 13%; padding: 5px;">

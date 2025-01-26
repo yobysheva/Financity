@@ -4,9 +4,8 @@ import {ref} from 'vue';
 import {authService} from "@/services/auth";
 import store from "@/store";
 
-const emit = defineEmits(['close', 'update-balance']);
+const emit = defineEmits(['close', 'update-balance', 'plus', 'minus']);
 const answerText = ref("Ваше действие будет иметь последствия");
-const emit = defineEmits(['close', 'plus', 'minus']);
 
 const close = () => {
   emit('close');
@@ -302,6 +301,23 @@ defineExpose({
         @click="setTimerThenClose"
       >
         ответить
+      </button>
+</div>
+    </div>
+  </div>
+  <div v-if="visible && answerTextVisible" class="modal" :style="modalStyles">
+    <div class="container modal-container" :style="containerStyles">
+      <div class="column" style="justify-content: center; align-items: center; padding: 5%;" :style="contentStyles">
+        <div v-if="questionType === 2">
+          <h1>{{ answerText }}</h1>
+        </div>
+        <button v-if="isMyTurn"
+        class="button-33"
+        role="button"
+        style="margin-bottom: 16px;"
+        @click="close"
+      >
+        Закрыть
       </button>
 
       </div>
