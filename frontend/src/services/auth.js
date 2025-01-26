@@ -27,6 +27,9 @@ export const authService = {
     updateData(userData) {
         return axios.put(`${apiUrl}user/updateData/`, userData);
     },
+    updatePhoto(userData){
+        return axios.put(`${apiUrl}user/updatePhoto/`, userData);
+    },
     getUsersStats(username){
         return axios.get(`${apiUrl}user/getStats/`, {params : {username : username}});
     },

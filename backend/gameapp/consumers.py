@@ -116,25 +116,25 @@ class SendGameRequestConsumer(WebsocketConsumer):
 
     def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
-        sender_id = text_data_json['sender_id']
+        sender = text_data_json['sender']
         game_id = text_data_json['game_id']
 
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
                 'type': 'send_game_invitation',
-                'sender_id': sender_id,
+                'sender': sender,
                 'game_id': game_id
             }
         )
 
     def send_game_invitation(self, event):
-        sender_id = event['sender_id']
+        sender = event['sender']
         game_id = event['game_id']
 
         self.send(text_data=json.dumps({
             'type': 'game_invitation',
-            'sender_id': sender_id,
+            'sender': sender,
             'game_id': game_id
         }))
 
@@ -153,7 +153,6 @@ class QuestionConsumer(WebsocketConsumer):
 
     def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
-        print(text_data_json)
         type_ = text_data_json['type']
         match type_:
             case "textAnswer":

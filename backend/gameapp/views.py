@@ -288,6 +288,7 @@ def getActiveGames(request):
             responseData = [{
                 'game_id': game.id,
                 'username': game.players.first().user.username if game.players.exists() else None,
+                'indexPhoto': game.players.first().user.indexPhoto if game.players.exists() else None,
             } for game in games]
             return JsonResponse(responseData, safe=False)
         except Exception as e:

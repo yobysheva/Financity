@@ -4,13 +4,11 @@ import Profile from "@/views/user/Profile.vue";
 // import CurrentGames from "@/views/children/CurrentGames.vue";
 import { authService } from "@/services/auth";
 import store from "../store.js";
-import { CometChat } from "@cometchat-pro/chat";
 
 export default {
   components: {
     Rating,
     Profile,
-    // CurrentGames,
   },
 
   data() {
@@ -27,63 +25,27 @@ export default {
       GameCreated: false,
       IsGameRequested: false,
       incomingInvite: false,
-      ongoingCall: false,
       gameId: null,
       activeGame: [],
+      senderName: '',
+      images: [
+        require('@/assets/av1.png'),
+        require('@/assets/av2.png'),
+        require('@/assets/av3.png'),
+        require('@/assets/av4.png'),
+        require('@/assets/av5.png'),
+        require('@/assets/av6.png'),
+      ],
     };
   },
-
+  mounted() {
+    window.addEventListener('keydown', this.handleKeyDown);
+  },
   created() {
     this.createWaitingRequestSocket()
     this.createActiveGamesSocket()
     this.getLoggedInUser();
     this.getActiveGames();
-    // let globalContext = this;
-    //
-    // var listnerID = this.user.username;
-    // CometChat.addCallListener(
-    //   listnerID,
-    //   new CometChat.CallListener({
-    //     onincomingInviteReceived(call) {
-    //       globalContext.incomingInvite = true;
-    //       globalContext.session_id = call.sessionId;
-    //     },
-    //
-    //     onOutgoingCallAccepted(call) {
-    //       globalContext.ongoingCall = true;
-    //       call.setSessionId(this.gameId);
-    //       CometChat.startCall(
-    //         call.sessionId,
-    //         document.getElementById("callScreen"),
-    //         new CometChat.OngoingCallListener({
-    //           onUserJoined: user => {
-    //             /* Notification received here if another user joins the call. */
-    //             /* this method can be use to display message or perform any actions if someone joining the call */
-    //           },
-    //           onUserLeft: user => {
-    //             /* Notification received here if another user left the call. */
-    //             /* this method can be use to display message or perform any actions if someone leaving the call */
-    //           },
-    //           onCallEnded: call => {
-    //             globalContext.ongoingCall = false;
-    //             globalContext.incomingInvite = false;
-    //             /* Notification received here if current ongoing call is ended. */
-    //             /* hiding/closing the call screen can be done here. */
-    //           }
-    //         })
-    //       );
-    //       // Outgoing Call Accepted
-    //     },
-    //     onOutgoingCallRejected(call) {
-    //       this.incomingInvite = false;
-    //       this.ongoingCall = false;
-    //       this.receiver_id = "";
-    //       // Outgoing Call Rejected
-    //     },
-    //     onincomingInviteCancelled(call) {
-    //     }
-    //   })
-    // );
   },
 
   methods: {
@@ -110,7 +72,6 @@ export default {
     async getActiveGames() {
       try {
         const response = await authService.getActiveGames();
-        console.log(',smdfkmasfpdgaswkp')
         for(let r in response.data) {
           this.activeGame.push(response.data[r]);
         }
@@ -134,8 +95,8 @@ export default {
         let data = JSON.parse(event.data);
         if (data.type === "game_invitation") {
           await store.dispatch("updateGameID", data.game_id);
+          this.senderName = data.sender;
           this.incomingInvite = true
-          // this.$router.push({name: "Game", query: {id: data.game_id}});
         }
       }
       this.waitingRequestSocket.onerror = (error) => {
@@ -147,11 +108,11 @@ export default {
 
       sendRequestSocket.onopen = () => {
         let data = {
-          "sender_id": senderUsername,
+          "sender": senderUsername,
           "game_id": gameID
         };
         sendRequestSocket.send(JSON.stringify(data));
-        // sendRequestSocket.close();
+        setTimeout(() => { sendRequestSocket.close(); }, 1000);
       };
 
       sendRequestSocket.onerror = (error) => {
@@ -162,18 +123,7 @@ export default {
     getLoggedInUser() {
       if(!store.state.username) {
         this.$router.push({ name: "login" });
-        // return;
       }
-      // CometChat.getLoggedinUser().then(
-      //   cometUser => {
-      //     this.user.username = cometUser.name;
-      //     this.user.uid = cometUser.uid;
-      //   },
-      //   error => {
-      //     // this.$router.push({ name: "login" });
-      //     console.log(error);
-      //   }
-      // );
     },
 
     addUserToGroup() {
@@ -183,51 +133,6 @@ export default {
     } else if(this.groupUsers.length >= 5){
         alert('Максимальное число игорков: 6');
       }
-    },
-
-    makeGroup(gameId) {
-      let GUID = gameId;
-      let UID = this.user.username;
-      let groupName = gameId;
-      let groupType = CometChat.GROUP_TYPE.PUBLIC;
-
-      let group = new CometChat.Group(GUID, groupName, groupType);
-      let members = [
-        new CometChat.GroupMember(UID, CometChat.GROUP_MEMBER_SCOPE.PARTICIPANT)
-      ];
-      for(let user of this.groupUsers){
-        members.push(new CometChat.GroupMember(user, CometChat.GROUP_MEMBER_SCOPE.PARTICIPANT))
-      }
-
-      return CometChat.createGroupWithMembers(group, members, []).then(
-    (response) => {
-      console.log("Group created successfully", response);
-    },
-    (error) => {
-      console.log("Some error occurred while creating group", error);
-      throw error; // Пробрасываем ошибку для обработки в makeNewGame
-    }
-  ).finally(() => {
-    // this.groupUsers = [];
-  });
-    },
-
-    makeGroupCall(gameId) {
-      const receiverID = gameId;
-      const callType = CometChat.CALL_TYPE.AUDIO;
-      const receiverType = CometChat.RECEIVER_TYPE.GROUP;
-
-      const call = new CometChat.Call(receiverID, callType, receiverType);
-
-      CometChat.initiateCall(call).then(
-        (outGoingCall) => {
-          console.log("Call initiated successfully:", outGoingCall);
-        },
-        (error) => {
-          console.log("Call initialization failed with exception:", error);
-        }
-      );
-      this.GameCreated = false;
     },
 
     addUsersToGame() {
@@ -250,15 +155,9 @@ export default {
       await store.dispatch("updateGameID", response.data.gameId);
       await store.dispatch("updatePlayerID", response.data.playerID);
       this.sendMessageToActiveGamesSocket(response.data.gameId, response.data.playerID);
-
       this.$router.push({ name: "Game", query: { id: store.state.gameID } });
-
       this.gameId = String(response.data.gameId);
-      // const groupId = String(response.data.gameId);
-
       try {
-        // await this.makeGroup(groupId);
-        // this.makeGroupCall(groupId);
         this.sendInvitation(this.gameId);
         this.groupUsers = [];
         this.$router.push({ name: "Game", query: { id: response.data.gameId} });
@@ -276,6 +175,16 @@ export default {
     }
   }
 },
+    closeModals() {
+      this.GameCreated = false;
+    },
+
+    handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        this.closeModals();
+      }
+    },
+
     async joinToGame(gameID) {
       const response = await authService.connectToGame({
         username: store.state.username,
@@ -302,21 +211,6 @@ export default {
     rejectInvite() {
       this.$router.push({ name: "home" });
       this.incomingInvite = false
-      // var sessionID = this.session_id;
-      // var globalContext = this;
-      // var status = CometChat.CALL_STATUS.REJECTED;
-      //
-      // CometChat.rejectInvite(sessionID, status).then(
-      //   call => {
-      //     console.log("Call rejected successfully", call);
-      //     globalContext.incomingInvite = false;
-      //     globalContext.ongoingCall = false;
-      //     globalContext.receiver_id = "";
-      //   },
-      //   error => {
-      //     console.log("Call rejection failed with error:", error);
-      //   }
-      // );
     }
   }
 };
@@ -340,7 +234,7 @@ export default {
     <button class="button-33" role="button" @click="makeNewGame">Начать игру</button>
   </div>
 </div>
-  <div class="overlay"></div>
+    <div v-if="GameCreated" class="overlay" @click="closeModals" id="overlay"></div>
   </div>
 
 
@@ -352,13 +246,11 @@ export default {
         <h3>Присоединись к этим играм!</h3>
       </div>
        <div v-if="incomingInvite">
-<!--          <button class="btn btn-success" @click="acceptInvite">Accept Call</button>-->
-<!--          <button class="btn btn-success" @click="rejectInvite">Reject Call</button>-->
          <div class="modal" style="top: 35%; width: 60%; min-height: 30%; height: auto; overflow: visible;">
             <div class="container modal-container" style="width: 100%; min-height: 100%; padding: 5%;  align-items: center; justify-content: center;">
                 <h3>Приглашение в игру</h3>
                 <div class="row" style=" align-items: center; justify-content: center;">
-                <p>Вас приглашают присоединиться к игре</p>
+                <p>{{this.senderName}} приглашает вас присоединиться к игре</p>
               </div>
                 <div class="row" style=" align-items: center; justify-content: center;">
                 <button class="button-33" role="button" @click="acceptInvite">Принять приглашение</button>
@@ -381,7 +273,7 @@ export default {
           <div class="row" style="justify-content: flex-start;">
           <div class="row" style="margin-left: 4%; margin-right: 4%;">
             <p>1</p>
-            <div class="photo"></div>
+            <div class="photo"><img :src="images[game.indexPhoto || 0]" alt="User Photo" /></div>
             </div>
             <div class="row" style="justify-content: space-between; padding: 10px;">
             <p>{{ game.username }}</p>
@@ -455,10 +347,17 @@ h3 {
   box-shadow: rgba(44, 187, 99, .1) 0 2px 4px, rgba(44, 187, 99, .05) 0 1px 2px;
   color: #333;
   /*font-family: CerebriSans-Regular, -apple-system, system-ui, Roboto, sans-serif;*/
-  padding: 10px 15px;
+  padding: 0;
   font-size: 16px;
   border: 2px solid rgba(44, 187, 99, .3);
   transition: all 250ms;
+}
+
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
 }
 
 .photo:focus {
@@ -470,6 +369,17 @@ h3 {
 .photo::placeholder {
   color: #aaa;
   opacity: 0.8;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 5;
 }
 
 .photo:hover {
