@@ -253,11 +253,14 @@ async function openModalWithValues (title, questionId, questionType) {
 }
 
 
-const closeModal = () => {
+async function closeModal(){
     if (modalQuestionType.value === 1) {
-        console.log(votes.value)
-
-        // вот это не удаляем это прикол реально!
+        console.log(votes.value);
+      if(isMyTurn.value){
+        const response = await authService.voteHandler(players.value[current_player_index].id, votes.value.pluses, votes.value.minuses);
+        players.value[current_player_index].balance = response.data['balance'];
+      }
+       // вот это не удаляем это прикол реально!
         votes.value = {
           "pluses": 0,
           "minuses": 0
@@ -267,7 +270,7 @@ const closeModal = () => {
     modalVisible.value = false;
     // modalChanceVisible.value = false;
     sendCloseQuestion();
-};
+}
 
 
 const moveDot = (targetIndex) => {
@@ -636,14 +639,6 @@ const handleUpdateBalance = (newBalance, player_id) => {
   <Rules v-if="rulesVisible" @close="showRules"/>
 <!--  <Question v-if="questionActive"/>-->
 <div class="outer-container">
-  <button
-      class="button-33"
-      :hidden="isGameStarted"
-      :disabled="!isMyTurn"
-      @click="sendStartGame">
-      Начать игру
-    </button>
-
 <div class="transparent-container game-page" style="min-height: 98%; max-height: 98%; min-width: 100%; max-width: 100%; width: 100%;">
   <div class="row" style="height: 100%; width: 100%;">
     <div class="column" style="height: 85%; width: 13%; padding: 5px;">
@@ -658,6 +653,13 @@ const handleUpdateBalance = (newBalance, player_id) => {
       />
     </div>
     <div class="column" style="height: 100%; width: 60%; margin-left: 2%; padding: 5px;">
+        <button
+      class="button-33"
+      :hidden="isGameStarted"
+      :disabled="!isMyTurn"
+      @click="sendStartGame">
+      Начать игру
+    </button>
       <div class="container" style="width: 100%; height: 100%; position: relative">
         <img class="image" src="../assets/financity_pole.png" style="width: 100%; height: 100%">
 <!--        <Fields/>-->

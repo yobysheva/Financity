@@ -5,6 +5,9 @@ from rest_framework import status
 from rest_framework.response import Response
 import json
 from .models import Player, Game, User, Question, Answer, Chance, Professions, Action
+import logging
+
+logging.basicConfig(level=logging.ERROR)
 
 @api_view(['POST'])
 def createGame(request):
@@ -329,6 +332,28 @@ def updateGameStatus(request):
 
             return Response({'status': 200}, status=status.HTTP_200_OK)
         except Exception as e:
+            return Response(
+                {"detail": f"An error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+@api_view(['POST'])
+def voteHandler(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode())
+        player_id = data['player_id']
+        plus = data['plus']
+        minus = data['minus']
+        try:
+            player = Player.objects.get(id=player_id)
+            if plus:
+                player.balance += 10000 * plus / (plus + minus)
+            if minus:
+                player.balance -= 10000 * minus / (plus + minus)
+            player.save()
+            return JsonResponse({'status': 200, 'balance': player.balance}, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(f"Error in voteHandler: {str(e)}")
             return Response(
                 {"detail": f"An error occurred: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

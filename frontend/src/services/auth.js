@@ -75,4 +75,7 @@ export const authService = {
     getAnswerOutcome(answer_id){
         return axios.get(`${apiUrl}gameApp/getAnswerOutcome/`, {params: {answer_id: answer_id}})
     },
+    voteHandler(player_id, plus, minus){
+        return axios.post(`${apiUrl}gameApp/voteHandler/`, { player_id: player_id, plus: plus, minus: minus })
+    }
 };

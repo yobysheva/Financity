@@ -293,15 +293,15 @@ defineExpose({
         -
       </button>
         </div>
-
-        <button v-if="questionType === 1 && isMyTurn"
+        <button v-if="questionType === 1 && isMyTurn && !stopAnswering"
         class="button-33"
         role="button"
         style="margin-bottom: 16px;"
         @click="setTimerThenClose"
       >
-        ответить
+        Ответить
       </button>
+        <h3 v-if="questionType === 1 && stopAnswering">{{timeBeforeClose}}</h3>
 </div>
     </div>
   </div>
