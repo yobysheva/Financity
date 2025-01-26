@@ -21,6 +21,11 @@ let images = ref([
   require('@/assets/av6.png')
 ]);
 
+let votes = ref({
+  "pluses": 0,
+  "minuses": 0
+})
+
 // const props = defineProps({
 //   id: {
 //     type: String,
@@ -160,7 +165,6 @@ const spinButtonLabel = ref("Крутить");
 let spinTimer = null;
 
 const modalVisible = ref(false);
-// const answerTextVisible = ref(false);
 
 
 const modalTitle = ref("");
@@ -250,9 +254,19 @@ async function openModalWithValues (title, questionId, questionType) {
 
 
 const closeModal = () => {
-  modalVisible.value = false;
-  // modalChanceVisible.value = false;
-  sendCloseQuestion();
+    if (modalQuestionType.value === 1) {
+        console.log(votes.value)
+
+        // вот это не удаляем это прикол реально!
+        votes.value = {
+          "pluses": 0,
+          "minuses": 0
+        }
+    }
+
+    modalVisible.value = false;
+    // modalChanceVisible.value = false;
+    sendCloseQuestion();
 };
 
 
@@ -325,7 +339,10 @@ answerSocket.onmessage = (event) => {
             if (players[current_player_index] === store.state.playerID) break
             // eslint-disable-next-line no-case-declarations
             let text = content['text']
+            // eslint-disable-next-line no-case-declarations
+            let sa = content['stop_answering'] !== 'false'
             questionComponent.value.setTextInTextArea(text)
+            questionComponent.value.set_stop_answering(sa)
             break;
         case 'radio_button_answer':
             if (players[current_player_index] === store.state.playerID) break
@@ -333,15 +350,26 @@ answerSocket.onmessage = (event) => {
             let button_id = content['button_id']
             questionComponent.value.setActiveRadioButtonForId(button_id)
             break;
+        case 'vote':
+            if (players.value[current_player_index].id !== store.state.playerID) {
+                break
+            }
+            // eslint-disable-next-line no-case-declarations
+            let type_ = content["vote"]
+            votes.value[type_]++
+            console.log(votes.value)
+
     }
 }
 
 function textAnswerTranslate() {
     if (!need_to_share_text_answer) return;
-    const input = questionComponent.value.getTextInTextArea()
+    const input1 = questionComponent.value.getTextInTextArea()
+    const input2 = questionComponent.value.get_stop_answering()
     answerSocket.send(JSON.stringify({
         "type": "textAnswer",
-        "text": input,
+        "text": input1,
+        "stop_answering": input2.toString()
     }))
 
     setTimeout(
@@ -360,6 +388,24 @@ function radioButtonAnswerTranslate() {
     setTimeout(
         radioButtonAnswerTranslate
     , 1000)
+}
+
+function sendPlus() {
+    answerSocket.send(JSON.stringify(
+        {
+          "type": "vote",
+          "vote": "pluses"
+        }
+    ))
+}
+
+function sendMinus() {
+    answerSocket.send(JSON.stringify(
+        {
+          "type": "vote",
+          "vote": "minuses"
+        }
+    ))
 }
 
 const gameSocket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/${store.state.playerID}/`);
@@ -416,9 +462,9 @@ gameSocket.onmessage = async (event) => {
               }
               else{
                 scip = false;
-                isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
               }
             }
+            questionComponent.value.update_variables()
 
             isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
             modalVisible.value = false;
@@ -604,13 +650,6 @@ const handleUpdateBalance = (newBalance, player_id) => {
       />
     </div>
     <div class="column" style="height: 100%; width: 60%; margin-left: 2%; padding: 5px;">
-      <button
-      class="button-33"
-      :hidden="isGameStarted"
-      :disabled="!isMyTurn"
-      @click="sendStartGame">
-      Начать игру
-    </button>
       <div class="container" style="width: 100%; height: 100%; position: relative">
         <img class="image" src="../assets/financity_pole.png" style="width: 100%; height: 100%">
 <!--        <Fields/>-->
@@ -683,8 +722,8 @@ const handleUpdateBalance = (newBalance, player_id) => {
       @click="manualSpin">
       {{ spinButtonLabel }}
     </button>
-      <Question ref="questionComponent" @update-balance="handleUpdateBalance" :questionId="modalQuestionId" :questionType="modalQuestionType" :caseTitle="modalTitle" :visible="modalVisible" :color="modalColor" :isMyTurn="isMyTurn" @close="closeModal" :answerTextVisible="false"/>
-  </div>
+      <Question ref="questionComponent" @update-balance="handleUpdateBalance" :questionId="modalQuestionId" :questionType="modalQuestionType" :caseTitle="modalTitle" :visible="modalVisible" :color="modalColor" :isMyTurn="isMyTurn" @close="closeModal" @minus="sendMinus" @plus="sendPlus" :answerTextVisible="false"/>
+    </div>
   <div class="column" style="width: 22%; min-height: 95vh; height: 95%; margin-left: 2%;">
     <div class="row buttons">
       <button class="button-33" role="button" @click="leaveCall">Выйти из игры</button>
