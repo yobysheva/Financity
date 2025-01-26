@@ -20,7 +20,7 @@ RUN npm run build
 RUN npm install -g serve
 
 # Expose порт для сервера
-EXPOSE 8080
+EXPOSE 8280
 
 # Запускаем сервер для собранных файлов
 CMD ["npm", "run", "serve"]

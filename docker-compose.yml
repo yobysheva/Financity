@@ -14,7 +14,7 @@ services:
     volumes:
       - ./backend:/app/backend
     ports:
-      - "8000:8000"
+      - "8200:8200"
   vue:
     build:
       context: .
@@ -23,7 +23,7 @@ services:
     volumes:
       - ./frontend:/app/frontend
     ports:
-      - "8080:8080"
+      - "8280:8280"
     depends_on:
       - django
     environment:
