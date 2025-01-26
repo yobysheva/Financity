@@ -282,7 +282,6 @@ def getRandomProfession(request):
 @api_view(['GET'])
 def getActiveGames(request):
     if request.method == 'GET':
-        print(1234567890)
         try:
             games = [game for game in Game.objects.filter(status='newGame')]
             responseData = [{
@@ -291,6 +290,23 @@ def getActiveGames(request):
                 'indexPhoto': game.players.first().user.indexPhoto if game.players.exists() else None,
             } for game in games]
             return JsonResponse(responseData, safe=False)
+        except Exception as e:
+            return Response(
+                {"detail": f"An error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+@api_view(['PUT'])
+def updateGameStatus(request):
+    if request.method == 'PUT':
+        data = json.loads(request.body.decode())
+        try:
+            game = Game.objects.get(id=data['game_id'])
+
+            game.status = data['status']
+            game.save()
+
+            return Response({'status': 200}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(
                 {"detail": f"An error occurred: {str(e)}"},

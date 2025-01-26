@@ -19,16 +19,26 @@ class Player (models.Model):
 
 
 class Game (models.Model):
+    NG = "new game"
+    ST = "started"
+    FD = "finished"
+    __UPDATE_STATUS = {
+        NG: ST,
+        ST: FD
+    }
+    STATUS_CHOICES = (
+        (NG, "New game"),
+        (ST, "Started"),
+        (FD, "Finished"),
+    )
     id = models.AutoField(primary_key=True)
     players = models.ManyToManyField(Player, related_name='playersID')
-    status = models.CharField(max_length=50)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=NG)
     def __str__(self):
         return f"gameID: {self.id} | status: {self.status}"
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        print(f"ID: {self.id} | Статус: {self.status}")
-
 
 class Question(models.Model):
     QUESTION_TYPES = [

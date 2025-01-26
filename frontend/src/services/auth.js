@@ -3,6 +3,9 @@ import axios from 'axios';
 const apiUrl = 'http://localhost:8000/api/';
 
 export const authService = {
+    updateGameStatus(gameData) {
+        return axios.put(`${apiUrl}gameApp/updateGameStatus/`, gameData)
+    },
     register(userData) {
         return axios.post(`${apiUrl}user/register/`, userData);
     },

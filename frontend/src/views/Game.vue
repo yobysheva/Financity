@@ -42,16 +42,14 @@ let images = ref([
 // });
 
 let players = ref([])
-console.log("created")
 onMounted(() => {
   players.value = []
-  console.log("cleared")
 })
 let current_player_index = 0
 let shine = ref([])
+let isGameStarted = ref(false)
 let need_to_share_text_answer = false
 let need_to_share_radio_button_answer = false
-let isMyTurn = ref(false)
 
 // async function getProfession(){
 //   await authService.getRandomProfession(store.state.playerID);
@@ -80,8 +78,9 @@ authService.getInfoAboutGame(
             shine.value.push(false)
         }
     )
+    isMyTurn.value = (players.value.length === 1)
 })
-
+let isMyTurn = ref(false)
 
 let newMessage = ref("")
 
@@ -90,6 +89,28 @@ let rulesVisible = ref(false)
 function showRules() {
   rulesVisible.value = !rulesVisible.value;
 }
+
+async function sendStartGame() {
+  gameSocket.send(
+      JSON.stringify({
+        'type': 'start_game',
+        'info': {}
+      })
+  )
+
+  await authService.updateGameStatus(
+      {
+        "game_id": store.state.gameID,
+        "status": "started"
+      }
+  )
+}
+
+function startGame() {
+    isGameStarted.value = true
+}
+
+
 
 // if(!props.userType){
   // let sessionID = props.sessionId;
@@ -177,14 +198,12 @@ async function checkPositionAndShowModal (currentCoords){
     if (players.value[current_player_index].id === store.state.playerID){
       try {
     const response = await authService.getRandomChance();
-    console.log("chance")
     modalQuestionId.value = response.data['id'];
     modalQuestionType.value = 3;
     await questionComponent.value.getQuestion(response.data['id'], 3);
   } catch (error) {
         console.error(error);
   }
-    // console.log(modalQuestion.value);
     sendQuestion();
     setTimeout(() => {
         modalVisible.value = true;
@@ -201,7 +220,6 @@ async function checkPositionAndShowModal (currentCoords){
     await questionComponent.value.getQuestion(response.data['id'], response.data['type']);
     need_to_share_text_answer = response.data['type'] === 1
     need_to_share_radio_button_answer = response.data['type'] === 2
-    console.log(response.data['type'])
   } catch (error) {
         console.error(error);
   }
@@ -217,7 +235,6 @@ async function checkPositionAndShowModal (currentCoords){
 
 
 async function openModalWithValues (title, questionId, questionType) {
-  console.log(questionId)
   modalTitle.value = title
   modalQuestionId.value = questionId
   modalQuestionType.value = questionType
@@ -239,25 +256,20 @@ const moveDot = (targetIndex) => {
   const steps = [];
   if (targetIndex > currentIndexMassive.value[current_player_index]) {
     for (let i = currentIndexMassive.value[current_player_index] + 1; i <= targetIndex; i++) {
-      console.log('first')
       steps.push(i);
     }
   } else {
     for (let i = currentIndexMassive.value[current_player_index] + 1; i < positions.length; i++) {
-      console.log('second')
       steps.push(i);
     }
     for (let i = 0; i <= targetIndex; i++) {
-      console.log('third')
       steps.push(i);
     }
-    console.log(steps)
   }
 
   let stepIndex = 0;
   const moveNext = () => {
     if (stepIndex < steps.length) {
-      console.log('immoving', stepIndex, steps.length)
       const [leftPercent, topPercent] = positions[steps[stepIndex]];
       dotStyleMassive.value[current_player_index].left = `${leftPercent}%`;
       dotStyleMassive.value[current_player_index].top = `${topPercent}%`;
@@ -336,7 +348,6 @@ function textAnswerTranslate() {
 function radioButtonAnswerTranslate() {
     if (!need_to_share_radio_button_answer) return;
     const input = questionComponent.value.getIdOfActiveRadioButton()
-    console.log(input)
     answerSocket.send(JSON.stringify({
         "type": "radioButtonAnswer",
         "button_id": input.toString()
@@ -391,7 +402,6 @@ gameSocket.onmessage = (event) => {
             break;
         case "notification_about_connect_to_game":
             if (Number(info['id']) === store.state.playerID) break;
-            console.log(info)
             players.value.push(info);
             dotStyleMassive.value.push({
               width: "auto",
@@ -404,6 +414,8 @@ gameSocket.onmessage = (event) => {
             currentIndexMassive.value.push(0);
             totalSumMassive.value.push(0);
             break;
+        case "start_game":
+            startGame()
     }
 };
 
@@ -421,7 +433,6 @@ function sendCloseQuestion() {
 }
 
 function sendQuestion() {
-  console.log(modalQuestionId.value)
   const info = {
     "type": "on_question_open",
     "info": {
@@ -430,7 +441,6 @@ function sendQuestion() {
       "questionType": modalQuestionType.value,
     }
   }
-  console.log(info)
   gameSocket.send(JSON.stringify(
       info
   ))
@@ -462,9 +472,6 @@ function leaveCall() {
 function spin(rnd) {
   isSpinDisabled.value = true;
   let x, y;
-
-  console.log(players.value[current_player_index].id);
-  console.log(rnd);
 
   if (lastRoll.value === rnd) {
     x = lastX.value + 360;
@@ -541,6 +548,14 @@ function isMyMessage(message) {
 
 <template>
 <!--  <QuizQuestion/>-->
+  <button
+      class="button-33"
+      :hidden="isGameStarted"
+      :disabled="!isMyTurn"
+      @click="sendStartGame">
+
+      {{ spinButtonLabel }}
+    </button>
   <Rules v-if="rulesVisible" @close="showRules"/>
 <!--  <Question v-if="questionActive"/>-->
 <div class="outer-container">
@@ -630,7 +645,7 @@ function isMyMessage(message) {
 <!--    <button v-if="isMyTurn" class="button-33" @click="startTurn">Сделать ход</button>-->
     <button
       class="button-33"
-      :disabled="!isMyTurn || isSpinDisabled"
+      :disabled="!isMyTurn || isSpinDisabled || !isGameStarted"
       @click="manualSpin">
       {{ spinButtonLabel }}
     </button>
