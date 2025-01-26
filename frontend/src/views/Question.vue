@@ -31,6 +31,7 @@ const props = defineProps({
   // questionText: String,
   visible: Boolean,
   color: String,
+  isMyTurn: Boolean
 });
 
 const modalStyles = computed(() => ({
@@ -171,21 +172,24 @@ defineExpose({
         <textarea
           v-if="questionType === 1"
           class="input-custom"
+          :disabled="!isMyTurn"
           style="min-height: 120px; height:40%; width: 100%; padding: 40px; margin-bottom: 16px;"
         ></textarea>
-        <div v-if="questionType === 2" class="answers">
+        <div v-if="questionType === 2" class="answers" style="justify-content: space-between;">
           <div
-            class="column"
+            class="radio-container column"
             style="margin-bottom: 8px; align-items: center; -ms-overflow-style: none; scrollbar-width: none;"
           >
             <label v-for="answer in answers"
-            :key="answer.id" style="color:black; ">
-              <input type="radio" name="answer" :value="answer.id" />
+            :key="answer.id" style="color:black; display: flex; align-items: center;">
+              <input type="radio" name="answer" :value="answer.id" :disabled="!isMyTurn" />
+              <div class="radio-custom"></div>
               {{ answer.text }}
             </label>
           </div>
         </div>
-      <button  v-if="questionType !== 1"
+
+      <button v-if="questionType !== 1 && isMyTurn"
         class="button-33"
         role="button"
         style="margin-bottom: 16px;"
@@ -261,4 +265,58 @@ defineExpose({
 h3{
   width: 80%;
 }
+
+input[type="radio"] {
+    display: none;
+}
+
+.radio-container {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    cursor: pointer;
+}
+
+.radio-custom {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(44, 187, 99, .6);
+    border-radius: 10px;
+    position: relative;
+    margin-right: 10px;
+    transition: background-color 0.3s, border-color 0.3s;
+    flex-shrink: 0;
+}
+
+input[type="radio"]:checked + .radio-custom {
+    background-color: rgba(44, 187, 99, .3);
+}
+
+.radio-custom::after {
+    content: '';
+    width: 5px;
+    height: 5px;
+    background-color: white;
+    border-radius: 10px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.3s;
+}
+
+input[type="radio"]:checked + .radio-custom::after {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Стили для кастомного RadioButton при наведении */
+.radio-custom:hover {
+    border-color: rgba(44, 187, 99, .3); /* Измените цвет границы при наведении */
+}
+
+/* Стили для активного состояния при наведении */
+input[type="radio"]:checked + .radio-custom:hover {
+    background-color: rgba(44, 187, 99, .3); /* Измените цвет фона при наведении на выбранный RadioButton */
+}
+
 </style>
