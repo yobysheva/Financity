@@ -77,5 +77,8 @@ export const authService = {
     },
     voteHandler(player_id, plus, minus){
         return axios.post(`${apiUrl}gameApp/voteHandler/`, { player_id: player_id, plus: plus, minus: minus })
+    },
+    addWinToGameWinner(userData) {
+        return axios.put(`${apiUrl}gameApp/addWinToGameWinner`, userData)
     }
 };

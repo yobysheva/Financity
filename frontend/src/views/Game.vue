@@ -255,6 +255,7 @@ async function openModalWithValues (title, questionId, questionType) {
 }
 
 async function endGame () {
+    console.log("я кончил")
     await authService.updateGameStatus({
         "game_id": store.state.gameID,
         "status": "finished"
@@ -262,6 +263,9 @@ async function endGame () {
 
     winner.value = getWinner()
     isGameEnded.value = true
+    await authService.addWinToGameWinner({
+        "player_id": winner.value.id
+    })
     console.log(winner.value)
 }
 
@@ -547,7 +551,7 @@ gameSocket.onmessage = async (event) => {
             startGame()
             break
 
-        case "player_living":
+        case "player_leaving":
             // eslint-disable-next-line no-case-declarations
             let index = checkPlayerLeave(Number(info['player_id']))
             console.log(index, Number(info['player_id']))
@@ -555,7 +559,10 @@ gameSocket.onmessage = async (event) => {
               console.log('DELETE')
               players.value.splice(index, 1)
             }
-            console.log(players.value)
+             if (checkToEnd()) {
+                await endGame()
+                return
+            }
             break;
         case "start_voting":
             questionComponent.value.setVotingTimer()
@@ -615,7 +622,7 @@ const generateAndSpin = () => {
 
 function leaveCall() {
   const info = {
-      "type": "player_living",
+      "type": "player_leaving",
       "info": {
           "player_id": store.state.playerID
       }
