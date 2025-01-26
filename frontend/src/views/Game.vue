@@ -91,6 +91,8 @@ function showRules() {
 }
 
 async function sendStartGame() {
+  if (players.value.length < 2) return
+
   gameSocket.send(
       JSON.stringify({
         'type': 'start_game',
