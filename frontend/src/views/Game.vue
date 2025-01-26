@@ -53,6 +53,7 @@ onMounted(() => {
 let current_player_index = 0
 let shine = ref([])
 let isGameStarted = ref(false)
+let isGameEnded = ref(false)
 let need_to_share_text_answer = false
 let need_to_share_radio_button_answer = false
 let isMyTurn = ref(false)
@@ -252,6 +253,32 @@ async function openModalWithValues (title, questionId, questionType) {
     }, 500);
 }
 
+async function endGame () {
+    await authService.updateGameStatus({
+        "game_id": store.state.gameID,
+        "status": "finished"
+    })
+    isGameEnded.value = true
+}
+
+function checkToEnd() {
+    for (let player in players.value) {
+        if (player.balance <= 0) {
+            return true
+        }
+    }
+    return players.value.length <= 1
+}
+
+function checkPlayerLeave(id) {
+    for (let i = 0; i < players.value.length; i++) {
+
+        if (players.value[i].id === id) {
+            return i
+        }
+    }
+    return -1
+}
 
 const closeModal = () => {
     if (modalQuestionType.value === 1) {
@@ -444,6 +471,11 @@ gameSocket.onmessage = async (event) => {
             }
             break;
         case "on_question_close":
+            if (checkToEnd()) {
+                await endGame()
+                return
+            }
+
             need_to_share_text_answer = false
             need_to_share_radio_button_answer = false
             players.value[info["player_index"]].balance = info["balance"];
@@ -486,6 +518,18 @@ gameSocket.onmessage = async (event) => {
             break;
         case "start_game":
             startGame()
+            break
+
+        case "player_living":
+            // eslint-disable-next-line no-case-declarations
+            let index = checkPlayerLeave(Number(info['player_id']))
+            console.log(index, Number(info['player_id']))
+            if (index !== -1) {
+              console.log('DELETE')
+              players.value.splice(index, 1)
+            }
+            console.log(players.value)
+            break;
     }
 };
 
@@ -541,7 +585,15 @@ const generateAndSpin = () => {
 };
 
 function leaveCall() {
-  // this.$router.push({ name: "home" });
+  const info = {
+      "type": "player_living",
+      "info": {
+          "player_id": store.state.playerID
+      }
+  }
+  gameSocket.send(JSON.stringify(
+        info
+    ))
   routes.push({ name: "home" });
 }
 
@@ -726,7 +778,7 @@ const handleUpdateBalance = (newBalance, player_id) => {
 <!--    <button v-if="isMyTurn" class="button-33" @click="startTurn">Сделать ход</button>-->
     <button
       class="button-33"
-      :disabled="!isMyTurn || isSpinDisabled || !isGameStarted"
+      :disabled="!isMyTurn || isSpinDisabled || !isGameStarted || isGameEnded"
       @click="manualSpin">
       {{ spinButtonLabel }}
     </button>

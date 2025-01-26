@@ -241,7 +241,7 @@ defineExpose({
         <textarea
           v-if="questionType === 1"
           class="input-custom"
-          :disabled="!isMyTurn && stopAnswering"
+          :disabled="!isMyTurn || stopAnswering"
           style="min-height: 120px; height:40%; width: 100%; padding: 40px; margin-bottom: 16px;"
         ></textarea>
         <div v-if="questionType === 2" class="answers" style="justify-content: space-between;">
@@ -297,10 +297,11 @@ defineExpose({
         <button v-if="questionType === 1 && isMyTurn"
         class="button-33"
         role="button"
+        :hidden="stopAnswering"
         style="margin-bottom: 16px;"
         @click="setTimerThenClose"
       >
-        ответить
+        Ответить
       </button>
 </div>
     </div>
