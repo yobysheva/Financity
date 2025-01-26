@@ -71,13 +71,24 @@ def addActionAnswer(request):
 def addActionChance(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode())
+        player_id = data.get('player_id')
+        chance_id = data.get('chance_id')
+        if not player_id or not chance_id:
+            return Response(
+                {"detail": "player_id and chance_id are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         try:
-            player = Player.objects.get(id=data['player_id'])
-            chance = Chance.objects.get(id=data['chance_id'])
-            if chance.period == 0:
-                player.balance -= chance.sum
+            player = Player.objects.get(id=player_id)
+            chance = Chance.objects.get(id=chance_id)
             if chance.period or chance.scip:
                 action = Action.objects.create(player=player, sum=chance.sum, period=chance.period, scip = chance.scip)
+                return Response({"action_id": action.id, "balance": player.balance}, status=status.HTTP_201_CREATED)
+            if chance.period == 0:
+                player.balance += chance.sum
+                player.save()
+                return JsonResponse({"balance": player.balance})
+            return Response({"detail": "Action created", "balance": player.balance}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -85,17 +96,18 @@ def addActionChance(request):
 @api_view(['POST'])
 def checkScip(request):
     if request.method == 'POST':
-        data = json.loads(request.body.decode())
+        player_id = request.data.get('player_id', None)
+        if not player_id:
+            return Response({"detail": "player_id is required"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            player = Player.objects.get(id=data['player_id'])
+            player = Player.objects.get(id=player_id)
             actions = Action.objects.filter(player=player, scip=True)
+            if not actions:
+                return JsonResponse({'scip': False})
             for action in actions:
                 action.scip = False
                 action.save()
-            if actions:
-                return JsonResponse({'scip': True})
-            else:
-                return JsonResponse({'scip': False})
+            return JsonResponse({'scip': True})
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

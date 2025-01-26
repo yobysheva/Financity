@@ -52,19 +52,19 @@ export const authService = {
         return axios.get(`${apiUrl}gameApp/getRandomProfession/`, {params: {player_id: player_id}})
     },
     changePlayer(player_id, profession){
-        return axios.get(`${apiUrl}gameApp/changePlayer/`,{params: {player_id: player_id, profession: profession}})
+        return axios.post(`${apiUrl}gameApp/changePlayer/`,{params: {player_id: player_id, profession: profession}})
     },
     addActionAnswer(player_id, answer_id){
-        return axios.get(`${apiUrl}gameApp/addActionAnswer/`, {params: {player_id: player_id, answer_id: answer_id}})
+        return axios.post(`${apiUrl}gameApp/addActionAnswer/`, {player_id: player_id, answer_id: answer_id})
     },
     addActionChance(player_id, chance_id){
-        return axios.get(`${apiUrl}gameApp/addActionChance/`, {params: {player_id: player_id, chance_id: chance_id}})
+        return axios.post(`${apiUrl}gameApp/addActionChance/`, {player_id: player_id, chance_id: chance_id})
     },
     checkScip(player_id){
-      return axios.get(`${apiUrl}gameApp/checkScip/`, {params: {player_id: player_id}})
+      return axios.post(`${apiUrl}gameApp/checkScip/`, {player_id: player_id})
     },
     changeBalance(player_id){
-      return axios.get(`${apiUrl}gameApp/changeBalance/`, {params: {player_id: player_id}})
+      return axios.post(`${apiUrl}gameApp/changeBalance/`, { player_id: player_id })
     },
     getAnswerOutcome(answer_id){
         return axios.get(`${apiUrl}gameApp/getAnswerOutcome/`, {params: {answer_id: answer_id}})

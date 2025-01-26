@@ -185,7 +185,7 @@ async function checkPositionAndShowModal (currentCoords){
         console.error(error);
   }
     // console.log(modalQuestion.value);
-    sendQuestion();
+    await sendQuestion();
     setTimeout(() => {
         modalVisible.value = true;
     }, 500);
@@ -205,7 +205,7 @@ async function checkPositionAndShowModal (currentCoords){
   } catch (error) {
         console.error(error);
   }
-    sendQuestion();
+    await sendQuestion();
     setTimeout(() => {
         modalVisible.value = true;
     }, 500);
@@ -348,7 +348,7 @@ function radioButtonAnswerTranslate() {
 }
 
 const gameSocket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/${store.state.playerID}/`);
-gameSocket.onmessage = (event) => {
+gameSocket.onmessage = async (event) => {
     let text_data = JSON.parse(event.data);
     text_data = text_data["info"];
     let info = text_data["info"];
@@ -362,6 +362,10 @@ gameSocket.onmessage = (event) => {
           // eslint-disable-next-line no-case-declarations
             const turn_count = info["turn_count"];
             // totalSum.value += turn_count;
+            if(isMyTurn.value && totalSumMassive.value[current_player_index] % 26 + turn_count >= 26){
+              const response = await authService.changeBalance(players.value[current_player_index].id);
+              players.value[current_player_index].balance = response.data['balance'];
+            }
             totalSumMassive.value[current_player_index] += turn_count;
             spin(turn_count);
             break;
@@ -385,6 +389,21 @@ gameSocket.onmessage = (event) => {
             players.value.forEach((player, index) => {
               shine.value[index] = player.id === players.value[current_player_index].id;
             });
+            // eslint-disable-next-line no-case-declarations
+            let scip = true;
+            while (scip) {
+              // eslint-disable-next-line no-case-declarations
+              const response = await authService.checkScip(players.value[current_player_index].id);
+              if(response.data['scip']){
+                current_player_index = (current_player_index + 1) % players.value.length;
+                console.log("scip");
+              }
+              else{
+                scip = false;
+              }
+            }
+
+
             isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
             modalVisible.value = false;
             isSpinDisabled.value = false;
@@ -420,8 +439,7 @@ function sendCloseQuestion() {
     ))
 }
 
-function sendQuestion() {
-  console.log(modalQuestionId.value)
+async function sendQuestion() {
   const info = {
     "type": "on_question_open",
     "info": {
@@ -430,10 +448,14 @@ function sendQuestion() {
       "questionType": modalQuestionType.value,
     }
   }
-  console.log(info)
   gameSocket.send(JSON.stringify(
       info
   ))
+  if(modalQuestionType.value === 3){
+    console.log("chance 3")
+    let response = await authService.addActionChance(store.state.playerID, modalQuestionId.value)
+    players.value[current_player_index].balance = response.data['balance']
+  }
 }
 
 function sendTurnCount(turn_count) {
@@ -462,9 +484,6 @@ function leaveCall() {
 function spin(rnd) {
   isSpinDisabled.value = true;
   let x, y;
-
-  console.log(players.value[current_player_index].id);
-  console.log(rnd);
 
   if (lastRoll.value === rnd) {
     x = lastX.value + 360;
