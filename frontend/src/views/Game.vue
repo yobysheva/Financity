@@ -21,6 +21,11 @@ let images = ref([
   require('@/assets/av6.png')
 ]);
 
+let votes = ref({
+  "pluses": 0,
+  "minuses": 0
+})
+
 // const props = defineProps({
 //   id: {
 //     type: String,
@@ -249,9 +254,19 @@ async function openModalWithValues (title, questionId, questionType) {
 
 
 const closeModal = () => {
-  modalVisible.value = false;
-  // modalChanceVisible.value = false;
-  sendCloseQuestion();
+    if (modalQuestionType.value === 1) {
+        console.log(votes.value)
+
+        // вот это не удаляем это прикол реально!
+        votes.value = {
+          "pluses": 0,
+          "minuses": 0
+        }
+    }
+
+    modalVisible.value = false;
+    // modalChanceVisible.value = false;
+    sendCloseQuestion();
 };
 
 
@@ -321,26 +336,45 @@ answerSocket.onmessage = (event) => {
     let content = text_data['content']
     switch (type) {
         case 'change_text_answer':
-            if (players[current_player_index] === store.state.playerID) break
+            if (players.value[current_player_index].id === store.state.playerID) break
             // eslint-disable-next-line no-case-declarations
             let text = content['text']
+            // eslint-disable-next-line no-case-declarations
+            let sa = content['stop_answering'] !== 'false'
             questionComponent.value.setTextInTextArea(text)
+            questionComponent.value.set_stop_answering(sa)
+            console.log("after sa? ", sa)
             break;
         case 'radio_button_answer':
-            if (players[current_player_index] === store.state.playerID) break
+            if (players.value[current_player_index].id === store.state.playerID) break
             // eslint-disable-next-line no-case-declarations
             let button_id = content['button_id']
+            // eslint-disable-next-line no-case-declarations
             questionComponent.value.setActiveRadioButtonForId(button_id)
             break;
+        case 'vote':
+            console.log("я тут", content)
+            if (players.value[current_player_index].id !== store.state.playerID) {
+                console.log(players.value[current_player_index] !== store.state.playerID, players.value[current_player_index].id, store.state.playerID)
+                break
+            }
+            console.log(votes.value)
+            // eslint-disable-next-line no-case-declarations
+            let type_ = content["vote"]
+            votes.value[type_]++
+            console.log(votes.value)
+
     }
 }
 
 function textAnswerTranslate() {
     if (!need_to_share_text_answer) return;
-    const input = questionComponent.value.getTextInTextArea()
+    const input1 = questionComponent.value.getTextInTextArea()
+    const input2 = questionComponent.value.get_stop_answering()
     answerSocket.send(JSON.stringify({
         "type": "textAnswer",
-        "text": input,
+        "text": input1,
+        "stop_answering": input2.toString()
     }))
 
     setTimeout(
@@ -350,15 +384,35 @@ function textAnswerTranslate() {
 
 function radioButtonAnswerTranslate() {
     if (!need_to_share_radio_button_answer) return;
-    const input = questionComponent.value.getIdOfActiveRadioButton()
+    const input1 = questionComponent.value.getIdOfActiveRadioButton()
     answerSocket.send(JSON.stringify({
         "type": "radioButtonAnswer",
-        "button_id": input.toString()
+        "button_id": input1.toString(),
     }))
 
     setTimeout(
         radioButtonAnswerTranslate
     , 1000)
+}
+
+function sendPlus() {
+    console.log("sendplus")
+    answerSocket.send(JSON.stringify(
+        {
+          "type": "vote",
+          "vote": "pluses"
+        }
+    ))
+}
+
+function sendMinus() {
+    console.log("sendminus")
+    answerSocket.send(JSON.stringify(
+        {
+          "type": "vote",
+          "vote": "minuses"
+        }
+    ))
 }
 
 const gameSocket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/${store.state.playerID}/`);
@@ -416,7 +470,7 @@ gameSocket.onmessage = async (event) => {
                 scip = false;
               }
             }
-
+            questionComponent.value.update_variables()
 
             isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
             modalVisible.value = false;
@@ -676,7 +730,7 @@ function isMyMessage(message) {
       @click="manualSpin">
       {{ spinButtonLabel }}
     </button>
-      <Question ref="questionComponent" :questionId="modalQuestionId" :questionType="modalQuestionType" :caseTitle="modalTitle" :visible="modalVisible" :color="modalColor" :isMyTurn="isMyTurn" @close="closeModal" />
+      <Question ref="questionComponent" :questionId="modalQuestionId" :questionType="modalQuestionType" :caseTitle="modalTitle" :visible="modalVisible" :color="modalColor" :isMyTurn="isMyTurn" @close="closeModal" @minus="sendMinus" @plus="sendPlus"/>
 <!--      <Chance ref="chanceComponent" :chanceText=modalChance :chanceId="modalQuestionId" :visible="modalChanceVisible" @close="closeModal" />-->
     </div>
   <div class="column" style="width: 22%; min-height: 95vh; height: 95%; margin-left: 2%;">

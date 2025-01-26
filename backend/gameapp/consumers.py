@@ -157,6 +157,7 @@ class QuestionConsumer(WebsocketConsumer):
         match type_:
             case "textAnswer":
                 text = text_data_json['text']
+                stopAnswering = text_data_json['stop_answering']
 
                 async_to_sync(self.channel_layer.group_send)(
                     self.room_group_name,
@@ -165,7 +166,8 @@ class QuestionConsumer(WebsocketConsumer):
                         'info': {
                             'type': 'change_text_answer',
                             'content': {
-                                'text': text
+                                'text': text,
+                                'stop_answering': stopAnswering,
                             },
                         }
                     }
@@ -181,11 +183,28 @@ class QuestionConsumer(WebsocketConsumer):
                         'info': {
                             'type': 'radio_button_answer',
                             'content': {
-                                'button_id': buttonId
+                                'button_id': buttonId,
                             },
                         }
                     }
                 )
+
+            case 'vote':
+                print("тыебанулся")
+                vote = text_data_json['vote']
+                async_to_sync(self.channel_layer.group_send)(
+                    self.room_group_name,
+                    {
+                        'type': 'default_handler',
+                        'info': {
+                            'type': 'vote',
+                            'content': {
+                                'vote': vote
+                            }
+                        }
+                    }
+                )
+
     def  default_handler(self, event):
         info = event['info']
 

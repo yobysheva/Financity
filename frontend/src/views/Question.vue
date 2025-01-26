@@ -4,7 +4,7 @@ import {defineProps, defineEmits, onMounted, onUnmounted, defineExpose, computed
 import {ref} from 'vue';
 import {authService} from "@/services/auth";
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'plus', 'minus']);
 
 const close = () => {
   emit('close');
@@ -77,7 +77,51 @@ let question = ref({
   text : "",
 });
 
+let stopAnswering = ref(false)
+let didIVote = ref(false)
+let timeBeforeClose = ref(10)
 let answers = ref([])
+let votes_pluses = ref(0)
+let votes_minuses = ref(0)
+
+function update_variables() {
+    didIVote.value = false
+    stopAnswering.value = false
+    timeBeforeClose.value = 10
+}
+function vote_minus() {
+    if (stopAnswering.value && !didIVote.value) {
+        votes_minuses.value++
+        didIVote.value = true
+        emit('minus')
+        console.log("я проголосовал за минус", didIVote.value)
+    }
+}
+
+function vote_plus() {
+    if (stopAnswering.value && !didIVote.value) {
+        didIVote.value = true
+        emit('plus')
+        console.log("я проголосовал за плюс", didIVote.value)
+    }
+}
+
+function get_votes() {
+    return {
+        "pluses": votes_pluses.value,
+        "minuses": votes_minuses.value
+    }
+}
+
+function get_stop_answering() {
+    return stopAnswering.value
+}
+
+function set_stop_answering(value) {
+    console.log(didIVote.value || !value, value)
+    stopAnswering.value = value
+}
+
 
 onMounted(() => {
   const textarea = document.querySelector('.input-custom');
@@ -111,6 +155,20 @@ function getIdOfActiveRadioButton() {
         }
     }
     return -1
+}
+
+function setTimerThenClose() {
+    console.log(didIVote.value)
+    stopAnswering.value = true
+    if (timeBeforeClose.value > 0) {
+        console.log(`${timeBeforeClose.value--} осталось`)
+        setTimeout(setTimerThenClose, 1000)
+    }
+    else {
+        stopAnswering.value = false
+        timeBeforeClose.value = 10
+        close()
+    }
 }
 
 function setActiveRadioButtonForId(id) {
@@ -148,7 +206,11 @@ defineExpose({
     setTextInTextArea ,
     getTextInTextArea ,
     getIdOfActiveRadioButton ,
-    setActiveRadioButtonForId
+    setActiveRadioButtonForId ,
+    get_votes,
+    get_stop_answering,
+    set_stop_answering,
+    update_variables
 });
 </script>
 
@@ -161,7 +223,7 @@ defineExpose({
         <textarea
           v-if="questionType === 1"
           class="input-custom"
-          :disabled="!isMyTurn"
+          :disabled="!isMyTurn && stopAnswering"
           style="min-height: 120px; height:40%; width: 100%; padding: 40px; margin-bottom: 16px;"
         ></textarea>
         <div v-if="questionType === 2" class="answers" style="justify-content: space-between;">
@@ -182,28 +244,39 @@ defineExpose({
         class="button-33"
         role="button"
         style="margin-bottom: 16px;"
-        @click="$emit('close')"
+        @click="close"
       >
-        Закрыть
+        закрыть
       </button>
-        <div class="row" v-if="questionType === 1">
+        <div class="row" v-if="questionType === 1 && !isMyTurn">
           <button
         class="button-33"
         role="button"
+        :hidden="didIVote || !stopAnswering"
         style="margin-bottom: 16px;"
-        @click="$emit('close')"
+        @click="vote_plus"
       >
         +
       </button>
               <button
         class="button-33"
         role="button"
+        :hidden="didIVote || !stopAnswering"
         style="margin-bottom: 16px;"
-        @click="$emit('close')"
+        @click="vote_minus"
       >
         -
       </button>
         </div>
+
+        <button v-if="questionType === 1 && isMyTurn"
+        class="button-33"
+        role="button"
+        style="margin-bottom: 16px;"
+        @click="setTimerThenClose"
+      >
+        ответить
+      </button>
 
       </div>
     </div>
