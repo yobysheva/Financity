@@ -30,7 +30,6 @@ const props = defineProps({
   questionId: Number,
   caseTitle: String,
   questionType: Number,
-  // questionText: String,
   visible: Boolean,
   color: String,
   isMyTurn: Boolean
@@ -117,14 +116,6 @@ function get_votes() {
     }
 }
 
-function get_stop_answering() {
-    return stopAnswering.value
-}
-
-function set_stop_answering(value) {
-    console.log(didIVote.value || !value, value)
-    stopAnswering.value = value
-}
 
 
 onMounted(() => {
@@ -154,7 +145,7 @@ function getTextInTextArea() {
 function getIdOfActiveRadioButton() {
     let rates = document.getElementsByName('answer');
     for(let i = 0; i < rates.length; i++){
-        if(rates[i].checked){
+        if (rates[i].checked){
             return i
         }
     }
@@ -162,8 +153,9 @@ function getIdOfActiveRadioButton() {
 }
 
 function setTimerThenClose() {
-    console.log(didIVote.value)
     stopAnswering.value = true
+    console.log(stopAnswering.value, 1234)
+
     if (timeBeforeClose.value > 0) {
         console.log(`${timeBeforeClose.value--} осталось`)
         setTimeout(setTimerThenClose, 1000)
@@ -176,10 +168,11 @@ function setTimerThenClose() {
 }
 
 function setVotingTimer() {
+    console.log("tf am i doing")
     stopAnswering.value = true
     if (timeBeforeClose.value > 0) {
         console.log(`${timeBeforeClose.value--} осталось`)
-        setTimeout(setTimerThenClose, 1000)
+        setTimeout(setVotingTimer, 1000)
     }
     else {
         stopAnswering.value = false
@@ -238,8 +231,6 @@ defineExpose({
     getIdOfActiveRadioButton ,
     setActiveRadioButtonForId ,
     get_votes,
-    get_stop_answering,
-    set_stop_answering,
     update_variables,
     setVotingTimer
 });
@@ -311,7 +302,7 @@ defineExpose({
         role="button"
         :hidden="stopAnswering"
         style="margin-bottom: 16px;"
-        @click="setTimerThenClose; $emit('setVotingTimer')"
+        @click="setTimerThenClose(); emit('setVotingTimer')"
       >
         Ответить
       </button>

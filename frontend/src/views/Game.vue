@@ -397,10 +397,7 @@ answerSocket.onmessage = (event) => {
             if (players[current_player_index] === store.state.playerID) break
             // eslint-disable-next-line no-case-declarations
             let text = content['text']
-            // eslint-disable-next-line no-case-declarations
-            let sa = content['stop_answering'] !== 'false'
             questionComponent.value.setTextInTextArea(text)
-            questionComponent.value.set_stop_answering(sa)
             break;
         case 'radio_button_answer':
             if (players[current_player_index] === store.state.playerID) break
@@ -423,11 +420,9 @@ answerSocket.onmessage = (event) => {
 function textAnswerTranslate() {
     if (!need_to_share_text_answer) return;
     const input1 = questionComponent.value.getTextInTextArea()
-    const input2 = questionComponent.value.get_stop_answering()
     answerSocket.send(JSON.stringify({
         "type": "textAnswer",
         "text": input1,
-        "stop_answering": input2.toString()
     }))
 
     setTimeout(
@@ -565,6 +560,7 @@ gameSocket.onmessage = async (event) => {
             }
             break;
         case "start_voting":
+            if (players.value[current_player_index].id === store.state.playerID) break;
             questionComponent.value.setVotingTimer()
     }
 };

@@ -157,7 +157,6 @@ class QuestionConsumer(WebsocketConsumer):
         match type_:
             case "textAnswer":
                 text = text_data_json['text']
-                stopAnswering = text_data_json['stop_answering']
 
                 async_to_sync(self.channel_layer.group_send)(
                     self.room_group_name,
@@ -167,12 +166,10 @@ class QuestionConsumer(WebsocketConsumer):
                             'type': 'change_text_answer',
                             'content': {
                                 'text': text,
-                                'stop_answering': stopAnswering,
                             },
                         }
                     }
                 )
-
             case "radioButtonAnswer":
                 buttonId = text_data_json['button_id']
 
