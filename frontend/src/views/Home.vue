@@ -219,13 +219,13 @@ export default {
 
 <template>
   <div class="add-users" v-if="GameCreated">
-    <div class="modal" style="top: 35%; width: 50%; height: 60%; overflow: visible; padding: 15px;">
-  <div class="container modal-container" style="opacity: 1; width: 100%; min-height: 100%; padding: 15px; align-items: center; justify-content: center; position: relative;">
+    <div class="modal" style="top: 35%; width: 60%; height: 70%;">
+  <div class="container modal-container" style="opacity: 1; width: 100%; min-height: 100%; align-items: center; justify-content: center; position: relative;  overflow: auto;">
     <div class="column" style="width: 100%; align-items: center; justify-content: center;">
       <div class="column" style="justify-content: center;">
-      <h3 style="text-align: center; margin-bottom: 15px; margin-top: 15px;">Вы пригласили в игру пользователей:</h3>
+      <h1 style="text-align: center; margin-bottom: 15px; margin-top: 15px;">Вы пригласили в игру пользователей:</h1>
           <ul>
-          <li v-for="user in  groupUsers" :key="user.id">{{ user }}</li>
+          <h3 v-for="user in  groupUsers" :key="user.id">{{ user }}</h3>
           </ul>
     </div>
       <input id="add-user" v-model="newUser" class="input-custom" style="min-height: 20%; width: 80%;" placeholder="Введите уникальный id пользователей, которых хотите пригласить в игру">
@@ -248,9 +248,9 @@ export default {
        <div v-if="incomingInvite">
          <div class="modal" style="top: 35%; width: 60%; min-height: 30%; height: auto; overflow: visible;">
             <div class="container modal-container" style="width: 100%; min-height: 100%; padding: 5%;  align-items: center; justify-content: center;">
-                <h3>Приглашение в игру</h3>
+                <h1>Приглашение в игру</h1>
                 <div class="row" style=" align-items: center; justify-content: center;">
-                <p>{{this.senderName}} приглашает вас присоединиться к игре</p>
+                <h3>{{this.senderName}} приглашает вас присоединиться к игре</h3>
               </div>
                 <div class="row" style=" align-items: center; justify-content: center;">
                 <button class="button-33" role="button" @click="acceptInvite">Принять приглашение</button>

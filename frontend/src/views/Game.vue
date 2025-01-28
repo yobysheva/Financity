@@ -269,6 +269,10 @@ async function endGame () {
     console.log(winner.value)
 }
 
+function redirectToHome(){
+  routes.push({ name: "home" });
+}
+
 function checkToEnd() {
     for (let player in players.value) {
         if (player.balance <= 0) {
@@ -717,7 +721,14 @@ const handleUpdateBalance = (newBalance, player_id) => {
 
 <template>
   <Rules v-if="rulesVisible" @close="showRules"/>
-
+<div v-if="isGameEnded" class="modal" style="width: 50%; height: 50%">
+  <div class="container" style="width: 100%; height: 100%;">
+  <h1 style="margin-top: 30px;">Победитель: игрок {{winner.name}}</h1>
+  <h3>Победитель накопил наибольший капитал размером {{winner.balance}}₽</h3>
+  <button class="button-33" style="margin-bottom: 30px;" @click="redirectToHome">Вернуться в меню</button>
+  </div>
+</div>
+    <div class="overlay" v-if="isGameEnded" @click="redirectToHome"></div>
 <div class="outer-container">
 <div class="transparent-container game-page" style="min-height: 98%; max-height: 98%; min-width: 100%; max-width: 100%; width: 100%;">
   <div class="row" style="height: 100%; width: 100%;">
