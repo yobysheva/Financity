@@ -161,6 +161,7 @@ function setTimerThenClose() {
         setTimeout(setTimerThenClose, 1000)
     }
     else {
+        console.log("вызываю функцию клоуз!")
         stopAnswering.value = false
         timeBeforeClose.value = 10
         close()
@@ -168,7 +169,6 @@ function setTimerThenClose() {
 }
 
 function setVotingTimer() {
-    console.log("tf am i doing")
     stopAnswering.value = true
     if (timeBeforeClose.value > 0) {
         console.log(`${timeBeforeClose.value--} осталось`)
@@ -196,11 +196,12 @@ async function addAnswer() {
 
 function setActiveRadioButtonForId(id) {
     let rates = document.getElementsByName('answer');
-        for(let i = 0; i < rates.length; i++){
-            rates[i].checked = false
-        }
-        if (Number(id) !== -1) rates[id].checked = true
-  }
+    if (Number(id) !== -1) return;
+    for(let i = 0; i < rates.length; i++){
+        rates[i].checked = false
+    }
+    rates[id].checked = true
+}
 
 async function getQuestion(id, type) {
   try {
