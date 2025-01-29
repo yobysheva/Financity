@@ -1,17 +1,17 @@
 # Используем официальный Node.js образ
 FROM node:18-alpine
 
-# Копируем приложение
-COPY . /app
-
 # Устанавливаем рабочую директорию
 WORKDIR /app/frontend
+
+# Копируем только package.json и package-lock.json для установки зависимостей
+COPY frontend/package*.json ./
 
 # Устанавливаем зависимости
 RUN npm install
 
-# Устанавливаем NODE_ENV в production
-ENV NODE_ENV=production
+# Копируем остальную часть приложения
+COPY ./frontend /app/frontend
 
 # Собираем приложение
 RUN npm run build
