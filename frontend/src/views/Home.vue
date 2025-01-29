@@ -50,7 +50,7 @@ export default {
 
   methods: {
     createActiveGamesSocket() {
-        this.activeGamesSocket = new WebSocket(`ws://localhost:8000/ws/home/`);
+        this.activeGamesSocket = new WebSocket(`ws://localhost:8200/ws/home/`);
         this.activeGamesSocket.onmessage = (event) => {
         let text_data = JSON.parse(event.data)
         this.activeGame.push(text_data)
@@ -88,7 +88,7 @@ export default {
 
     createWaitingRequestSocket() {
       let username = store.state.username;
-      this.waitingRequestSocket = new WebSocket(`ws://localhost:8000/ws/waiting_request/${username}/`);
+      this.waitingRequestSocket = new WebSocket(`ws://localhost:8200/ws/waiting_request/${username}/`);
 
 
       this.waitingRequestSocket.onmessage = async (event) => {
@@ -104,7 +104,7 @@ export default {
       }
     },
     sendWaitingRequestSocket(senderUsername, recipientUsername, gameID) {
-      let sendRequestSocket = new WebSocket(`ws://localhost:8000/ws/waiting_request/${recipientUsername}/`);
+      let sendRequestSocket = new WebSocket(`ws://localhost:8200/ws/waiting_request/${recipientUsername}/`);
 
       sendRequestSocket.onopen = () => {
         let data = {

@@ -255,7 +255,6 @@ async function openModalWithValues (title, questionId, questionType) {
 }
 
 async function endGame () {
-    console.log("я кончил")
     await authService.updateGameStatus({
         "game_id": store.state.gameID,
         "status": "finished"
@@ -371,7 +370,7 @@ const messages = ref([
 ])
 
 const gameId = new URLSearchParams(window.location.search).get('id');
-const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${gameId}/`);
+const chatSocket = new WebSocket(`ws://localhost:8200/ws/chat/${gameId}/`);
 chatSocket.onmessage = function (event) {
     let data = JSON.parse(event.data)
     messages.value.push({
@@ -390,7 +389,7 @@ function sendMessage() {
       }))
 }
 
-const answerSocket = new WebSocket(`ws://localhost:8000/ws/game_answer/${gameId}/`);
+const answerSocket = new WebSocket(`ws://localhost:8200/ws/game_answer/${gameId}/`);
 answerSocket.onmessage = (event) => {
     let text_data = JSON.parse(event.data);
     text_data = text_data["info"];
@@ -465,7 +464,7 @@ function sendMinus() {
     ))
 }
 
-const gameSocket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/${store.state.playerID}/`);
+const gameSocket = new WebSocket(`ws://localhost:8200/ws/game/${gameId}/${store.state.playerID}/`);
 gameSocket.onmessage = async (event) => {
     let text_data = JSON.parse(event.data);
     text_data = text_data["info"];
