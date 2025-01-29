@@ -6,11 +6,6 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     container_name: docker-app-backend
-    environment:
-      POSTGRES_NAME: postgres
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-      POSTGRES_HOST: db
     volumes:
       - ./backend:/app/backend
     ports:
