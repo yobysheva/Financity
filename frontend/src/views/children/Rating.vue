@@ -31,7 +31,7 @@ export default {
       try {
         const response = await authService.getUsersStats(store.state.username);
         this.usersStats.push(response.data['user_data']);
-        console.log(this.usersStats);
+        // console.log(this.usersStats);
       } catch (error) {
         if (error.response) {
           alert("Login failed: " + error.response.data || "Unknown error");
