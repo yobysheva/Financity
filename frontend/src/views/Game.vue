@@ -7,7 +7,7 @@ import Player from "@/views/user/Player.vue";
   // import Chance from "@/views/children/Chance.vue";
   import { authService } from "@/services/auth";
 // import QuizQuestion from "@/views/QuizQuestion.vue";
-import {ref} from 'vue';
+import {nextTick, ref} from 'vue';
 // import { getCurrentInstance } from 'vue';
 import store from "@/store";
 import routes from "../router/index.js";
@@ -363,6 +363,16 @@ const moveDot = (targetIndex) => {
   moveNext();
 };
 
+const chatContainer = ref(null);
+
+const scrollToBottom = () => {
+  if (chatContainer.value) {
+    chatContainer.value.scrollTo({
+      top: chatContainer.value.scrollHeight,
+      behavior: 'smooth',
+    });
+  }
+};
 
 const messages = ref([
 ])
@@ -376,6 +386,9 @@ chatSocket.onmessage = function (event) {
       username: data["username"],
       msg: data["message"].toString()
     })
+  nextTick(() => {
+        scrollToBottom();
+      });
 }
 
 function sendMessage() {
@@ -852,8 +865,11 @@ const handleUpdateBalance = (newBalance, player_id) => {
       <button class="button-33" role="button" @click="leaveCall">Выйти из игры</button>
       <button class="button-33" role="button" @click="showRules">?</button>
     </div>
-    <div class="container" style="padding: 5px; min-height: 82vh; max-height:82%; display:flex; flex-direction:column; align-items:center; justify-content: end; position: relative;">
-    <div class="column message-container" id="messageContainer" style="
+    <div class="container" style="padding: 3px; min-height: 82vh; max-height:82%; display:flex; flex-direction:column; align-items:center; justify-content: end; position: relative;">
+    <div class="column message-container"
+         id="messageContainer"
+         ref="chatContainer"
+         style="
     -ms-overflow-style: none;
       scrollbar-width: none;
       align-items:center;
@@ -866,18 +882,17 @@ const handleUpdateBalance = (newBalance, player_id) => {
       font-size: 12px;
       display: flex;
       flex-direction: column;
+      min-width: 90%
       "
     :style="{
       'mask-image': 'linear-gradient(to top, black 0%, black 20%, black 80%, transparent 100%)',
       '-webkit-mask-image': 'linear-gradient(to top, black 0%, black 20%, black 80%, transparent 100%)'
     }">
-      <div style = "min-width: 90%">
         <div v-for="message in messages"
              :key="message.id"
              :class="{'my-message': isMyMessage(message), 'other-message': !isMyMessage(message)}"
              class="message">
-          {{ message.username }}: {{ message.msg }}
-        </div>
+          <span v-if="!isMyMessage(message)">{{ message.username }}:</span> {{ message.msg }}
       </div>
     </div>
     <input class="input-custom" id="123" v-model="newMessage" style="width: 90%;" @keydown.enter="sendMessage">
