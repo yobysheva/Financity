@@ -450,6 +450,7 @@ function textAnswerTranslate() {
 function radioButtonAnswerTranslate() {
     if (!need_to_share_radio_button_answer) return;
     const input = questionComponent.value.getIdOfActiveRadioButton()
+    if (input)
     answerSocket.send(JSON.stringify({
         "type": "radioButtonAnswer",
         "button_id": input.toString()
