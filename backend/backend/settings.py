@@ -86,11 +86,16 @@ CHANNEL_LAYERS = {
 }
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': 'postgres',
+        'NAME': 'postgres',
+        'PASSWORD': 'passw0rd',
+        'HOST': '77.34.97.28',
+        'PORT': '5432',
     }
 }
+
 
 
 
