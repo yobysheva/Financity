@@ -135,11 +135,12 @@ onMounted(() => {
 
 function setTextInTextArea(text) {
   const textarea = document.querySelector('.input-custom');
+  if (textarea)
   textarea.value = text
 }
 
 function getTextInTextArea() {
-  return document.querySelector('.input-custom').value
+  return document.querySelector('.input-custom')?.value
 }
 
 function getIdOfActiveRadioButton() {
