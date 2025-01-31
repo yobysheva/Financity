@@ -7,7 +7,7 @@ import Player from "@/views/user/Player.vue";
   // import Chance from "@/views/children/Chance.vue";
   import { authService } from "@/services/auth";
 // import QuizQuestion from "@/views/QuizQuestion.vue";
-import {ref} from 'vue';
+import {nextTick, ref} from 'vue';
 // import { getCurrentInstance } from 'vue';
 import store from "@/store";
 import routes from "../router/index.js";
@@ -66,13 +66,8 @@ let need_to_share_radio_button_answer = false
 let isMyTurn = ref(false)
 let winner = ref(false)
 
-// async function getProfession(){
-//   await authService.getRandomProfession(store.state.playerID);
-// }
-//
-// onMounted(() => {
-//   getProfession();
-// })
+const playerComponent = ref([])
+const balanceChange = ref([])
 
 authService.getInfoAboutGame(
       store.state.gameID
@@ -90,12 +85,13 @@ authService.getInfoAboutGame(
             });
             currentIndexMassive.value.push(0);
             totalSumMassive.value.push(0);
-            shine.value.push(false)
+            shine.value.push(false);
+            balanceChange.value.push('');
+            playerComponent.value.push(null);
         }
     )
     isMyTurn.value = (players.value.length === 1)
 })
-
 
 let newMessage = ref("")
 
@@ -127,8 +123,6 @@ function startGame() {
     isGameStarted.value = true
 }
 
-
-
 // if(!props.userType){
   // let sessionID = props.sessionId;
 
@@ -149,6 +143,7 @@ const positions = [
 //   top: `${positions[0][1]}%`,
 //   transition: "all 0.3s ease"
 // });
+
 const dotStyleMassive = ref([{
   width: "auto",
   height: "8%",
@@ -168,13 +163,11 @@ const lastRoll = ref(null);
 let lastX = ref(0);
 let lastY = ref(0);
 
-
 const isSpinDisabled = ref(false);
 const spinButtonLabel = ref("Крутить");
 let spinTimer = null;
 
 const modalVisible = ref(false);
-
 
 const modalTitle = ref("");
 // const modalQuestion = ref("");
@@ -371,6 +364,16 @@ const moveDot = (targetIndex) => {
   moveNext();
 };
 
+const chatContainer = ref(null);
+
+const scrollToBottom = () => {
+  if (chatContainer.value) {
+    chatContainer.value.scrollTo({
+      top: chatContainer.value.scrollHeight,
+      behavior: 'smooth',
+    });
+  }
+};
 
 const messages = ref([
 ])
@@ -384,6 +387,9 @@ chatSocket.onmessage = function (event) {
       username: data["username"],
       msg: data["message"].toString()
     })
+  nextTick(() => {
+        scrollToBottom();
+      });
 }
 
 function sendMessage() {
@@ -484,10 +490,19 @@ gameSocket.onmessage = async (event) => {
         case "on_turn_start":
           // eslint-disable-next-line no-case-declarations
             const turn_count = info["turn_count"];
+            console.log("on_turn_start")
             // totalSum.value += turn_count;
-            if(isMyTurn.value && totalSumMassive.value[current_player_index] % 26 + turn_count >= 26){
-              const response = await authService.changeBalance(players.value[current_player_index].id);
+            if(totalSumMassive.value[current_player_index] % 26 + turn_count >= 26){
+              let response = "";
+              if (isMyTurn.value){
+                response = await authService.changeBalance(players.value[current_player_index].id);
+              }
+              else{
+                response = await authService.checkBalance(players.value[current_player_index].id);
+              }
               players.value[current_player_index].balance = response.data['balance'];
+              playerComponent.value[current_player_index].makeBalanceChanceVisible();
+              balanceChange.value[current_player_index] = response.data['result'];
             }
             totalSumMassive.value[current_player_index] += turn_count;
             spin(turn_count);
@@ -512,11 +527,8 @@ gameSocket.onmessage = async (event) => {
             }
             need_to_share_text_answer = false
             need_to_share_radio_button_answer = false
-            players.value[info["player_index"]].balance = info["balance"];
+            players.value[info['player_index']].balance = info['balance'];
             current_player_index = (current_player_index + 1) % players.value.length;
-            players.value.forEach((player, index) => {
-              shine.value[index] = player.id === players.value[current_player_index].id;
-            });
             // eslint-disable-next-line no-case-declarations
             let scip = true;
             while (scip) {
@@ -531,10 +543,15 @@ gameSocket.onmessage = async (event) => {
             }
             questionComponent.value.update_variables()
 
+            players.value.forEach((player, index) => {
+              shine.value[index] = player.id === players.value[current_player_index].id;
+            });
+
             isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
             modalVisible.value = false;
             isSpinDisabled.value = false;
             break;
+
         case "notification_about_connect_to_game":
             if (Number(info['id']) === store.state.playerID) break;
             players.value.push(info);
@@ -548,6 +565,8 @@ gameSocket.onmessage = async (event) => {
             });
             currentIndexMassive.value.push(0);
             totalSumMassive.value.push(0);
+            balanceChange.value.push('');
+            playerComponent.value.push(null);
             break;
         case "start_game":
             startGame()
@@ -558,6 +577,11 @@ gameSocket.onmessage = async (event) => {
             let index = checkPlayerLeave(Number(info['player_id']))
             if (index !== -1) {
               players.value.splice(index, 1)
+              dotStyleMassive.value.splice(index, 1)
+              currentIndexMassive.value.splice(index, 1)
+              totalSumMassive.value.splice(index, 1)
+              balanceChange.value.splice(index, 1)
+              playerComponent.value.splice(index, 1)
             }
              if (checkToEnd()) {
                 await endGame()
@@ -734,6 +758,7 @@ const handleUpdateBalance = (newBalance, player_id) => {
   <div class="row" style="height: 100%; width: 100%;">
     <div class="column" style="height: 85%; width: 13%; padding: 5px;">
       <Player v-for="(player, index) in players"
+              :ref="(el) => (playerComponent[index] = el)"
              :key="index"
               :name = player.name
               :jobName = player.profession
@@ -741,6 +766,7 @@ const handleUpdateBalance = (newBalance, player_id) => {
               :jobPayment = player.salary
               :av="images[index]"
               :shine="shine[index]"
+              :balanceChange="balanceChange[index]"
       />
     </div>
     <div class="column" style="height: 100%; width: 60%; margin-left: 2%; padding: 5px;">
@@ -753,8 +779,6 @@ const handleUpdateBalance = (newBalance, player_id) => {
     </button>
       <div class="container" style="width: 100%; height: 100%; position: relative">
         <img class="image" src="../assets/financity_pole.png" style="width: 100%; height: 100%">
-<!--        <Fields/>-->
-<!--        <img src="../assets/kletki.svg" style="position:absolute; top: 0px; left: 0px; width: 100%; height: 100%">-->
          <img
              v-for="(player, index) in players"
              :key="index"
@@ -823,15 +847,30 @@ const handleUpdateBalance = (newBalance, player_id) => {
       @click="manualSpin">
       {{ spinButtonLabel }}
     </button>
-      <Question ref="questionComponent" @update-balance="handleUpdateBalance" :questionId="modalQuestionId" :questionType="modalQuestionType" :caseTitle="modalTitle" :visible="modalVisible" :color="modalColor" :isMyTurn="isMyTurn" @setVotingTimer="setVotingTimer" @close="closeModal" @minus="sendMinus" @plus="sendPlus" :answerTextVisible="false"/>
+      <Question ref="questionComponent"
+                @update-balance="handleUpdateBalance"
+                :questionId="modalQuestionId"
+                :questionType="modalQuestionType"
+                :caseTitle="modalTitle"
+                :visible="modalVisible"
+                :color="modalColor"
+                :isMyTurn="isMyTurn"
+                @setVotingTimer="setVotingTimer"
+                @close="closeModal"
+                @minus="sendMinus"
+                @plus="sendPlus"
+                :answerTextVisible="false"/>
     </div>
   <div class="column" style="width: 22%; min-height: 95vh; height: 95%; margin-left: 2%;">
     <div class="row buttons">
       <button class="button-33" role="button" @click="leaveCall">Выйти из игры</button>
       <button class="button-33" role="button" @click="showRules">?</button>
     </div>
-    <div class="container" style="padding: 5px; min-height: 82vh; max-height:82%; display:flex; flex-direction:column; align-items:center; justify-content: end; position: relative;">
-    <div class="column message-container" id="messageContainer" style="
+    <div class="container" style="padding: 3px; min-height: 82vh; max-height:82%; display:flex; flex-direction:column; align-items:center; justify-content: end; position: relative;">
+    <div class="column message-container"
+         id="messageContainer"
+         ref="chatContainer"
+         style="
     -ms-overflow-style: none;
       scrollbar-width: none;
       align-items:center;
@@ -844,18 +883,17 @@ const handleUpdateBalance = (newBalance, player_id) => {
       font-size: 12px;
       display: flex;
       flex-direction: column;
+      min-width: 90%
       "
     :style="{
       'mask-image': 'linear-gradient(to top, black 0%, black 20%, black 80%, transparent 100%)',
       '-webkit-mask-image': 'linear-gradient(to top, black 0%, black 20%, black 80%, transparent 100%)'
     }">
-      <div style = "min-width: 90%">
         <div v-for="message in messages"
              :key="message.id"
              :class="{'my-message': isMyMessage(message), 'other-message': !isMyMessage(message)}"
              class="message">
-          {{ message.username }}: {{ message.msg }}
-        </div>
+          <span v-if="!isMyMessage(message)">{{ message.username }}:</span> {{ message.msg }}
       </div>
     </div>
     <input class="input-custom" id="123" v-model="newMessage" style="width: 90%;" @keydown.enter="sendMessage">

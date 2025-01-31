@@ -1,14 +1,34 @@
 <script setup>
-import {defineProps} from 'vue';
+import {defineExpose, defineProps, ref} from 'vue';
 defineProps({
   name: String,
   jobName: String,
   jobPayment: Number,
   balance: Number,
   av: String,
-  shine: Boolean
+  shine: Boolean,
+  balanceChange: String
 });
 
+const balanceChanged = ref(false);
+const visibleTimer = ref(5);
+
+function makeBalanceChanceVisible(){
+  balanceChanged.value = true
+  console.log('Баланс изменился!')
+    if (visibleTimer.value > 0) {
+        // console.log(`${visibleTimer.value--} осталось`)
+        visibleTimer.value--;
+        setTimeout(makeBalanceChanceVisible, 1000)
+    }
+    else {
+        balanceChanged.value = false
+        visibleTimer.value = 5
+    }
+}
+defineExpose({
+    makeBalanceChanceVisible
+});
 </script>
 
 <template>
@@ -26,12 +46,18 @@ defineProps({
         <p>{{jobName}} {{jobPayment}}₽</p>
     <p>Баланс: {{balance}}₽</p>
   </div>
+  <div class="balance-change" v-if="balanceChanged">
+    <div class="container">
+      <p>{{balanceChange}}</p>
+    </div>
+  </div>
 </div>
 </template>
 
 <style scoped>
 .player-container{
   background-color: white;
+  position: relative;
   border-radius: 30px;
   box-shadow: rgba(44, 187, 99, .1) 0 2px 4px, rgba(44, 187, 99, .05) 0 1px 2px;
   color: #333;
@@ -45,6 +71,14 @@ defineProps({
   width: 100%;
   height: 10%;
   margin: 5px;
+}
+
+.balance-change{
+  position: absolute;
+  top: 0px;
+  left: 110%;
+  z-index: 1000;
+  opacity: 0.9;
 }
 
 .active{
