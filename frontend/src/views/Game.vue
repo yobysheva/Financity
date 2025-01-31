@@ -7,7 +7,7 @@ import Player from "@/views/user/Player.vue";
   // import Chance from "@/views/children/Chance.vue";
   import { authService } from "@/services/auth";
 // import QuizQuestion from "@/views/QuizQuestion.vue";
-import {onMounted, ref} from 'vue';
+import {ref} from 'vue';
 // import { getCurrentInstance } from 'vue';
 import store from "@/store";
 import routes from "../router/index.js";
@@ -47,9 +47,22 @@ let votes = ref({
 // });
 
 let players = ref([])
-onMounted(() => {
-  players.value = []
-})
+if (store.state.playerID !== '') {
+    localStorage.setItem('player_id', JSON.stringify(store.state.playerID))
+    localStorage.setItem('game_id', JSON.stringify(store.state.gameID))
+    console.log(store.state.playerID)
+    console.log(JSON.parse(localStorage.getItem("player_id")))
+    console.log("я записал в локал сторедж")
+}
+else {
+    const PID = JSON.parse(localStorage.getItem("player_id"))
+    const GID = JSON.parse(localStorage.getItem("game_id"))
+    store.dispatch("updatePlayerID", PID)
+    store.dispatch("updateGameID", GID)
+    console.log(store.state.playerID)
+    console.log("я взял из локал стореджа")
+}
+players.value = []
 let current_player_index = 0
 let shine = ref([])
 let isGameStarted = ref(false)
@@ -255,7 +268,6 @@ async function openModalWithValues (title, questionId, questionType) {
 }
 
 async function endGame () {
-    console.log("я кончил")
     await authService.updateGameStatus({
         "game_id": store.state.gameID,
         "status": "finished"
@@ -275,7 +287,8 @@ function redirectToHome(){
 
 function checkToEnd() {
     for (let player in players.value) {
-        if (player.balance <= 0) {
+        console.log(players.value[player].balance)
+        if (players.value[player].balance <= 0) {
             return true
         }
     }

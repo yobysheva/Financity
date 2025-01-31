@@ -144,6 +144,7 @@ function getTextInTextArea() {
 
 function getIdOfActiveRadioButton() {
     let rates = document.getElementsByName('answer');
+    if (rates.length === 0) return;
     for(let i = 0; i < rates.length; i++){
         if (rates[i].checked){
             return i
@@ -196,7 +197,7 @@ async function addAnswer() {
 
 function setActiveRadioButtonForId(id) {
     let rates = document.getElementsByName('answer');
-    if (Number(id) === -1) return;
+    if (Number(id) === -1 || rates.length === 0) return;
     console.log(rates)
     for(let i = 0; i < rates.length; i++){
         rates[i].checked = false
