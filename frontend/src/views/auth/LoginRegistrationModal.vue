@@ -55,7 +55,7 @@
 </template>
 
 <script>
-import { authService } from "@/services/auth";
+import {authService} from "@/services/auth";
 import store from "../../store.js";
 
 export default {
@@ -100,7 +100,7 @@ export default {
         });
         if (response.status === 202) {
           this.sendUsername();
-          this.$router.push({ name: "home" });
+          this.$router.push({name: "home"});
           this.username = '';
           this.password = '';
         }
@@ -114,31 +114,35 @@ export default {
         }
       }
     },
-    checkOrientation(){
+    checkOrientation() {
       this.isLandscape = window.innerWidth > window.innerHeight;
     },
     async register() {
       if (this.password2 === this.password) {
-        try {
-          const response = await authService.register({
-            username: this.username,
-            password: this.password,
-          });
-          if (response.status === 201) {
-            this.openLogin();
-            alert("User registered successfully!");
-            this.username = '';
-            this.password = '';
-            this.password2 = '';
+        if (this.username.length <= 15) {
+          try {
+            const response = await authService.register({
+              username: this.username,
+              password: this.password,
+            });
+            if (response.status === 201) {
+              this.openLogin();
+              alert("User registered successfully!");
+              // this.username = '';
+              // this.password = '';
+              this.password2 = '';
+            }
+          } catch (error) {
+            if (error.response) {
+              alert("Registration failed: " + error.response.data || "Unknown error");
+            } else if (error.request) {
+              alert("No response from server. Please try again later.");
+            } else {
+              alert("Error setting up request: " + error.message);
+            }
           }
-        } catch (error) {
-          if (error.response) {
-            alert("Registration failed: " + error.response.data || "Unknown error");
-          } else if (error.request) {
-            alert("No response from server. Please try again later.");
-          } else {
-            alert("Error setting up request: " + error.message);
-          }
+        } else {
+          alert("Username too long")
         }
       } else {
         alert("Password must match");
@@ -187,7 +191,7 @@ dialog {
   }
 }
 
-.button-33{
+.button-33 {
   font-size: 16px;
   margin: 10px;
 }
@@ -196,7 +200,7 @@ dialog {
   .button-33 {
     margin: 17px 26px;
     padding: 5px 17px;
-    font-size:13px;
+    font-size: 13px;
   }
 }
 
@@ -215,16 +219,18 @@ dialog {
     font-size: 9px;
   }
 }
+
 input {
   margin: 25px 30px;
   padding: 10px 20px;
-  font-size:14px;
+  font-size: 14px;
 }
+
 @media (max-width: 1200px) {
   input {
     margin: 17px 26px;
     padding: 5px 17px;
-    font-size:12px;
+    font-size: 12px;
   }
 }
 
