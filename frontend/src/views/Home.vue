@@ -50,7 +50,7 @@ export default {
 
   methods: {
     createActiveGamesSocket() {
-        this.activeGamesSocket = new WebSocket(`ws://localhost:8000/ws/home/`);
+        this.activeGamesSocket = new WebSocket(`ws://localhost:8200/ws/home/`);
         this.activeGamesSocket.onmessage = (event) => {
         let text_data = JSON.parse(event.data)
         this.activeGame.push(text_data)
@@ -88,7 +88,7 @@ export default {
 
     createWaitingRequestSocket() {
       let username = store.state.username;
-      this.waitingRequestSocket = new WebSocket(`ws://localhost:8000/ws/waiting_request/${username}/`);
+      this.waitingRequestSocket = new WebSocket(`ws://localhost:8200/ws/waiting_request/${username}/`);
 
 
       this.waitingRequestSocket.onmessage = async (event) => {
@@ -104,7 +104,7 @@ export default {
       }
     },
     sendWaitingRequestSocket(senderUsername, recipientUsername, gameID) {
-      let sendRequestSocket = new WebSocket(`ws://localhost:8000/ws/waiting_request/${recipientUsername}/`);
+      let sendRequestSocket = new WebSocket(`ws://localhost:8200/ws/waiting_request/${recipientUsername}/`);
 
       sendRequestSocket.onopen = () => {
         let data = {
@@ -267,7 +267,7 @@ export default {
 
 <!--      <CurrentGames/>-->
 
-      <div class="container games" style="max-height: 50vh; min-height: 50vh; overflow-y: scroll;">
+      <div class="container_games" style="overflow-y: scroll; overflow-x: hidden">
         <div v-for="game in this.activeGame"
              :key="game.game_id">
           <div class="row" style="justify-content: flex-start;">
@@ -280,7 +280,7 @@ export default {
             <p>Создана игра: {{game.game_id}}</p>
           </div>
             <div style="justify-content: flex-end;">
-              <button class="button-33" role="button" style="font-size: 12px;" @click="joinToGame(game.game_id)">Присоединиться к игре</button>
+              <button class="button-33" role="button" @click="joinToGame(game.game_id)">Присоединиться к игре</button>
             </div>
           </div>            
         </div>
@@ -297,6 +297,19 @@ export default {
 </template>
 
 <style scoped>
+.container_games{
+  max-height: 50vh;
+  min-height: 50vh;
+  @media(max-height: 800px) {
+    max-height: 45vh;
+    min-height: 45vh;
+  }
+  @media(max-height: 600px) {
+    max-height: 40vh;
+    min-height: 40vh;
+  }
+}
+
 .outer-container {
   //opacity: 0.9;
   //display: flex;
@@ -323,10 +336,23 @@ export default {
   align-items: center;
 }
 p{
-  font-size: 12px;
-  font-weight: bold;
+  font-size: 14px;
   margin: 15px;
+  @media(max-width: 1200px) {
+    font-size: 10px;
+    margin: 12px;
+  }
+  @media(max-width: 900px) {
+    font-size: 8px;
+    margin: 10px;
+  }
+  @media(max-width: 770px) {
+    font-size: 6px;
+    margin: 8px;
+  }
+  font-weight: bold;
 }
+
 .column {
   justify-content: space-between;
 }
@@ -338,10 +364,44 @@ p{
 h3 {
   font-weight: bold;
 }
+
+@media (max-width: 1200px) {
+  h3 {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 900px) {
+  h3 {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 770px) {
+  h3 {
+    font-size: 9px;
+  }
+}
+
 .photo{
   width: 40px;
   height: 40px;
   margin: 10px;
+  @media(max-width: 1200px) {
+    width: 30px;
+    height: 30px;
+    margin: 8px;
+  }
+  @media(max-width: 900px) {
+    width: 25px;
+    height: 25px;
+    margin: 6px;
+  }
+  @media(max-width: 770px) {
+    width: 20px;
+    height: 20px;
+    margin: 5px;
+  }
   background-color: white;
   border-radius: 10px;
   box-shadow: rgba(44, 187, 99, .1) 0 2px 4px, rgba(44, 187, 99, .05) 0 1px 2px;
@@ -403,6 +463,35 @@ h3 {
 ::-webkit-scrollbar-thumb {
   border-radius: 10px;
   background: linear-gradient(180deg, rgba(185, 255, 185, .6), rgba(173, 255, 176, .6));
+}
+
+.button-33{
+  font-size: 11px;
+  margin: 10px;
+}
+
+@media (max-width: 1200px) {
+  .button-33 {
+    margin: 17px 26px;
+    padding: 5px 17px;
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 900px) {
+  .button-33 {
+    margin: 13px 23px;
+    padding: 3px 13px;
+    font-size: 7px;
+  }
+}
+
+@media (max-width: 770px) {
+  .button-33 {
+    margin: 10px 19px;
+    padding: 3px 10px;
+    font-size: 5px;
+  }
 }
 
 </style>

@@ -384,7 +384,7 @@ const messages = ref([
 ])
 
 const gameId = new URLSearchParams(window.location.search).get('id');
-const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${gameId}/`);
+const chatSocket = new WebSocket(`ws://localhost:8200/ws/chat/${gameId}/`);
 chatSocket.onmessage = function (event) {
     let data = JSON.parse(event.data)
     messages.value.push({
@@ -403,7 +403,7 @@ function sendMessage() {
       }))
 }
 
-const answerSocket = new WebSocket(`ws://localhost:8000/ws/game_answer/${gameId}/`);
+const answerSocket = new WebSocket(`ws://localhost:8200/ws/game_answer/${gameId}/`);
 answerSocket.onmessage = (event) => {
     let text_data = JSON.parse(event.data);
     text_data = text_data["info"];
@@ -479,7 +479,7 @@ function sendMinus() {
     ))
 }
 
-const gameSocket = new WebSocket(`ws://localhost:8000/ws/game/${gameId}/${store.state.playerID}/`);
+const gameSocket = new WebSocket(`ws://localhost:8200/ws/game/${gameId}/${store.state.playerID}/`);
 gameSocket.onmessage = async (event) => {
     let text_data = JSON.parse(event.data);
     text_data = text_data["info"];
@@ -519,7 +519,6 @@ gameSocket.onmessage = async (event) => {
                 await endGame()
                 return
             }
-
             need_to_share_text_answer = false
             need_to_share_radio_button_answer = false
             players.value[info["player_index"]].balance = info["balance"];
@@ -914,6 +913,30 @@ const handleUpdateBalance = (newBalance, player_id) => {
   margin: 10px;
 }
 
+@media (max-width: 1200px) {
+  .button-33 {
+    margin: 17px 26px;
+    padding: 5px 17px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 900px) {
+  .button-33 {
+    margin: 13px 23px;
+    padding: 3px 13px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 770px) {
+  .button-33 {
+    margin: 10px 19px;
+    padding: 3px 10px;
+    font-size: 8px;
+  }
+}
+
 .buttons{
   flex-wrap: nowrap;
   align-items: center;
@@ -1111,6 +1134,5 @@ const handleUpdateBalance = (newBalance, player_id) => {
   margin-right: auto;
   margin-bottom: 10px;
 }
-
 
 </style>

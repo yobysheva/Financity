@@ -68,6 +68,24 @@ export default {
   padding: 5px;
 }
 
+@media (max-width: 1200px) {
+  h3 {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 900px) {
+  h3 {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 770px) {
+  h3 {
+    font-size: 9px;
+  }
+}
+
 .photo{
   width: 40px;
   height: 40px;

@@ -66,22 +66,59 @@ getData();
   margin-top: 20px;
 }
 
-.photo {
+.photo{
   position: relative;
   width: 150px;
   height: 150px;
   margin: 30px;
+  @media(max-width: 1200px) {
+    width: 120px;
+    height: 120px;
+    margin: 25px;
+  }
+  @media(max-width: 900px) {
+    width: 100px;
+    height: 100px;
+    margin: 20px;
+  }
+  @media(max-width: 770px) {
+    width: 75px;
+    height: 75px;
+    margin: 16px;
+  }
   background-color: white;
   border-radius: 10px;
-  box-shadow: rgba(44, 187, 99, 0.1) 0 2px 4px, rgba(44, 187, 99, 0.05) 0 1px 2px;
-  overflow: hidden;
+  box-shadow: rgba(44, 187, 99, .1) 0 2px 4px, rgba(44, 187, 99, .05) 0 1px 2px;
+  color: #333;
+  /*font-family: CerebriSans-Regular, -apple-system, system-ui, Roboto, sans-serif;*/
   padding: 0;
+  font-size: 16px;
+  border: 2px solid rgba(44, 187, 99, .3);
+  transition: all 250ms;
+}
+
+.photo:focus {
+  outline: none;
+  border-color: rgba(44, 187, 99, .6);
+  box-shadow: rgba(44, 187, 99, .35) 0 0 5px;
+}
+
+.photo::placeholder {
+  color: #aaa;
+  opacity: 0.8;
+}
+
+.photo:hover {
+  //background-color: rgba(100, 255, 200, .9);
+  outline: none;
+  border-color: rgba(44, 187, 99, .6);
+  box-shadow: rgba(44, 187, 99, .35) 0 0 5px;
 }
 
 .photo img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   border-radius: inherit;
 }
 
@@ -103,6 +140,15 @@ getData();
 
 p{
   font-size: 14px;
+  @media(max-width: 1200px) {
+    font-size: 10px;
+  }
+  @media(max-width: 900px) {
+    font-size: 8px;
+  }
+  @media(max-width: 770px) {
+    font-size: 6px;
+  }
   font-weight: bold;
 }
 
