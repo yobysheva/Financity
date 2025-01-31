@@ -315,14 +315,13 @@ function getWinner() {
 async function closeModal(){
     if (modalQuestionType.value === 1) {
       if(isMyTurn.value){
-        const response = await authService.voteHandler(players.value[current_player_index].id, votes.value.pluses, votes.value.minuses);
+        const response = await authService.voteHandler(players.value[current_player_index].id, votes.value.pluses, votes.value.minuses, store.state.mySecret);
         players.value[current_player_index].balance = response.data['balance'];
       }
-       // вот это не удаляем это прикол реально!
-        votes.value = {
+      votes.value = {
           "pluses": 0,
           "minuses": 0
-        }
+      }
     }
 
     modalVisible.value = false;
@@ -413,13 +412,13 @@ answerSocket.onmessage = (event) => {
             if (players[current_player_index] === store.state.playerID) break
             // eslint-disable-next-line no-case-declarations
             let text = content['text']
-            questionComponent.value.setTextInTextArea(text)
+            questionComponent.value?.setTextInTextArea(text)
             break;
         case 'radio_button_answer':
             if (players[current_player_index] === store.state.playerID) break
             // eslint-disable-next-line no-case-declarations
             let button_id = content['button_id']
-            questionComponent.value.setActiveRadioButtonForId(button_id)
+            questionComponent.value?.setActiveRadioButtonForId(button_id)
             break;
         case 'vote':
             if (players.value[current_player_index].id !== store.state.playerID) {
@@ -434,7 +433,7 @@ answerSocket.onmessage = (event) => {
 
 function textAnswerTranslate() {
     if (!need_to_share_text_answer) return;
-    const input1 = questionComponent.value.getTextInTextArea()
+    const input1 = questionComponent.value?.getTextInTextArea()
     answerSocket.send(JSON.stringify({
         "type": "textAnswer",
         "text": input1,
@@ -447,7 +446,7 @@ function textAnswerTranslate() {
 
 function radioButtonAnswerTranslate() {
     if (!need_to_share_radio_button_answer) return;
-    const input = questionComponent.value.getIdOfActiveRadioButton()
+    const input = questionComponent.value?.getIdOfActiveRadioButton()
     if (input)
     answerSocket.send(JSON.stringify({
         "type": "radioButtonAnswer",
@@ -496,7 +495,7 @@ gameSocket.onmessage = async (event) => {
             if(totalSumMassive.value[current_player_index] % 26 + turn_count >= 26){
               let response = "";
               if (isMyTurn.value){
-                response = await authService.changeBalance(players.value[current_player_index].id);
+                response = await authService.changeBalance(players.value[current_player_index].id, store.state.mySecret);
               }
               else{
                 response = await authService.checkBalance(players.value[current_player_index].id);

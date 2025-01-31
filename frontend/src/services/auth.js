@@ -69,8 +69,8 @@ export const authService = {
     checkScip(player_id){
       return axios.post(`${apiUrl}gameApp/checkScip/`, {player_id: player_id})
     },
-    changeBalance(player_id){
-      return axios.post(`${apiUrl}gameApp/changeBalance/`, { player_id: player_id })
+    changeBalance(player_id, secret){
+      return axios.post(`${apiUrl}gameApp/changeBalance/`, { player_id: player_id, secret: secret })
     },
     checkBalance(player_id){
       return axios.get(`${apiUrl}gameApp/checkBalance/`, {params: { player_id: player_id }})
@@ -78,8 +78,8 @@ export const authService = {
     getAnswerOutcome(answer_id){
         return axios.get(`${apiUrl}gameApp/getAnswerOutcome/`, {params: {answer_id: answer_id}})
     },
-    voteHandler(player_id, plus, minus){
-        return axios.post(`${apiUrl}gameApp/voteHandler/`, { player_id: player_id, plus: plus, minus: minus })
+    voteHandler(player_id, plus, minus, secret){
+        return axios.post(`${apiUrl}gameApp/voteHandler/`, { player_id: player_id, plus: plus, minus: minus, secret: secret })
     },
     addWinToGameWinner(userData) {
         return axios.put(`${apiUrl}gameApp/addWinToGameWinner`, userData)
