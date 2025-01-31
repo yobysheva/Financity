@@ -77,7 +77,7 @@ def addActionAnswer(request):
             player.balance += answer.sum_now
             player.save()
             if answer.sum_later or answer.scip:
-                action = Action.objects.create(player=player, sum=answer.sum_later, period=answer.period, scip = answer.scip)
+                action = Action.objects.create(player=player, sum=answer.sum_later, period=answer.period, scip = answer.scip, category=answer.category)
             return JsonResponse({'text': answer.action_text, 'balance': player.balance})
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -98,7 +98,7 @@ def addActionChance(request):
             player = Player.objects.get(id=player_id)
             chance = Chance.objects.get(id=chance_id)
             if chance.period or chance.scip:
-                action = Action.objects.create(player=player, sum=chance.sum, period=chance.period, scip = chance.scip)
+                action = Action.objects.create(player=player, sum=chance.sum, period=chance.period, scip = chance.scip, category=chance.category)
                 return Response({"action_id": action.id, "balance": player.balance}, status=status.HTTP_201_CREATED)
             if chance.period == 0:
                 player.balance += chance.sum
@@ -133,8 +133,10 @@ def changeBalance(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode())
         try:
+            result = ""
             player = Player.objects.get(id=data['player_id'])
             player.balance += player.profession.salary
+            result += f"Заброботная плата: +{int(player.profession.salary)},\n"
             actions = Action.objects.filter(player=player)
             income = 0
             outcome = 0
@@ -145,12 +147,45 @@ def changeBalance(request):
                     action.save()
                     if action.sum > 0:
                         income += action.sum
-                    else:
+                        result += f"{action.category}: +{int(action.sum)},\n"
+                    elif action.sum < 0:
                         outcome -= action.sum
+                        result += f"{action.category}: {int(action.sum)},\n"
             player.save()
-            return JsonResponse({'balance': player.balance, 'salary': player.profession.salary, 'income': income, 'outcome': outcome})
+            return JsonResponse({'balance': player.balance, 'salary': player.profession.salary,
+                                 'income': income, 'outcome': outcome, 'result': result})
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+def checkBalance(request):
+    if request.method == 'GET':
+        player_id = request.GET.get('player_id', None)
+        try:
+            result = ""
+            player = Player.objects.get(id=player_id)
+            player.balance += player.profession.salary
+            result += f"Заброботная плата: +{int(player.profession.salary)},\n"
+            actions = Action.objects.filter(player=player)
+            income = 0
+            outcome = 0
+            for action in actions:
+                if action.period > 0:
+                    player.balance += action.sum
+                    # action.period -= 1
+                    # action.save()
+                    if action.sum > 0:
+                        income += action.sum
+                        result += f"{action.category}: +{int(action.sum)},\n"
+                    elif action.sum < 0:
+                        outcome -= action.sum
+                        result += f"{action.category}: {int(action.sum)},\n"
+            # player.save()
+            return JsonResponse({'balance': player.balance, 'salary': player.profession.salary,
+                                 'income': income, 'outcome': outcome, 'result': result})
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 api_view(['GET'])
@@ -258,6 +293,7 @@ def getInfoAboutGame(request):
              })
          except Game.DoesNotExist:
              return JsonResponse({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
 
 @api_view(['Get'])
 def getRandomChance(request):

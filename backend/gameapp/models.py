@@ -68,6 +68,7 @@ class Answer(models.Model):
     period = models.IntegerField()
     scip = models.BooleanField(default=False)
     action_text = models.TextField()
+    category = models.CharField(max_length=100, default="Ответ на вопрос")
     def __str__(self):
         return f"Answer {self.id} for Question {self.question.id}"
 
@@ -78,6 +79,7 @@ class Action(models.Model):
     sum = models.FloatField()
     period = models.IntegerField()
     scip = models.BooleanField(default=False)
+    category = models.CharField(max_length=100, default="Действие")
     def __str__(self):
         return f"Action {self.id} by Player {self.player.id}"
 
@@ -88,6 +90,7 @@ class Chance(models.Model):
     sum = models.FloatField()
     period = models.IntegerField()
     scip = models.BooleanField(default=False)
+    category = models.CharField(max_length=100, default="Шанс")
     def __str__(self):
         return f"Chance {self.id} with action {self.text}"
 

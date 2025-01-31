@@ -72,6 +72,9 @@ export const authService = {
     changeBalance(player_id){
       return axios.post(`${apiUrl}gameApp/changeBalance/`, { player_id: player_id })
     },
+    checkBalance(player_id){
+      return axios.get(`${apiUrl}gameApp/checkBalance/`, {params: { player_id: player_id }})
+    },
     getAnswerOutcome(answer_id){
         return axios.get(`${apiUrl}gameApp/getAnswerOutcome/`, {params: {answer_id: answer_id}})
     },
