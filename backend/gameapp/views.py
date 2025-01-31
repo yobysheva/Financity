@@ -406,6 +406,14 @@ def addWinToGameWinner(request):
         try:
             player = Player.objects.get(id=data['player_id'])
             user = User.objects.get(player=player)
+
+            if user.secret != data['secret']:
+                print('плохой ответ')
+                return Response(
+                    {"detail": "You are not the winner"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            print('хороший ответ')
             user.winGames += 1
             user.save()
             return JsonResponse({'status': 200, 'count_games': user.countGames, "win_games": user.winGames}, status=status.HTTP_200_OK)

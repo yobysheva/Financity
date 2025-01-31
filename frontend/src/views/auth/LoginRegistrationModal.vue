@@ -82,6 +82,9 @@ export default {
     sendUsername() {
       store.dispatch("updateUsername", this.username);
     },
+    sendSecret() {
+      store.dispatch("updateSecret", this.secret)
+    },
     openLogin() {
       this.isRegistrationModalVisible = false;
       this.isLoginModalVisible = true;
@@ -99,7 +102,9 @@ export default {
           password: this.password,
         });
         if (response.status === 202) {
+          this.secret = response.data.secret
           this.sendUsername();
+          this.sendSecret();
           this.$router.push({name: "home"});
           this.username = '';
           this.password = '';

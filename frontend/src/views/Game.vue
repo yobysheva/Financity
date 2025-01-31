@@ -248,7 +248,7 @@ async function openModalWithValues (title, questionId, questionType) {
   modalTitle.value = title
   modalQuestionId.value = questionId
   modalQuestionType.value = questionType
-  await questionComponent.value.getQuestion(questionId, questionType)
+  await questionComponent.value?.getQuestion(questionId, questionType)
   setTimeout(() => {
         modalVisible.value = true;
     }, 500);
@@ -264,7 +264,8 @@ async function endGame () {
     isGameEnded.value = true
     if (winner.value)
     await authService.addWinToGameWinner({
-        "player_id": winner.value.id
+        "player_id": winner.value.id,
+        'secret': store.state.mySecret
     })
 }
 
@@ -573,6 +574,7 @@ gameSocket.onmessage = async (event) => {
             break
 
         case "player_leaving":
+            if (Number(info['player_id']) === store.state.playerID) return;
             // eslint-disable-next-line no-case-declarations
             let index = checkPlayerLeave(Number(info['player_id']))
             if (index !== -1) {

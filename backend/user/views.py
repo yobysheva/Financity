@@ -34,7 +34,8 @@ def login_user(request):
         if serializer.is_valid():
             user = serializer.validated_data
             login(request, user)
-            return Response({"message": "Login successful"}, status=status.HTTP_202_ACCEPTED)
+            print(user.secret)
+            return Response({"message": "Login successful", "secret": user.secret}, status=status.HTTP_202_ACCEPTED)
         print(serializer.errors)
         return Response({"message": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
