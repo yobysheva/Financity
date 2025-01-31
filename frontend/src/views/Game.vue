@@ -504,7 +504,6 @@ gameSocket.onmessage = async (event) => {
                 await endGame()
                 return
             }
-
             need_to_share_text_answer = false
             need_to_share_radio_button_answer = false
             players.value[info["player_index"]].balance = info["balance"];
@@ -899,6 +898,30 @@ const handleUpdateBalance = (newBalance, player_id) => {
   margin: 10px;
 }
 
+@media (max-width: 1200px) {
+  .button-33 {
+    margin: 17px 26px;
+    padding: 5px 17px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 900px) {
+  .button-33 {
+    margin: 13px 23px;
+    padding: 3px 13px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 770px) {
+  .button-33 {
+    margin: 10px 19px;
+    padding: 3px 10px;
+    font-size: 8px;
+  }
+}
+
 .buttons{
   flex-wrap: nowrap;
   align-items: center;
@@ -1096,6 +1119,5 @@ const handleUpdateBalance = (newBalance, player_id) => {
   margin-right: auto;
   margin-bottom: 10px;
 }
-
 
 </style>

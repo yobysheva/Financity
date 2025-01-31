@@ -9,8 +9,10 @@
   },
   "dependencies": {
     "@cometchat-pro/chat": "^3.0.13",
+    "@vue/cli": "^5.0.8",
     "axios": "^1.7.9",
     "core-js": "^3.8.3",
+    "global": "^4.4.0",
     "io": "^1.5.3",
     "socket.io": "^4.8.1",
     "vue": "^3.5.13",
