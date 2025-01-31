@@ -5,6 +5,8 @@ COPY . /app
 # Устанавливаем рабочую директорию
 WORKDIR /app/frontend
 # Устанавливаем зависимости
+COPY package*.json /app/frontend/
+RUN npm add global @vue/cli
 RUN npm install
 # Устанавливаем NODE_ENV в production
 ENV NODE_ENV=production
