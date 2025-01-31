@@ -133,6 +133,13 @@ def changeBalance(request):
         try:
             result = ""
             player = Player.objects.get(id=data['player_id'])
+
+            if player.user.secret != data['secret']:
+                return Response(
+                {"detail": "You are not allowed to change your own secret!"},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+
             player.balance += player.profession.salary
             result += f"Заброботная плата: +{int(player.profession.salary)},\n"
             actions = Action.objects.filter(player=player)
@@ -383,11 +390,17 @@ def updateGameStatus(request):
 def voteHandler(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode())
+        secret = data['secret']
         player_id = data['player_id']
         plus = data['plus']
         minus = data['minus']
         try:
             player = Player.objects.get(id=player_id)
+            if player.user.secret != secret:
+                return Response(
+                    {"detail": "Player secret mismatch"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             if plus:
                 player.balance += 10000 * plus / (plus + minus)
             if minus:
@@ -408,6 +421,11 @@ def addWinToGameWinner(request):
         try:
             player = Player.objects.get(id=data['player_id'])
             user = User.objects.get(player=player)
+            if user.secret != data.get('secret', None):
+                return Response(
+                    {"detail": "You are not the winner"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             user.winGames += 1
             user.save()
             return JsonResponse({'status': 200, 'count_games': user.countGames, "win_games": user.winGames}, status=status.HTTP_200_OK)

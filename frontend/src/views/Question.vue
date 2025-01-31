@@ -154,8 +154,8 @@ function getIdOfActiveRadioButton() {
 
 function setTimerThenClose() {
     stopAnswering.value = true
-
-    if (timeBeforeClose.value > 0) {
+    console.log("я пидорас!")
+    if (timeBeforeClose.value-- > 0) {
         setTimeout(setTimerThenClose, 1000)
     }
     else {
@@ -167,7 +167,7 @@ function setTimerThenClose() {
 
 function setVotingTimer() {
     stopAnswering.value = true
-    if (timeBeforeClose.value > 0) {
+    if (timeBeforeClose.value-- > 0) {
         setTimeout(setVotingTimer, 1000)
     }
     else {

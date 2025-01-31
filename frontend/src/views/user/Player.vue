@@ -71,6 +71,15 @@ defineExpose({
   width: 100%;
   height: 10%;
   margin: 5px;
+  @media(max-width: 1200px) {
+    border-radius: 25px;
+  }
+  @media(max-width: 900px) {
+    border-radius: 20px;
+  }
+  @media(max-width: 770px) {
+    border-radius: 15px;
+  }
 }
 
 .balance-change{
