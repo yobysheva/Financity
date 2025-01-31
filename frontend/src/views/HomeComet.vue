@@ -60,13 +60,11 @@ export default {
       listnerID,
       new CometChat.CallListener({
         onIncomingCallReceived(call) {
-          console.log("Incoming call:", call);
           globalContext.incomingCall = true;
           globalContext.session_id = call.sessionId;
         },
 
         onOutgoingCallAccepted(call) {
-          console.log("Outgoing call accepted:", call);
           globalContext.ongoingCall = true;
           CometChat.startCall(
             call.sessionId,
@@ -74,19 +72,16 @@ export default {
             new CometChat.OngoingCallListener({
               onUserJoined: user => {
                 /* Notification received here if another user joins the call. */
-                console.log("User joined call:", user);
                 /* this method can be use to display message or perform any actions if someone joining the call */
               },
               onUserLeft: user => {
                 /* Notification received here if another user left the call. */
-                console.log("User left call:", user);
                 /* this method can be use to display message or perform any actions if someone leaving the call */
               },
               onCallEnded: call => {
                 globalContext.ongoingCall = false;
                 globalContext.incomingCall = false;
                 /* Notification received here if current ongoing call is ended. */
-                console.log("Call ended:", call);
                 /* hiding/closing the call screen can be done here. */
               }
             })
@@ -94,14 +89,12 @@ export default {
           // Outgoing Call Accepted
         },
         onOutgoingCallRejected(call) {
-          console.log("Outgoing call rejected:", call);
           this.incomingCall = false;
           this.ongoingCall = false;
           this.receiver_id = "";
           // Outgoing Call Rejected
         },
         onIncomingCallCancelled(call) {
-          console.log("Incoming call calcelled:", call);
         }
       })
     );

@@ -45,22 +45,16 @@ let votes = ref({
 //   username: 'name',
 //   uid: 0,
 // });
-console.log(store.state.playerID)
 let players = ref([])
 if (store.state.playerID !== '') {
     localStorage.setItem('player_id', JSON.stringify(store.state.playerID))
     localStorage.setItem('game_id', JSON.stringify(store.state.gameID))
-    console.log(store.state.playerID)
-    console.log(JSON.parse(localStorage.getItem("player_id")))
-    console.log("я записал в локал сторедж")
 }
 else {
     const PID = JSON.parse(localStorage.getItem("player_id"))
     const GID = JSON.parse(localStorage.getItem("game_id"))
     store.dispatch("updatePlayerID", PID)
     store.dispatch("updateGameID", GID)
-    console.log(store.state.playerID)
-    console.log("я взял из локал стореджа")
 }
 players.value = []
 let current_player_index = 0
@@ -278,7 +272,6 @@ async function endGame () {
     await authService.addWinToGameWinner({
         "player_id": winner.value.id
     })
-    console.log(winner.value)
 }
 
 function redirectToHome(){
@@ -287,7 +280,6 @@ function redirectToHome(){
 
 function checkToEnd() {
     for (let player in players.value) {
-        console.log(players.value[player].balance)
         if (players.value[player].balance <= 0) {
             return true
         }
@@ -327,7 +319,6 @@ function getWinner() {
 
 async function closeModal(){
     if (modalQuestionType.value === 1) {
-        console.log(votes.value);
       if(isMyTurn.value){
         const response = await authService.voteHandler(players.value[current_player_index].id, votes.value.pluses, votes.value.minuses);
         players.value[current_player_index].balance = response.data['balance'];
@@ -429,7 +420,6 @@ answerSocket.onmessage = (event) => {
             // eslint-disable-next-line no-case-declarations
             let type_ = content["vote"]
             votes.value[type_]++
-            console.log(votes.value)
 
     }
 }
@@ -533,7 +523,6 @@ gameSocket.onmessage = async (event) => {
               const response = await authService.checkScip(players.value[current_player_index].id);
               if(response.data['scip']){
                 current_player_index = (current_player_index + 1) % players.value.length;
-                console.log("scip");
               }
               else{
                 scip = false;
@@ -566,9 +555,7 @@ gameSocket.onmessage = async (event) => {
         case "player_leaving":
             // eslint-disable-next-line no-case-declarations
             let index = checkPlayerLeave(Number(info['player_id']))
-            console.log(index, Number(info['player_id']))
             if (index !== -1) {
-              console.log('DELETE')
               players.value.splice(index, 1)
             }
              if (checkToEnd()) {
@@ -609,7 +596,6 @@ async function sendQuestion() {
       info
   ))
   if(modalQuestionType.value === 3){
-    console.log("chance 3")
     let response = await authService.addActionChance(store.state.playerID, modalQuestionId.value)
     players.value[current_player_index].balance = response.data['balance']
   }
