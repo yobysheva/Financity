@@ -269,6 +269,7 @@ async function endGame () {
 
     winner.value = getWinner()
     isGameEnded.value = true
+    if (winner.value)
     await authService.addWinToGameWinner({
         "player_id": winner.value.id
     })
