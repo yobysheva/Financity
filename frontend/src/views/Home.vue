@@ -219,7 +219,7 @@ export default {
 
 <template>
   <div class="add-users" v-if="GameCreated">
-    <div class="modal" style="top: 35%; width: 60%; height: 80%;">
+    <div class="modal" style="top: 35%; min-height: 30%; width: 60%; height: auto;">
   <div class="container modal-container" style="opacity: 1; width: 100%; min-height: 100%; align-items: center; justify-content: center; position: relative;  overflow: auto;">
     <div class="column" style="width: 100%; align-items: center; justify-content: center;">
       <div class="column" style="justify-content: center;">
@@ -246,7 +246,7 @@ export default {
         <h3>Присоединись к этим играм!</h3>
       </div>
        <div v-if="incomingInvite">
-         <div class="modal" style="top: 35%; width: 60%; min-height: 30%; height: auto; overflow: visible;">
+         <div class="modal" style="top: 35%; width: 60%; min-height: 30%; height: auto; overflow: auto;">
             <div class="container modal-container" style="width: 100%; min-height: 100%; padding: 5%;  align-items: center; justify-content: center;">
                 <h1>Приглашение в игру</h1>
                 <div class="row" style=" align-items: center; justify-content: center;">
@@ -261,11 +261,6 @@ export default {
             <div class="overlay"></div>
         </div>
 
-<!--        <div v-else-if="ongoingCall">-->
-<!--          <button class="btn btn-secondary"> Ongoing Call ... </button>-->
-<!--        </div>-->
-
-<!--      <CurrentGames/>-->
 
       <div class="container_games" style="overflow-y: scroll; overflow-x: hidden">
         <div v-for="game in this.activeGame"
@@ -285,7 +280,6 @@ export default {
           </div>            
         </div>
       </div>
-      <div id="callScreen" style="position: absolute; width: 0px; height: 0px; overflow:hidden;"></div>
     </div>
 
     <div class="column" style="width: 25%; height: 98%; margin: 2.5%;">
@@ -516,14 +510,15 @@ h1 {
   background: linear-gradient(180deg, rgba(185, 255, 185, .6), rgba(173, 255, 176, .6));
 }
 
-.button-33{
-  font-size: 11px;
-  margin: 10px;
+.button-33 {
+    margin: 17px 20px;
+    padding: 5px 17px;
+    font-size: 15px;
 }
 
 @media (max-width: 1200px) {
   .button-33 {
-    margin: 17px 26px;
+    margin: 17px 15px;
     padding: 5px 17px;
     font-size: 13px;
   }
@@ -531,7 +526,7 @@ h1 {
 
 @media (max-width: 900px) {
   .button-33 {
-    margin: 13px 23px;
+    margin: 13px 10px;
     padding: 3px 13px;
     font-size: 11px;
   }
@@ -539,7 +534,7 @@ h1 {
 
 @media (max-width: 770px) {
   .button-33 {
-    margin: 10px 19px;
+    margin: 10px 5px;
     padding: 3px 10px;
     font-size: 9px;
   }

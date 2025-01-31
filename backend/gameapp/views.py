@@ -109,6 +109,7 @@ def addActionChance(request):
 def checkScip(request):
     if request.method == 'POST':
         player_id = request.data.get('player_id', None)
+        is_my_turn = request.data.get('is_my_turn', True)
         if not player_id:
             return Response({"detail": "player_id is required"}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -118,7 +119,8 @@ def checkScip(request):
                 return JsonResponse({'scip': False})
             for action in actions:
                 action.scip = False
-                action.save()
+                if is_my_turn:
+                    action.save()
             return JsonResponse({'scip': True})
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

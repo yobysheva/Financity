@@ -107,6 +107,21 @@ defineExpose({
   transition: all 250ms;
   position: relative;
   overflow: hidden;
+  @media(max-width: 1200px) {
+    width: 30px;
+    height: 30px;
+    margin: 4px;
+  }
+  @media(max-width: 900px) {
+    width: 20px;
+    height: 20px;
+    margin: 3px;
+  }
+  @media(max-width: 770px) {
+    width: 15px;
+    height: 15px;
+    margin: 2px;
+  }
 }
 
 .photo:focus {
@@ -130,6 +145,23 @@ p{
   font-size: 8px;
   margin: 5px;
   font-weight: bold;
+}
+p{
+  font-size: 8px;
+  margin: 5px;
+  font-weight: bold;
+  @media(max-width: 1200px) {
+    font-size: 7px;
+    margin: 3px;
+  }
+  @media(max-width: 900px) {
+    font-size: 6px;
+    margin: 2px;
+  }
+  @media(max-width: 770px) {
+    font-size: 5px;
+    margin: 2px;
+  }
 }
 
 </style>

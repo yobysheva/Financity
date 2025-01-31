@@ -1,6 +1,6 @@
 <template>
   <div v-if="isRegistrationModalVisible" class="modal" id="registration-modal">
-    <div class="modal-content">
+    <div class="modal-content" style="align-items: center; justify-content: center;">
       <h2 style="width: 80%; word-break: break-all;">Войдите или зарегистрируйтесь.</h2>
       <input
           v-model="username"
@@ -193,7 +193,7 @@ dialog {
 
 .button-33 {
   font-size: 16px;
-  margin: 10px;
+  margin: 25px 30px;
 }
 
 @media (max-width: 1200px) {

@@ -532,7 +532,7 @@ gameSocket.onmessage = async (event) => {
             let scip = true;
             while (scip) {
               // eslint-disable-next-line no-case-declarations
-              const response = await authService.checkScip(players.value[current_player_index].id);
+              const response = await authService.checkScip(players.value[current_player_index].id, players.value[current_player_index].id === store.state.playerID);
               if(response.data['scip']){
                 current_player_index = (current_player_index + 1) % players.value.length;
               }
@@ -860,7 +860,7 @@ const handleUpdateBalance = (newBalance, player_id) => {
                 @plus="sendPlus"
                 :answerTextVisible="false"/>
     </div>
-  <div class="column" style="width: 22%; min-height: 95vh; height: 95%; margin-left: 2%;">
+  <div class="column" style="width: 22%; min-height: 95vh; height: 95%; max-height: 95vh; margin-left: 2%;  padding: 1%;">
     <div class="row buttons">
       <button class="button-33" role="button" @click="leaveCall">Выйти из игры</button>
       <button class="button-33" role="button" @click="showRules">?</button>
@@ -934,12 +934,12 @@ const handleUpdateBalance = (newBalance, player_id) => {
 
 .button-33{
   font-size: 14px;
-  margin: 10px;
+  margin: 15px;
 }
 
 @media (max-width: 1200px) {
   .button-33 {
-    margin: 17px 26px;
+    margin: 10px 5px;
     padding: 5px 17px;
     font-size: 12px;
   }
@@ -947,7 +947,7 @@ const handleUpdateBalance = (newBalance, player_id) => {
 
 @media (max-width: 900px) {
   .button-33 {
-    margin: 13px 23px;
+    margin: 7px 4px;
     padding: 3px 13px;
     font-size: 10px;
   }
@@ -955,7 +955,7 @@ const handleUpdateBalance = (newBalance, player_id) => {
 
 @media (max-width: 770px) {
   .button-33 {
-    margin: 10px 19px;
+    margin: 5px 3px;
     padding: 3px 10px;
     font-size: 8px;
   }
@@ -1114,12 +1114,36 @@ const handleUpdateBalance = (newBalance, player_id) => {
 
 .message {
   word-break: break-word;
-  margin: 15px 0;
+  margin: 7px 0;
   padding: 15px;
   border-radius: 10px;
   max-width: 100%;
   min-width: 100%;
   transition: opacity 0.3s ease;
+}
+
+@media (max-width: 1200px) {
+  .message {
+    margin: 5px 0;
+    padding: 10px;
+    font-size:11px;
+  }
+}
+
+@media (max-width: 900px) {
+  .message {
+    margin: 5px 0;
+    padding: 8px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 770px) {
+  .message {
+    margin: 4px 0;
+    padding: 7px;
+    font-size: 8px;
+  }
 }
 
 .message-container {
@@ -1157,6 +1181,81 @@ const handleUpdateBalance = (newBalance, player_id) => {
   text-align: left;
   margin-right: auto;
   margin-bottom: 10px;
+}
+
+input,
+  .input-custom {
+  margin: 15px;
+  padding: 10px 20px;
+  font-size:15px;
+}
+
+@media (max-width: 1200px) {
+  input,
+  .input-custom {
+    margin: 10px 20px;
+    padding: 5px 17px;
+    font-size:12px;
+  }
+}
+
+@media (max-width: 900px) {
+  input,
+  .input-custom {
+    margin: 7px 13px;
+    padding: 3px 13px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 770px) {
+  input,
+  .input-custom{
+    margin: 5px 10px;
+    padding: 3px 10px;
+    font-size: 9px;
+  }
+}
+
+
+@media (max-width: 1200px) {
+  h3 {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 900px) {
+  h3 {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 770px) {
+  h3 {
+    font-size: 11px;
+  }
+}
+
+h1 {
+  font-weight: bold;
+}
+
+@media (max-width: 1200px) {
+  h1 {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 900px) {
+  h1 {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 770px) {
+  h1 {
+    font-size: 13px;
+  }
 }
 
 </style>

@@ -329,21 +329,6 @@ defineExpose({
 </template>
 
 <style scoped>
-.photo{
-  width: 50px;
-  height: 50px;
-  margin: 10px;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: rgba(44, 187, 99, .1) 0 2px 4px, rgba(44, 187, 99, .05) 0 1px 2px;
-  color: #333;
-  /*font-family: CerebriSans-Regular, -apple-system, system-ui, Roboto, sans-serif;*/
-  padding: 10px 15px;
-  font-size: 16px;
-  border: 2px solid rgba(44, 187, 99, .3);
-  transition: all 250ms;
-}
-
 .modal{
   opacity: 0.9;
   padding: 5%;
@@ -415,14 +400,70 @@ input[type="radio"]:checked + .radio-custom::after {
     transform: translate(-50%, -50%) scale(1);
 }
 
-/* Стили для кастомного RadioButton при наведении */
 .radio-custom:hover {
-    border-color: rgba(44, 187, 99, .3); /* Измените цвет границы при наведении */
+    border-color: rgba(44, 187, 99, .3);
 }
 
-/* Стили для активного состояния при наведении */
 input[type="radio"]:checked + .radio-custom:hover {
-    background-color: rgba(44, 187, 99, .3); /* Измените цвет фона при наведении на выбранный RadioButton */
+    background-color: rgba(44, 187, 99, .3);
 }
 
+
+@media (max-width: 1200px) {
+  h3 {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 900px) {
+  h3 {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 770px) {
+  h3 {
+    font-size: 11px;
+  }
+}
+
+h1 {
+  font-weight: bold;
+}
+
+@media (max-width: 1200px) {
+  h1 {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 900px) {
+  h1 {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 770px) {
+  h1 {
+    font-size: 13px;
+  }
+}
+
+p{
+  font-size: 16px;
+  margin: 15px;
+  @media(max-width: 1200px) {
+    font-size: 14px;
+    margin: 12px;
+  }
+  @media(max-width: 900px) {
+    font-size: 12px;
+    margin: 10px;
+  }
+  @media(max-width: 770px) {
+    font-size: 10px;
+    margin: 8px;
+  }
+  font-weight: bold;
+}
 </style>
