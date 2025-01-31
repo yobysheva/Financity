@@ -97,7 +97,6 @@ function vote_minus() {
         votes_minuses.value++
         didIVote.value = true
         emit('minus')
-        console.log("я проголосовал за минус", didIVote.value)
     }
 }
 
@@ -105,7 +104,6 @@ function vote_plus() {
     if (stopAnswering.value && !didIVote.value) {
         didIVote.value = true
         emit('plus')
-        console.log("я проголосовал за плюс", didIVote.value)
     }
 }
 
@@ -135,15 +133,17 @@ onMounted(() => {
 
 function setTextInTextArea(text) {
   const textarea = document.querySelector('.input-custom');
+  if (textarea)
   textarea.value = text
 }
 
 function getTextInTextArea() {
-  return document.querySelector('.input-custom').value
+  return document.querySelector('.input-custom')?.value
 }
 
 function getIdOfActiveRadioButton() {
     let rates = document.getElementsByName('answer');
+    if (rates.length === 0) return;
     for(let i = 0; i < rates.length; i++){
         if (rates[i].checked){
             return i
@@ -154,14 +154,11 @@ function getIdOfActiveRadioButton() {
 
 function setTimerThenClose() {
     stopAnswering.value = true
-    console.log(stopAnswering.value, 1234)
 
     if (timeBeforeClose.value > 0) {
-        console.log(`${timeBeforeClose.value--} осталось`)
         setTimeout(setTimerThenClose, 1000)
     }
     else {
-        console.log("вызываю функцию клоуз!")
         stopAnswering.value = false
         timeBeforeClose.value = 10
         close()
@@ -171,7 +168,6 @@ function setTimerThenClose() {
 function setVotingTimer() {
     stopAnswering.value = true
     if (timeBeforeClose.value > 0) {
-        console.log(`${timeBeforeClose.value--} осталось`)
         setTimeout(setVotingTimer, 1000)
     }
     else {
@@ -196,8 +192,7 @@ async function addAnswer() {
 
 function setActiveRadioButtonForId(id) {
     let rates = document.getElementsByName('answer');
-    if (Number(id) === -1) return;
-    console.log(rates)
+    if (Number(id) === -1 || rates.length === 0) return;
     for(let i = 0; i < rates.length; i++){
         rates[i].checked = false
     }

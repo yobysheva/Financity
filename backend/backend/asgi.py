@@ -9,8 +9,6 @@ import gameapp.routing
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 
-print(chat.routing.websocket_urlpatterns + gameapp.routing.websocket_urlpatterns)
-
 application = ProtocolTypeRouter({
 	'http': get_asgi_application(),
 	"websocket": AuthMiddlewareStack(

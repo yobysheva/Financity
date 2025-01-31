@@ -7,7 +7,7 @@ import Player from "@/views/user/Player.vue";
   // import Chance from "@/views/children/Chance.vue";
   import { authService } from "@/services/auth";
 // import QuizQuestion from "@/views/QuizQuestion.vue";
-import {onMounted, ref} from 'vue';
+import {ref} from 'vue';
 // import { getCurrentInstance } from 'vue';
 import store from "@/store";
 import routes from "../router/index.js";
@@ -45,11 +45,18 @@ let votes = ref({
 //   username: 'name',
 //   uid: 0,
 // });
-
 let players = ref([])
-onMounted(() => {
-  players.value = []
-})
+if (store.state.playerID !== '') {
+    localStorage.setItem('player_id', JSON.stringify(store.state.playerID))
+    localStorage.setItem('game_id', JSON.stringify(store.state.gameID))
+}
+else {
+    const PID = JSON.parse(localStorage.getItem("player_id"))
+    const GID = JSON.parse(localStorage.getItem("game_id"))
+    store.dispatch("updatePlayerID", PID)
+    store.dispatch("updateGameID", GID)
+}
+players.value = []
 let current_player_index = 0
 let shine = ref([])
 let isGameStarted = ref(false)
@@ -258,7 +265,6 @@ async function endGame () {
     await authService.addWinToGameWinner({
         "player_id": winner.value.id
     })
-    console.log(winner.value)
 }
 
 function redirectToHome(){
@@ -267,7 +273,7 @@ function redirectToHome(){
 
 function checkToEnd() {
     for (let player in players.value) {
-        if (player.balance <= 0) {
+        if (players.value[player].balance <= 0) {
             return true
         }
     }
@@ -306,7 +312,6 @@ function getWinner() {
 
 async function closeModal(){
     if (modalQuestionType.value === 1) {
-        console.log(votes.value);
       if(isMyTurn.value){
         const response = await authService.voteHandler(players.value[current_player_index].id, votes.value.pluses, votes.value.minuses);
         players.value[current_player_index].balance = response.data['balance'];
@@ -408,7 +413,6 @@ answerSocket.onmessage = (event) => {
             // eslint-disable-next-line no-case-declarations
             let type_ = content["vote"]
             votes.value[type_]++
-            console.log(votes.value)
 
     }
 }
@@ -429,6 +433,7 @@ function textAnswerTranslate() {
 function radioButtonAnswerTranslate() {
     if (!need_to_share_radio_button_answer) return;
     const input = questionComponent.value.getIdOfActiveRadioButton()
+    if (input)
     answerSocket.send(JSON.stringify({
         "type": "radioButtonAnswer",
         "button_id": input.toString()
@@ -517,7 +522,6 @@ gameSocket.onmessage = async (event) => {
               const response = await authService.checkScip(players.value[current_player_index].id);
               if(response.data['scip']){
                 current_player_index = (current_player_index + 1) % players.value.length;
-                console.log("scip");
               }
               else{
                 scip = false;
@@ -557,9 +561,7 @@ gameSocket.onmessage = async (event) => {
         case "player_leaving":
             // eslint-disable-next-line no-case-declarations
             let index = checkPlayerLeave(Number(info['player_id']))
-            console.log(index, Number(info['player_id']))
             if (index !== -1) {
-              console.log('DELETE')
               players.value.splice(index, 1)
               dotStyleMassive.value.splice(index, 1)
               currentIndexMassive.value.splice(index, 1)
@@ -605,7 +607,6 @@ async function sendQuestion() {
       info
   ))
   if(modalQuestionType.value === 3){
-    console.log("chance 3")
     let response = await authService.addActionChance(store.state.playerID, modalQuestionId.value)
     players.value[current_player_index].balance = response.data['balance']
   }
@@ -921,6 +922,30 @@ const handleUpdateBalance = (newBalance, player_id) => {
   margin: 10px;
 }
 
+@media (max-width: 1200px) {
+  .button-33 {
+    margin: 17px 26px;
+    padding: 5px 17px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 900px) {
+  .button-33 {
+    margin: 13px 23px;
+    padding: 3px 13px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 770px) {
+  .button-33 {
+    margin: 10px 19px;
+    padding: 3px 10px;
+    font-size: 8px;
+  }
+}
+
 .buttons{
   flex-wrap: nowrap;
   align-items: center;
@@ -1118,6 +1143,5 @@ const handleUpdateBalance = (newBalance, player_id) => {
   margin-right: auto;
   margin-bottom: 10px;
 }
-
 
 </style>

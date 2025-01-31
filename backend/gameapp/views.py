@@ -15,8 +15,6 @@ def createGame(request):
         data = json.loads(request.body.decode())
         try:
             user = User.objects.get(username=data['username'])
-            user.countGames += 1
-            user.save()
             player = Player.objects.create(user=user)
             profession = Professions.objects.order_by('?').first()
             player.profession = profession
@@ -36,8 +34,6 @@ def createPlayer(request):
         try:
             user = User.objects.get(username=data['username'])
             player = Player.objects.create(user=user)
-            user.countGames += 1
-            user.save()
             game = Game.objects.get(id=data['id'])
             game.players.add(player)
             return JsonResponse({'gameId': game.id, 'playerID': player.id})
@@ -260,8 +256,6 @@ def connectToGame(request):
         data = json.loads(request.body.decode())
         try:
             user = User.objects.get(username=data['username'])
-            user.countGames += 1
-            user.save()
             player = Player.objects.create(user=user)
             profession = Professions.objects.order_by('?').first()
             player.profession = profession
@@ -372,6 +366,10 @@ def updateGameStatus(request):
             game.status = data['status']
             game.save()
 
+            if data['status'] == "started":
+                for player in game.players.all():
+                    player.user.countGames += 1
+                    player.user.save()
             return Response({'status': 200}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(

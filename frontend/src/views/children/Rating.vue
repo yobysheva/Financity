@@ -21,17 +21,23 @@ export default {
         require('@/assets/av5.png'),
         require('@/assets/av6.png'),
       ],
+      interval: null,
     };
   },
-  created() {
+  mounted() {
     this.getUsersStats();
+    this.interval = setInterval(() => {
+      this.getUsersStats();
+    }, 1000);
+  },
+  beforeUnmount() {
+    clearInterval(this.interval);
   },
   methods: {
     async getUsersStats() {
       try {
         const response = await authService.getUsersStats(store.state.username);
-        this.usersStats.push(response.data['user_data']);
-        // console.log(this.usersStats);
+        this.usersStats[0] = response.data['user_data'];
       } catch (error) {
         if (error.response) {
           alert("Login failed: " + error.response.data || "Unknown error");
@@ -66,6 +72,24 @@ export default {
 }
 .row{
   padding: 5px;
+}
+
+@media (max-width: 1200px) {
+  h3 {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 900px) {
+  h3 {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 770px) {
+  h3 {
+    font-size: 9px;
+  }
 }
 
 .photo{
@@ -120,7 +144,7 @@ export default {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: inherit;
+  display: block;
 }
 
 p{

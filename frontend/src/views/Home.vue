@@ -219,7 +219,7 @@ export default {
 
 <template>
   <div class="add-users" v-if="GameCreated">
-    <div class="modal" style="top: 35%; width: 60%; height: 70%;">
+    <div class="modal" style="top: 35%; width: 60%; height: 80%;">
   <div class="container modal-container" style="opacity: 1; width: 100%; min-height: 100%; align-items: center; justify-content: center; position: relative;  overflow: auto;">
     <div class="column" style="width: 100%; align-items: center; justify-content: center;">
       <div class="column" style="justify-content: center;">
@@ -267,7 +267,7 @@ export default {
 
 <!--      <CurrentGames/>-->
 
-      <div class="container games" style="max-height: 50vh; min-height: 50vh; overflow-y: scroll;">
+      <div class="container_games" style="overflow-y: scroll; overflow-x: hidden">
         <div v-for="game in this.activeGame"
              :key="game.game_id">
           <div class="row" style="justify-content: flex-start;">
@@ -280,7 +280,7 @@ export default {
             <p>Создана игра: {{game.game_id}}</p>
           </div>
             <div style="justify-content: flex-end;">
-              <button class="button-33" role="button" style="font-size: 12px;" @click="joinToGame(game.game_id)">Присоединиться к игре</button>
+              <button class="button-33" role="button" @click="joinToGame(game.game_id)">Присоединиться к игре</button>
             </div>
           </div>            
         </div>
@@ -297,6 +297,47 @@ export default {
 </template>
 
 <style scoped>
+input {
+  margin: 25px 30px;
+  padding: 10px 20px;
+  font-size:14px;
+}
+@media (max-width: 1200px) {
+  input {
+    margin: 17px 26px;
+    padding: 5px 17px;
+    font-size:12px;
+  }
+}
+
+@media (max-width: 900px) {
+  input {
+    margin: 13px 23px;
+    padding: 3px 13px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 770px) {
+  input {
+    margin: 10px 19px;
+    padding: 3px 10px;
+    font-size: 9px;
+  }
+}
+.container_games{
+  max-height: 50vh;
+  min-height: 50vh;
+  @media(max-height: 800px) {
+    max-height: 45vh;
+    min-height: 45vh;
+  }
+  @media(max-height: 600px) {
+    max-height: 40vh;
+    min-height: 40vh;
+  }
+}
+
 .outer-container {
   //opacity: 0.9;
   //display: flex;
@@ -323,10 +364,23 @@ export default {
   align-items: center;
 }
 p{
-  font-size: 12px;
-  font-weight: bold;
+  font-size: 16px;
   margin: 15px;
+  @media(max-width: 1200px) {
+    font-size: 14px;
+    margin: 12px;
+  }
+  @media(max-width: 900px) {
+    font-size: 12px;
+    margin: 10px;
+  }
+  @media(max-width: 770px) {
+    font-size: 10px;
+    margin: 8px;
+  }
+  font-weight: bold;
 }
+
 .column {
   justify-content: space-between;
 }
@@ -338,10 +392,66 @@ p{
 h3 {
   font-weight: bold;
 }
+
+@media (max-width: 1200px) {
+  h3 {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 900px) {
+  h3 {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 770px) {
+  h3 {
+    font-size: 11px;
+  }
+}
+
+h1 {
+  font-weight: bold;
+}
+
+@media (max-width: 1200px) {
+  h1 {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 900px) {
+  h1 {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 770px) {
+  h1 {
+    font-size: 13px;
+  }
+}
+
 .photo{
   width: 40px;
   height: 40px;
   margin: 10px;
+  @media(max-width: 1200px) {
+    width: 30px;
+    height: 30px;
+    margin: 8px;
+  }
+  @media(max-width: 900px) {
+    width: 25px;
+    height: 25px;
+    margin: 6px;
+  }
+  @media(max-width: 770px) {
+    width: 20px;
+    height: 20px;
+    margin: 5px;
+  }
   background-color: white;
   border-radius: 10px;
   box-shadow: rgba(44, 187, 99, .1) 0 2px 4px, rgba(44, 187, 99, .05) 0 1px 2px;
@@ -357,8 +467,9 @@ h3 {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: inherit;
+  display: block;
 }
+
 
 .photo:focus {
   outline: none;
@@ -403,6 +514,35 @@ h3 {
 ::-webkit-scrollbar-thumb {
   border-radius: 10px;
   background: linear-gradient(180deg, rgba(185, 255, 185, .6), rgba(173, 255, 176, .6));
+}
+
+.button-33{
+  font-size: 11px;
+  margin: 10px;
+}
+
+@media (max-width: 1200px) {
+  .button-33 {
+    margin: 17px 26px;
+    padding: 5px 17px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 900px) {
+  .button-33 {
+    margin: 13px 23px;
+    padding: 3px 13px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 770px) {
+  .button-33 {
+    margin: 10px 19px;
+    padding: 3px 10px;
+    font-size: 9px;
+  }
 }
 
 </style>
