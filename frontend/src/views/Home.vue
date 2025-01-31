@@ -219,7 +219,7 @@ export default {
 
 <template>
   <div class="add-users" v-if="GameCreated">
-    <div class="modal" style="top: 35%; width: 60%; height: 70%;">
+    <div class="modal" style="top: 35%; width: 60%; height: 80%;">
   <div class="container modal-container" style="opacity: 1; width: 100%; min-height: 100%; align-items: center; justify-content: center; position: relative;  overflow: auto;">
     <div class="column" style="width: 100%; align-items: center; justify-content: center;">
       <div class="column" style="justify-content: center;">
@@ -297,6 +297,34 @@ export default {
 </template>
 
 <style scoped>
+input {
+  margin: 25px 30px;
+  padding: 10px 20px;
+  font-size:14px;
+}
+@media (max-width: 1200px) {
+  input {
+    margin: 17px 26px;
+    padding: 5px 17px;
+    font-size:12px;
+  }
+}
+
+@media (max-width: 900px) {
+  input {
+    margin: 13px 23px;
+    padding: 3px 13px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 770px) {
+  input {
+    margin: 10px 19px;
+    padding: 3px 10px;
+    font-size: 9px;
+  }
+}
 .container_games{
   max-height: 50vh;
   min-height: 50vh;
@@ -336,18 +364,18 @@ export default {
   align-items: center;
 }
 p{
-  font-size: 14px;
+  font-size: 16px;
   margin: 15px;
   @media(max-width: 1200px) {
-    font-size: 10px;
+    font-size: 14px;
     margin: 12px;
   }
   @media(max-width: 900px) {
-    font-size: 8px;
+    font-size: 12px;
     margin: 10px;
   }
   @media(max-width: 770px) {
-    font-size: 6px;
+    font-size: 10px;
     margin: 8px;
   }
   font-weight: bold;
@@ -367,19 +395,41 @@ h3 {
 
 @media (max-width: 1200px) {
   h3 {
-    font-size: 14px;
+    font-size: 16px;
   }
 }
 
 @media (max-width: 900px) {
   h3 {
-    font-size: 11px;
+    font-size: 14px;
   }
 }
 
 @media (max-width: 770px) {
   h3 {
-    font-size: 9px;
+    font-size: 11px;
+  }
+}
+
+h1 {
+  font-weight: bold;
+}
+
+@media (max-width: 1200px) {
+  h1 {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 900px) {
+  h1 {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 770px) {
+  h1 {
+    font-size: 13px;
   }
 }
 
@@ -417,8 +467,9 @@ h3 {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: inherit;
+  display: block;
 }
+
 
 .photo:focus {
   outline: none;
@@ -474,7 +525,7 @@ h3 {
   .button-33 {
     margin: 17px 26px;
     padding: 5px 17px;
-    font-size: 9px;
+    font-size: 13px;
   }
 }
 
@@ -482,7 +533,7 @@ h3 {
   .button-33 {
     margin: 13px 23px;
     padding: 3px 13px;
-    font-size: 7px;
+    font-size: 11px;
   }
 }
 
@@ -490,7 +541,7 @@ h3 {
   .button-33 {
     margin: 10px 19px;
     padding: 3px 10px;
-    font-size: 5px;
+    font-size: 9px;
   }
 }
 

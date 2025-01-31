@@ -46,7 +46,7 @@ INSTALLED_APPS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8080', 'http://localhost:8081', 'http://localhost:8082', 'http://localhost:8280'
+    'http://localhost:8080', 'http://localhost:8081', 'http://localhost:8082', 'http://localhost:8280', 'http://5.100.120.178:8280'
 ]
 
 MIDDLEWARE = [
@@ -86,11 +86,16 @@ CHANNEL_LAYERS = {
 }
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': 'postgres',
+        'NAME': 'postgres',
+        'PASSWORD': 'passw0rd',
+        'HOST': '77.34.97.28',
+        'PORT': '5432',
     }
 }
+
 
 
 
