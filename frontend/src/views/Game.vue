@@ -259,10 +259,10 @@ async function endGame () {
         "game_id": store.state.gameID,
         "status": "finished"
     })
-
     winner.value = getWinner()
     isGameEnded.value = true
-    if (winner.value)
+
+    if (winner.value && winner.value.id === store.state.playerID)
     await authService.addWinToGameWinner({
         "player_id": winner.value.id,
         'secret': store.state.mySecret
@@ -275,7 +275,7 @@ function redirectToHome(){
 
 function checkToEnd() {
     for (let player in players.value) {
-        if (players.value[player].balance <= 0) {
+        if (players.value[player].balance < 0) {
             return true
         }
     }
@@ -490,7 +490,6 @@ gameSocket.onmessage = async (event) => {
         case "on_turn_start":
           // eslint-disable-next-line no-case-declarations
             const turn_count = info["turn_count"];
-            console.log("on_turn_start")
             // totalSum.value += turn_count;
             if(totalSumMassive.value[current_player_index] % 26 + turn_count >= 26){
               let response = "";
@@ -521,14 +520,14 @@ gameSocket.onmessage = async (event) => {
             }
             break;
         case "on_question_close":
-            if (checkToEnd()) {
-                await endGame()
-                return
-            }
             need_to_share_text_answer = false
             need_to_share_radio_button_answer = false
             players.value[info['player_index']].balance = info['balance'];
             current_player_index = (current_player_index + 1) % players.value.length;
+            if (checkToEnd()) {
+                await endGame()
+                return
+            }
             // eslint-disable-next-line no-case-declarations
             let scip = true;
             while (scip) {
