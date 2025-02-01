@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const apiUrl = 'http://localhost:8200/api/';
+const apiUrl = `http://${process.env.VUE_APP_SERVER_IP}/api/`;
 
 export const authService = {
     updateGameStatus(gameData) {

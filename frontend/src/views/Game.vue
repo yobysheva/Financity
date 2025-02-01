@@ -261,10 +261,10 @@ async function endGame () {
         "game_id": store.state.gameID,
         "status": "finished"
     })
-
     winner.value = getWinner()
     isGameEnded.value = true
-    if (winner.value)
+
+    if (winner.value && winner.value.id === store.state.playerID)
     await authService.addWinToGameWinner({
         "player_id": winner.value.id,
         'secret': store.state.mySecret
@@ -277,7 +277,7 @@ function redirectToHome(){
 
 function checkToEnd() {
     for (let player in players.value) {
-        if (players.value[player].balance <= 0) {
+        if (players.value[player].balance < 0) {
             return true
         }
     }
@@ -381,7 +381,7 @@ const messages = ref([
 ])
 
 const gameId = new URLSearchParams(window.location.search).get('id');
-const chatSocket = new WebSocket(`ws://localhost:8200/ws/chat/${gameId}/`);
+const chatSocket = new WebSocket(`ws://${process.env.VUE_APP_SERVER_IP}/ws/chat/${gameId}/`);
 chatSocket.onmessage = function (event) {
     let data = JSON.parse(event.data)
     messages.value.push({
@@ -403,7 +403,7 @@ function sendMessage() {
       }))
 }
 
-const answerSocket = new WebSocket(`ws://localhost:8200/ws/game_answer/${gameId}/`);
+const answerSocket = new WebSocket(`ws://${process.env.VUE_APP_SERVER_IP}/ws/game_answer/${gameId}/`);
 answerSocket.onmessage = (event) => {
     let text_data = JSON.parse(event.data);
     text_data = text_data["info"];
@@ -478,7 +478,7 @@ function sendMinus() {
     ))
 }
 
-const gameSocket = new WebSocket(`ws://localhost:8200/ws/game/${gameId}/${store.state.playerID}/`);
+const gameSocket = new WebSocket(`ws://${process.env.VUE_APP_SERVER_IP}/ws/game/${gameId}/${store.state.playerID}/`);
 gameSocket.onmessage = async (event) => {
     let text_data = JSON.parse(event.data);
     text_data = text_data["info"];
@@ -492,7 +492,6 @@ gameSocket.onmessage = async (event) => {
         case "on_turn_start":
           // eslint-disable-next-line no-case-declarations
             const turn_count = info["turn_count"];
-            console.log("on_turn_start")
             // totalSum.value += turn_count;
 
             if(totalSumMassive.value[current_player_index] % 26 + turn_count >= 26){
@@ -525,14 +524,14 @@ gameSocket.onmessage = async (event) => {
             }
             break;
         case "on_question_close":
-            if (checkToEnd()) {
-                await endGame()
-                return
-            }
             need_to_share_text_answer = false
             need_to_share_radio_button_answer = false
             players.value[info['player_index']].balance = info['balance'];
             current_player_index = (current_player_index + 1) % players.value.length;
+            if (checkToEnd()) {
+                await endGame()
+                return
+            }
             // eslint-disable-next-line no-case-declarations
             let scip = true;
             while (scip) {
