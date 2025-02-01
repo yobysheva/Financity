@@ -1,7 +1,7 @@
 <script setup>
 import { authService } from "@/services/auth";
 import store from "../../store.js";
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 
 let user = ref({
   username: 'имя',
@@ -19,6 +19,7 @@ const images = ref([
   require('@/assets/av6.png'),
 ]);
 
+let interval = null;
 
 async function getData() {
   try {
@@ -41,6 +42,17 @@ async function changePhoto() {
     'indexPhoto': store.state.photo,
   });
 }
+
+onMounted(() => {
+  getData();
+  interval = setInterval(() => {
+    getData();
+  }, 2000);
+});
+
+onBeforeUnmount(() => {
+  clearInterval(interval);
+});
 
 getData();
 </script>
