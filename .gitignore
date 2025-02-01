@@ -5,7 +5,8 @@
 venv/
 .idea/
 .idea/*
-.env/
+backend/.env/
+frontend/.env/
 
 docs/_book
 
