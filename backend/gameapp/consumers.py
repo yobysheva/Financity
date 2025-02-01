@@ -187,7 +187,6 @@ class QuestionConsumer(WebsocketConsumer):
                 )
 
             case 'vote':
-                print("тыебанулся")
                 vote = text_data_json['vote']
                 async_to_sync(self.channel_layer.group_send)(
                     self.room_group_name,

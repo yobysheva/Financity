@@ -65,6 +65,7 @@ let need_to_share_text_answer = false
 let need_to_share_radio_button_answer = false
 let isMyTurn = ref(false)
 let winner = ref(false)
+let scipPlayer = ref([])
 
 const playerComponent = ref([])
 const balanceChange = ref([])
@@ -88,6 +89,7 @@ authService.getInfoAboutGame(
             shine.value.push(false);
             balanceChange.value.push('');
             playerComponent.value.push(null);
+            scipPlayer.value.push(false);
         }
     )
     isMyTurn.value = (players.value.length === 1)
@@ -492,6 +494,7 @@ gameSocket.onmessage = async (event) => {
             const turn_count = info["turn_count"];
             console.log("on_turn_start")
             // totalSum.value += turn_count;
+
             if(totalSumMassive.value[current_player_index] % 26 + turn_count >= 26){
               let response = "";
               if (isMyTurn.value){
@@ -514,6 +517,7 @@ gameSocket.onmessage = async (event) => {
             const questionId = info["questionId"]
           // eslint-disable-next-line no-case-declarations
             const questionType = info["questionType"]
+            scipPlayer.value[current_player_index] = info["scip"]
             if (players.value[current_player_index].id !== store.state.playerID) {
                 openModalWithValues(
                     title, questionId, questionType
@@ -533,8 +537,10 @@ gameSocket.onmessage = async (event) => {
             let scip = true;
             while (scip) {
               // eslint-disable-next-line no-case-declarations
-              const response = await authService.checkScip(players.value[current_player_index].id, players.value[current_player_index].id === store.state.playerID);
-              if(response.data['scip']){
+              // const response = await authService.checkScip(players.value[current_player_index].id);
+
+              if(scipPlayer.value[current_player_index]){
+                scipPlayer.value[current_player_index] = false;
                 current_player_index = (current_player_index + 1) % players.value.length;
               }
               else{
@@ -567,6 +573,7 @@ gameSocket.onmessage = async (event) => {
             totalSumMassive.value.push(0);
             balanceChange.value.push('');
             playerComponent.value.push(null);
+            scipPlayer.value.push(false);
             break;
         case "start_game":
             startGame()
@@ -583,6 +590,7 @@ gameSocket.onmessage = async (event) => {
               totalSumMassive.value.splice(index, 1)
               balanceChange.value.splice(index, 1)
               playerComponent.value.splice(index, 1)
+              scipPlayer.value.splice(index, 1)
             }
              if (checkToEnd()) {
                 await endGame()
@@ -610,21 +618,25 @@ function sendCloseQuestion() {
 }
 
 async function sendQuestion() {
+  let scip = false
+  if(modalQuestionType.value === 3){
+    let response = await authService.addActionChance(store.state.playerID, modalQuestionId.value)
+    players.value[current_player_index].balance = response.data['balance']
+    scipPlayer.value[current_player_index] = response.data['scip']
+    scip = response.data['scip']
+  }
   const info = {
     "type": "on_question_open",
     "info": {
       "title": modalTitle.value,
       "questionId": modalQuestionId.value,
       "questionType": modalQuestionType.value,
+      "scip": scip
     }
   }
   gameSocket.send(JSON.stringify(
       info
   ))
-  if(modalQuestionType.value === 3){
-    let response = await authService.addActionChance(store.state.playerID, modalQuestionId.value)
-    players.value[current_player_index].balance = response.data['balance']
-  }
 }
 
 function sendTurnCount(turn_count) {

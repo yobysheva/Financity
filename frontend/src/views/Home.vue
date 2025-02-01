@@ -358,19 +358,19 @@ input {
   align-items: center;
 }
 p{
-  font-size: 16px;
-  margin: 15px;
+  font-size: 15px;
+  margin: 13px;
   @media(max-width: 1200px) {
-    font-size: 14px;
-    margin: 12px;
+    font-size: 12px;
+    margin: 8px;
   }
   @media(max-width: 900px) {
-    font-size: 12px;
-    margin: 10px;
+    font-size: 10px;
+    margin: 6px;
   }
   @media(max-width: 770px) {
-    font-size: 10px;
-    margin: 8px;
+    font-size: 8px;
+    margin: 4px;
   }
   font-weight: bold;
 }
@@ -511,32 +511,32 @@ h1 {
 }
 
 .button-33 {
-    margin: 17px 20px;
+    margin: 17px 13px;
     padding: 5px 17px;
-    font-size: 15px;
+    font-size: 14px;
 }
 
 @media (max-width: 1200px) {
   .button-33 {
-    margin: 17px 15px;
-    padding: 5px 17px;
-    font-size: 13px;
+    margin: 15px 10px;
+    padding: 5px 15px;
+    font-size: 12px;
   }
 }
 
 @media (max-width: 900px) {
   .button-33 {
-    margin: 13px 10px;
-    padding: 3px 13px;
-    font-size: 11px;
+    margin: 10px 7px;
+    padding: 3px 10px;
+    font-size: 10px;
   }
 }
 
 @media (max-width: 770px) {
   .button-33 {
-    margin: 10px 5px;
-    padding: 3px 10px;
-    font-size: 9px;
+    margin: 5px 5px;
+    padding: 3px 7px;
+    font-size: 8px;
   }
 }
 

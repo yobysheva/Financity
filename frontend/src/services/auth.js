@@ -66,8 +66,8 @@ export const authService = {
     addActionChance(player_id, chance_id){
         return axios.post(`${apiUrl}gameApp/addActionChance/`, {player_id: player_id, chance_id: chance_id})
     },
-    checkScip(player_id, is_my_turn){
-      return axios.post(`${apiUrl}gameApp/checkScip/`, {player_id: player_id, is_my_turn: is_my_turn})
+    checkScip(player_id){
+      return axios.post(`${apiUrl}gameApp/checkScip/`, {player_id: player_id})
     },
     changeBalance(player_id, secret){
       return axios.post(`${apiUrl}gameApp/changeBalance/`, { player_id: player_id, secret: secret })

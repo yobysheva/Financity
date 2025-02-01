@@ -715,20 +715,6 @@
   },
   {
     "model": "gameapp.answer",
-    "pk": 52,
-    "fields": {
-      "question": 20,
-      "answer_text": "Посмотреть фильм в плохом качестве, скачав его бесплатно из интернета.",
-      "sum_now": 0.0,
-      "sum_later": 0.0,
-      "period": 0,
-      "scip": true,
-      "action_text": "Баланс не изменился, но глаза придется восстанавливать еще долго, придется пропустить следующий ход.",
-      "category": "Пропуск хода"
-    }
-  },
-  {
-    "model": "gameapp.answer",
     "pk": 53,
     "fields": {
       "question": 26,

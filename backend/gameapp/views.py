@@ -95,13 +95,14 @@ def addActionChance(request):
             chance = Chance.objects.get(id=chance_id)
             if chance.period or chance.scip:
                 action = Action.objects.create(player=player, sum=chance.sum, period=chance.period, scip = chance.scip, category=chance.category)
-                return Response({"action_id": action.id, "balance": player.balance}, status=status.HTTP_201_CREATED)
+                return Response({"action_id": action.id, "balance": player.balance, "scip": chance.scip}, status=status.HTTP_201_CREATED)
             if chance.period == 0:
                 player.balance += chance.sum
                 player.save()
-                return JsonResponse({"balance": player.balance})
+                return JsonResponse({"balance": player.balance, "scip": chance.scip})
             return Response({"detail": "Action created", "balance": player.balance}, status=status.HTTP_200_OK)
         except Exception as e:
+            print(e)
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -109,7 +110,6 @@ def addActionChance(request):
 def checkScip(request):
     if request.method == 'POST':
         player_id = request.data.get('player_id', None)
-        is_my_turn = request.data.get('is_my_turn', True)
         if not player_id:
             return Response({"detail": "player_id is required"}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -119,8 +119,7 @@ def checkScip(request):
                 return JsonResponse({'scip': False})
             for action in actions:
                 action.scip = False
-                if is_my_turn:
-                    action.save()
+                action.save()
             return JsonResponse({'scip': True})
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
