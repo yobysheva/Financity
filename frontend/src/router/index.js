@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import HomeComet from '../views/HomeComet.vue';
 import Login from '../views/auth/LoginRegistrationModal.vue';
 // import {authService} from "@/services/auth";
 // import Profile from '../views/Profile.vue';
@@ -28,11 +27,6 @@ const routes = [
     meta: {
       source: "home"
     }
-  },
-  {
-    path: '/comet',
-    name: 'comet',
-    component: HomeComet
   },
   {
     path: '/game',
