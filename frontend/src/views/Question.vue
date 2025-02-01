@@ -154,7 +154,6 @@ function getIdOfActiveRadioButton() {
 
 function setTimerThenClose() {
     stopAnswering.value = true
-    console.log("я пидорас!")
     if (timeBeforeClose.value-- > 0) {
         setTimeout(setTimerThenClose, 1000)
     }
