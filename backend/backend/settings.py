@@ -14,16 +14,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-# Загружаем переменные из .env
 load_dotenv()
-
-# Теперь можно использовать их через os.environ
-debug = os.getenv('DEBUG')  # Получим значение переменной DEBUG
-secret_key = os.getenv('SECRET_KEY')
-database_url = os.getenv('DATABASE_URL')
-
-print(debug, secret_key, database_url)
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
