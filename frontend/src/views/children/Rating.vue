@@ -37,6 +37,11 @@ export default {
           break
         }
       }
+
+      this.usersStats[0].sort((a, b) => {
+        return a.winGames - b.winGames
+      })
+
     },
     updateUserPhoto(username, new_photo_index) {
       for (let i = 0; i < this.usersStats[0].length; i++) {
