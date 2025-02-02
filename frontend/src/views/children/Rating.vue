@@ -26,14 +26,16 @@ export default {
   },
   mounted() {
     this.getUsersStats();
-    this.interval = setInterval(() => {
-      this.getUsersStats();
-    }, 1000);
-  },
-  beforeUnmount() {
-    clearInterval(this.interval);
   },
   methods: {
+    updateUserPhoto(username, new_photo_index) {
+      for (let i = 0; i < this.usersStats[0].length; i++) {
+        if (this.usersStats[0][i].username === username) {
+          this.usersStats[0][i].indexPhoto = new_photo_index
+          break
+        }
+      }
+    },
     async getUsersStats() {
       try {
         const response = await authService.getUsersStats(store.state.username);

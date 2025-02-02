@@ -4,8 +4,16 @@ import Profile from "@/views/user/Profile.vue";
 // import CurrentGames from "@/views/children/CurrentGames.vue";
 import { authService } from "@/services/auth";
 import store from "../store.js";
+import {useTemplateRef} from "vue";
 
 export default {
+  setup() {
+    let ratingComponent = useTemplateRef('rating')
+
+    return {
+      ratingComponent
+    }
+  },
   components: {
     Rating,
     Profile,
@@ -17,6 +25,7 @@ export default {
         username: 'name',
         uid: 0,
       },
+      ratingSocket: null,
       activeGamesSocket: false,
       session_id: "",
       receiver_id: null,
@@ -44,11 +53,41 @@ export default {
   created() {
     this.createWaitingRequestSocket()
     this.createActiveGamesSocket()
+    this.createRatingSocket();
     this.getLoggedInUser();
     this.getActiveGames();
   },
 
   methods: {
+    createRatingSocket() {
+      this.ratingSocket = new WebSocket(`ws://localhost:8200/ws/rating/`)
+      this.ratingSocket.onmessage = (event) => {
+        let text_data = JSON.parse(event.data)['info']
+        console.log(text_data, 'handle message from server')
+
+        let type_ = text_data['type']
+        switch (type_) {
+          case "photo_update":
+            text_data = text_data['content']
+            this.ratingComponent.updateUserPhoto(text_data['username'], text_data['new_photo_index'])
+        }
+      }
+    },
+    sendPhotoUpdate() {
+
+      let data = {
+        type: 'photo_update',
+        username: store.state.username,
+        new_photo_index: store.state.photo
+      }
+
+      this.ratingSocket.send(
+          JSON.stringify(
+              data
+          )
+      )
+      console.log('send message to socket')
+    },
     createActiveGamesSocket() {
         this.activeGamesSocket = new WebSocket(`ws://localhost:8200/ws/home/`);
         this.activeGamesSocket.onmessage = (event) => {
@@ -241,7 +280,9 @@ export default {
   <div class="outer-container">
 <div class="container home-page" style="min-height: 95%; max-height: 95%;">
     <div class="column" style="width: 70%; height: 98%; max-height: 98%;">
-      <Profile/>
+      <Profile
+          @updatePhoto="sendPhotoUpdate"
+      />
       <div class="row game-row">
         <h3>Присоединись к этим играм!</h3>
       </div>
@@ -284,7 +325,9 @@ export default {
 
     <div class="column" style="width: 25%; height: 98%; margin: 2.5%;">
       <button class="button-33" role="button" @click="addUsersToGame">Новая игра</button>
-      <Rating/>
+      <Rating
+          ref="rating"
+      />
     </div>
   </div>
 </div>

@@ -1,7 +1,9 @@
 <script setup>
 import { authService } from "@/services/auth";
 import store from "../../store.js";
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, defineEmits } from 'vue';
+
+const emit = defineEmits(['updatePhoto'])
 
 let user = ref({
   username: 'имя',
@@ -18,8 +20,6 @@ const images = ref([
   require('@/assets/av5.png'),
   require('@/assets/av6.png'),
 ]);
-
-let interval = null;
 
 async function getData() {
   try {
@@ -41,18 +41,8 @@ async function changePhoto() {
     'username': store.state.username,
     'indexPhoto': store.state.photo,
   });
+  emit('updatePhoto')
 }
-
-onMounted(() => {
-  getData();
-  interval = setInterval(() => {
-    getData();
-  }, 2000);
-});
-
-onBeforeUnmount(() => {
-  clearInterval(interval);
-});
 
 getData();
 </script>

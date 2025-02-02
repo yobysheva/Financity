@@ -212,7 +212,7 @@ async function checkPositionAndShowModal (currentCoords){
     const response = await authService.getRandomChance();
     modalQuestionId.value = response.data['id'];
     modalQuestionType.value = 3;
-    await questionComponent.value.getQuestion(response.data['id'], 3);
+    await questionComponent.value?.getQuestion(response.data['id'], 3);
   } catch (error) {
         console.error(error);
   }
@@ -229,7 +229,7 @@ async function checkPositionAndShowModal (currentCoords){
     const response = await authService.getRandomQuestion(category);
     modalQuestionId.value = response.data['id'];
     modalQuestionType.value = response.data['type'];
-    await questionComponent.value.getQuestion(response.data['id'], response.data['type']);
+    await questionComponent.value?.getQuestion(response.data['id'], response.data['type']);
     need_to_share_text_answer = response.data['type'] === 1
     need_to_share_radio_button_answer = response.data['type'] === 2
   } catch (error) {
@@ -546,7 +546,7 @@ gameSocket.onmessage = async (event) => {
                 scip = false;
               }
             }
-            questionComponent.value.update_variables()
+            questionComponent.value?.update_variables()
 
             players.value.forEach((player, index) => {
               shine.value[index] = player.id === players.value[current_player_index].id;
@@ -601,7 +601,7 @@ gameSocket.onmessage = async (event) => {
             break;
         case "start_voting":
             if (players.value[current_player_index].id === store.state.playerID) break;
-            questionComponent.value.setVotingTimer()
+            questionComponent.value?.setVotingTimer()
     }
 };
 
