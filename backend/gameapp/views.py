@@ -42,6 +42,18 @@ def createPlayer(request):
 
 
 @api_view(['POST'])
+def removePlayerFromGame(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode())
+        try:
+            player = Player.objects.get(id=data['player_id'])
+            game = Game.objects.get(id=data['game_id'])
+            game.players.remove(player)
+            return JsonResponse({'data': "Player removed"}, status=status.HTTP_200_OK)
+        except Player.DoesNotExist or Game.DoesNotExist:
+            return JsonResponse({"detail": "Game not found or player not found"}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
 def changePlayer(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode())

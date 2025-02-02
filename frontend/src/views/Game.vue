@@ -485,8 +485,8 @@ gameSocket.onmessage = async (event) => {
     let info = text_data["info"];
     let type = text_data['type'];
     players.value.forEach((player, index) => {
-            shine.value[index] = player.id === players.value[current_player_index].id;
-          });
+      shine.value[index] = (player.id === players.value[current_player_index].id);
+    });
     isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
     switch (type) {
         case "on_turn_start":
@@ -579,6 +579,8 @@ gameSocket.onmessage = async (event) => {
             break
 
         case "player_leaving":
+            if (Number(info['player_id']) === store.state.playerID)
+                authService.removePlayerFromGame(Number(info['player_id']), store.state.gameID)
             if (Number(info['player_id']) === store.state.playerID) return;
             // eslint-disable-next-line no-case-declarations
             let index = checkPlayerLeave(Number(info['player_id']))
@@ -591,7 +593,8 @@ gameSocket.onmessage = async (event) => {
               playerComponent.value.splice(index, 1)
               scipPlayer.value.splice(index, 1)
             }
-             if (checkToEnd()) {
+            if (isGameStarted.value)
+            if (checkToEnd()) {
                 await endGame()
                 return
             }
@@ -657,6 +660,7 @@ const generateAndSpin = () => {
 };
 
 function leaveCall() {
+  console.log("player_leaving", store.state.playerID)
   const info = {
       "type": "player_leaving",
       "info": {

@@ -2,10 +2,12 @@ from django.urls import path
 from .views import (createGame, createPlayer, getAnswers, getQuestion, getRandomQuestion, getRandomChance, getChance, \
                     getRandomProfession, connectToGame, getInfoAboutGame, changePlayer, addActionAnswer,
                     addActionChance, getAnswerOutcome, voteHandler, checkBalance,\
-                    changeBalance, checkScip, getActiveGames, updateGameStatus, addWinToGameWinner)
+                    changeBalance, checkScip, getActiveGames, updateGameStatus, addWinToGameWinner,
+                    removePlayerFromGame)
 
 urlpatterns = [
     path('createGame/', createGame, name='createGame'),
+    path('removePlayerFromGame/', removePlayerFromGame, name='removePlayerFromGame'),
     path('getInfoAboutGame/', getInfoAboutGame, name='getInfoAboutGame'),
     path('connectToGame/', connectToGame, name='connectToGame'),
     path('createPlayer/', createPlayer, name='createPlayer'),
