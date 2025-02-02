@@ -28,6 +28,16 @@ export default {
     this.getUsersStats();
   },
   methods: {
+    updateUserGames(username, games, wins) {
+      console.log(this.usersStats[0], games, wins)
+      for (let i = 0; i < this.usersStats[0].length; i++) {
+        if (this.usersStats[0][i].username === username) {
+          this.usersStats[0][i].winGames = wins
+          this.usersStats[0][i].countGames = games
+          break
+        }
+      }
+    },
     updateUserPhoto(username, new_photo_index) {
       for (let i = 0; i < this.usersStats[0].length; i++) {
         if (this.usersStats[0][i].username === username) {

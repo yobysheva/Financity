@@ -7,5 +7,5 @@ websocket_urlpatterns = [
     re_path(r'ws/waiting_request/(?P<username>\w+)/$', consumers.SendGameRequestConsumer.as_asgi()),
     re_path(r'ws/for_waiting_request/(?P<username>\w+)/$', consumers.SendGameRequestConsumer.as_asgi()),
     re_path(r'ws/game_answer/(?P<game_id>\d+)/$', consumers.QuestionConsumer.as_asgi()),
-    re_path(r'ws/rating/$', consumers.RatingConsumer.as_asgi()),
+    re_path(r'ws/rating/(?P<username>\w+)/$', consumers.RatingConsumer.as_asgi()),
 ]

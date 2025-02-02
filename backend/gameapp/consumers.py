@@ -3,6 +3,7 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 
 from gameapp.models import Player, Professions
+from user.models import User
 
 
 class GameConsumer(WebsocketConsumer):
@@ -212,9 +213,29 @@ class RatingConsumer(WebsocketConsumer):
     def connect(self):
         self.room_group_name = f'home_page_rating'
 
+        self.username = self.scope["url_route"]["kwargs"]["username"]
+
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name,
             self.channel_name
+        )
+
+        user = User.objects.get(username=self.username)
+        games = user.countGames
+        wins = user.winGames
+        async_to_sync(self.channel_layer.group_send)(
+            self.room_group_name,
+            {
+                'type': 'default_handler',
+                'info': {
+                    'type': 'gw_update',
+                    'content': {
+                        'username': self.username,
+                        'wins': wins,
+                        'games': games
+                    }
+                }
+            }
         )
 
         self.accept()
@@ -242,7 +263,6 @@ class RatingConsumer(WebsocketConsumer):
                         }
                     }
                 )
-
     def default_handler(self, event):
         info = event['info']
 

@@ -60,7 +60,7 @@ export default {
 
   methods: {
     createRatingSocket() {
-      this.ratingSocket = new WebSocket(`ws://localhost:8200/ws/rating/`)
+      this.ratingSocket = new WebSocket(`ws://localhost:8200/ws/rating/${store.state.username}/`)
       this.ratingSocket.onmessage = (event) => {
         let text_data = JSON.parse(event.data)['info']
         console.log(text_data, 'handle message from server')
@@ -69,7 +69,11 @@ export default {
         switch (type_) {
           case "photo_update":
             text_data = text_data['content']
-            this.ratingComponent.updateUserPhoto(text_data['username'], text_data['new_photo_index'])
+            this.ratingComponent?.updateUserPhoto(text_data['username'], text_data['new_photo_index'])
+            break;
+          case "gw_update":
+            text_data = text_data['content']
+            this.ratingComponent?.updateUserGames(text_data['username'], text_data['games'], text_data['wins'])
         }
       }
     },
