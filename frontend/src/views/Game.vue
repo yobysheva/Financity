@@ -22,7 +22,7 @@ import moneySound from "@/assets/sound/money.mp3"
 import soundOnImg from "@/assets/sound_on.png"
 import soundOfImg from "@/assets/sound_of.png"
 import song from "@/assets/sound/game_compress2.wav";
-
+import { onMounted, onUnmounted } from 'vue';
 let images = ref([
   require('@/assets/av1.png'),
   require('@/assets/av2.png'),
@@ -118,13 +118,37 @@ audio.loop = true
   //     }
   //   }
   // };
-
   // document.addEventListener('visibilitychange', handleVisibilityChange);
 
   onBeforeUnmount(() => {
     disableSound();
     // document.removeEventListener('visibilitychange', handleVisibilityChange);
   });
+
+// let loggedUser = ref({
+//   username: 'name',
+//   uid: 0,
+// });
+window.onbeforeunload = () => {
+
+}
+
+const handleUnload = (event) => {
+  event.preventDefault();
+  leaveCall();
+  if (players.value.length === 0) {
+    endGame()
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('unload', handleUnload);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('unload', handleUnload);
+});
+
 
 let players = ref([])
 if (store.state.playerID !== '') {
@@ -295,7 +319,7 @@ async function checkPositionAndShowModal (currentCoords){
     const response = await authService.getRandomChance();
     modalQuestionId.value = response.data['id'];
     modalQuestionType.value = 3;
-    await questionComponent.value.getQuestion(response.data['id'], 3);
+    await questionComponent.value?.getQuestion(response.data['id'], 3);
   } catch (error) {
         console.error(error);
   }
@@ -312,7 +336,7 @@ async function checkPositionAndShowModal (currentCoords){
     const response = await authService.getRandomQuestion(category);
     modalQuestionId.value = response.data['id'];
     modalQuestionType.value = response.data['type'];
-    await questionComponent.value.getQuestion(response.data['id'], response.data['type']);
+    await questionComponent.value?.getQuestion(response.data['id'], response.data['type']);
     need_to_share_text_answer = response.data['type'] === 1
     need_to_share_radio_button_answer = response.data['type'] === 2
   } catch (error) {
@@ -346,14 +370,28 @@ async function endGame () {
         "game_id": store.state.gameID,
         "status": "finished"
     })
-
     winner.value = getWinner()
     isGameEnded.value = true
-    if (winner.value)
+
+    if (winner.value && winner.value.id === store.state.playerID)
     await authService.addWinToGameWinner({
         "player_id": winner.value.id,
         'secret': store.state.mySecret
     })
+  let activeGamesSocket = new WebSocket(`ws://localhost:8200/ws/home/`);
+
+  activeGamesSocket.onopen = () => {
+    let data = {
+      "type": 'gameFinished',
+      "game_id": store.state.gameID,
+      "username": store.state.username,
+    };
+    activeGamesSocket.send(JSON.stringify(data));
+  };
+
+  activeGamesSocket.onerror = (error) => {
+    console.error("Ошибка WebSocket:", error);
+  };
 }
 
 function redirectToHome(){
@@ -364,7 +402,7 @@ function redirectToHome(){
 
 function checkToEnd() {
     for (let player in players.value) {
-        if (players.value[player].balance <= 0) {
+        if (players.value[player].balance < 0) {
             return true
         }
     }
@@ -469,7 +507,7 @@ const messages = ref([
 ])
 
 const gameId = new URLSearchParams(window.location.search).get('id');
-const chatSocket = new WebSocket(`ws://localhost:8200/ws/chat/${gameId}/`);
+const chatSocket = new WebSocket(`ws://${process.env.VUE_APP_SERVER_IP}/ws/chat/${gameId}/`);
 chatSocket.onmessage = function (event) {
   makeSound(messageAudio);
     let data = JSON.parse(event.data)
@@ -493,7 +531,7 @@ function sendMessage() {
       }))
 }
 
-const answerSocket = new WebSocket(`ws://localhost:8200/ws/game_answer/${gameId}/`);
+const answerSocket = new WebSocket(`ws://${process.env.VUE_APP_SERVER_IP}/ws/game_answer/${gameId}/`);
 answerSocket.onmessage = (event) => {
     let text_data = JSON.parse(event.data);
     text_data = text_data["info"];
@@ -570,21 +608,20 @@ function sendMinus() {
     ))
 }
 
-const gameSocket = new WebSocket(`ws://localhost:8200/ws/game/${gameId}/${store.state.playerID}/`);
+const gameSocket = new WebSocket(`ws://${process.env.VUE_APP_SERVER_IP}/ws/game/${gameId}/${store.state.playerID}/`);
 gameSocket.onmessage = async (event) => {
     let text_data = JSON.parse(event.data);
     text_data = text_data["info"];
     let info = text_data["info"];
     let type = text_data['type'];
     players.value.forEach((player, index) => {
-            shine.value[index] = player.id === players.value[current_player_index].id;
-          });
+      shine.value[index] = (player.id === players.value[current_player_index].id);
+    });
     isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
     switch (type) {
         case "on_turn_start":
           // eslint-disable-next-line no-case-declarations
             const turn_count = info["turn_count"];
-            console.log("on_turn_start")
             // totalSum.value += turn_count;
             makeSound(spinAudio);
             if(totalSumMassive.value[current_player_index] % 26 + turn_count >= 26){
@@ -619,14 +656,14 @@ gameSocket.onmessage = async (event) => {
             break;
         case "on_question_close":
           makeSound(modalAudio);
-            if (checkToEnd()) {
-                await endGame()
-                return
-            }
             need_to_share_text_answer = false
             need_to_share_radio_button_answer = false
             players.value[info['player_index']].balance = info['balance'];
             current_player_index = (current_player_index + 1) % players.value.length;
+            if (checkToEnd()) {
+                await endGame()
+                return
+            }
             // eslint-disable-next-line no-case-declarations
             let scip = true;
             while (scip) {
@@ -641,7 +678,7 @@ gameSocket.onmessage = async (event) => {
                 scip = false;
               }
             }
-            questionComponent.value.update_variables()
+            questionComponent.value?.update_variables()
 
             players.value.forEach((player, index) => {
               shine.value[index] = player.id === players.value[current_player_index].id;
@@ -674,6 +711,8 @@ gameSocket.onmessage = async (event) => {
             break
 
         case "player_leaving":
+            if (Number(info['player_id']) === store.state.playerID)
+                authService.removePlayerFromGame(Number(info['player_id']), store.state.gameID)
             if (Number(info['player_id']) === store.state.playerID) return;
             // eslint-disable-next-line no-case-declarations
             let index = checkPlayerLeave(Number(info['player_id']))
@@ -686,14 +725,15 @@ gameSocket.onmessage = async (event) => {
               playerComponent.value.splice(index, 1)
               scipPlayer.value.splice(index, 1)
             }
-             if (checkToEnd()) {
+            if (isGameStarted.value)
+            if (checkToEnd()) {
                 await endGame()
                 return
             }
             break;
         case "start_voting":
             if (players.value[current_player_index].id === store.state.playerID) break;
-            questionComponent.value.setVotingTimer()
+            questionComponent.value?.setVotingTimer()
     }
 };
 
@@ -752,6 +792,10 @@ const generateAndSpin = () => {
 };
 
 function leaveCall() {
+  if (players.value.length === 1) {
+    endGame()
+  }
+  console.log("player_leaving", store.state.playerID)
   const info = {
       "type": "player_leaving",
       "info": {

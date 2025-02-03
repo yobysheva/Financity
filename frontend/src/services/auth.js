@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const apiUrl = 'http://localhost:8200/api/';
+const apiUrl = `http://${process.env.VUE_APP_SERVER_IP}/api/`;
+console.log(apiUrl)
 
 export const authService = {
     updateGameStatus(gameData) {
@@ -23,6 +24,9 @@ export const authService = {
     },
     createPlayer(userData){
         return axios.post(`${apiUrl}gameApp/createPlayer/`, userData);
+    },
+    removePlayerFromGame(player_id, game_id) {
+        return axios.post(`${apiUrl}gameApp/removePlayerFromGame/`, {player_id: player_id, game_id: game_id})
     },
     getData(username) {
         return axios.get(`${apiUrl}user/getData/`, {params : {username : username}});

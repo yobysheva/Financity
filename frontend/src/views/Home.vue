@@ -11,13 +11,19 @@ import soundOnImg from "@/assets/sound_on.png";
 import soundOfImg from "@/assets/sound_of.png";
 import song from "@/assets/sound/menu.mp3"
 import {onBeforeUnmount, ref} from "vue";
-
+import {useTemplateRef} from "vue";
 export default {
   components: {
     Rating,
     Profile,
   },
   setup() {
+    window.onbeforeunload = () => {
+      localStorage.setItem('store_state', JSON.stringify(store.state))
+      console.log(localStorage.getItem('store_state'), 1231)
+    }
+    let ratingComponent = useTemplateRef('rating')
+
     const soundOn = ref(true);
       const clickAudio = new Audio(clickSound);
       const hoverAudio = new Audio(hoverSound);
@@ -89,7 +95,7 @@ export default {
     // document.removeEventListener('visibilitychange', handleVisibilityChange);
   });
 
-      return {buttonClickSound, buttonHoverSound, invitationSound, disableOrEnableSound, disableSound, soundOn, soundOnImg, soundOfImg}
+      return {ratingComponent, buttonClickSound, buttonHoverSound, invitationSound, disableOrEnableSound, disableSound, soundOn, soundOnImg, soundOfImg}
   },
   data() {
     return {
@@ -97,6 +103,7 @@ export default {
         username: 'name',
         uid: 0,
       },
+      ratingSocket: null,
       activeGamesSocket: false,
       session_id: "",
       receiver_id: null,
@@ -122,23 +129,73 @@ export default {
     window.addEventListener('keydown', this.handleKeyDown);
   },
   created() {
+    this.checkOnRefresh()
     this.createWaitingRequestSocket()
     this.createActiveGamesSocket()
+    this.createRatingSocket();
     this.getLoggedInUser();
     this.getActiveGames();
   },
 
   methods: {
+    checkOnRefresh() {
+      if (store.state.username === '') {
+        let state = JSON.parse(localStorage.getItem('store_state'))
+        store.dispatch("updateUsername", state['username'])
+        store.dispatch("updateSecret", state['mySecret'])
+        store.dispatch("updatePhoto", state['photo'])
+     }
+    },
+    createRatingSocket() {
+      this.ratingSocket = new WebSocket(`ws://localhost:8200/ws/rating/${store.state.username}/`)
+      this.ratingSocket.onmessage = (event) => {
+        let text_data = JSON.parse(event.data)['info']
+
+        let type_ = text_data['type']
+        switch (type_) {
+          case "photo_update":
+            text_data = text_data['content']
+            this.ratingComponent?.updateUserPhoto(text_data['username'], text_data['new_photo_index'])
+            break;
+          case "gw_update":
+            text_data = text_data['content']
+            this.ratingComponent?.updateUserGames(text_data['username'], text_data['games'], text_data['wins'])
+        }
+      }
+    },
+    sendPhotoUpdate() {
+
+      let data = {
+        type: 'photo_update',
+        username: store.state.username,
+        new_photo_index: store.state.photo
+      }
+
+      this.ratingSocket.send(
+          JSON.stringify(
+              data
+          )
+      )
+    },
     createActiveGamesSocket() {
         this.activeGamesSocket = new WebSocket(`ws://localhost:8200/ws/home/`);
         this.activeGamesSocket.onmessage = (event) => {
         let text_data = JSON.parse(event.data)
-        this.activeGame.push(text_data)
+        let type = text_data['type']
+        switch (type) {
+          case 'gameStarted':
+            this.activeGame.push(text_data)
+            break;
+          case 'gameFinished':
+            this.activeGame = this.activeGame.filter(game => game.game_id !== text_data['game_id']);
+            break;
+        }
       }
     },
 
     sendMessageToActiveGamesSocket(gameId) {
       let data = {
+        "type": 'gameStarted',
         "game_id": gameId,
         "username": store.state.username,
       }
@@ -334,7 +391,9 @@ export default {
   <div class="outer-container">
 <div class="container home-page" style="min-height: 95%; max-height: 95%;">
     <div class="column" style="width: 70%; height: 98%; max-height: 98%;">
-      <Profile/>
+      <Profile
+          @updatePhoto="sendPhotoUpdate"
+      />
       <div class="row game-row">
         <h3>Присоединись к этим играм!</h3>
       </div>
@@ -380,7 +439,7 @@ export default {
         <button class="button-33" style="flex-grow: 1;" role="button" @click="addUsersToGame" @mouseenter="buttonHoverSound">Новая игра</button>
         <button class="button-33" role="button" @click="disableOrEnableSound" @mouseenter="buttonHoverSound"><img :src="soundOn ? soundOnImg : soundOfImg" class="sound"></button>
       </div>
-      <Rating/>
+      <Rating ref="rating"/>
     </div>
   </div>
 </div>

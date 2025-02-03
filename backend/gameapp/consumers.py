@@ -3,6 +3,7 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 
 from gameapp.models import Player, Professions
+from user.models import User
 
 
 class GameConsumer(WebsocketConsumer):
@@ -202,6 +203,67 @@ class QuestionConsumer(WebsocketConsumer):
                 )
 
     def  default_handler(self, event):
+        info = event['info']
+
+        self.send(text_data=json.dumps({
+            'info': info
+        }))
+
+class RatingConsumer(WebsocketConsumer):
+    def connect(self):
+        self.room_group_name = f'home_page_rating'
+
+        self.username = self.scope["url_route"]["kwargs"]["username"]
+
+        async_to_sync(self.channel_layer.group_add)(
+            self.room_group_name,
+            self.channel_name
+        )
+
+        user = User.objects.get(username=self.username)
+        games = user.countGames
+        wins = user.winGames
+        async_to_sync(self.channel_layer.group_send)(
+            self.room_group_name,
+            {
+                'type': 'default_handler',
+                'info': {
+                    'type': 'gw_update',
+                    'content': {
+                        'username': self.username,
+                        'wins': wins,
+                        'games': games
+                    }
+                }
+            }
+        )
+
+        self.accept()
+
+    def receive(self, text_data=None, bytes_data=None):
+        text_data_json = json.loads(text_data)
+
+        type_ = text_data_json['type']
+
+        match type_:
+            case "photo_update":
+                username = text_data_json['username']
+                new_photo_index = text_data_json['new_photo_index']
+
+                async_to_sync(self.channel_layer.group_send)(
+                    self.room_group_name,
+                    {
+                        'type': 'default_handler',
+                        'info': {
+                            'type': 'photo_update',
+                            'content': {
+                                'username': username,
+                                'new_photo_index': new_photo_index
+                            }
+                        }
+                    }
+                )
+    def default_handler(self, event):
         info = event['info']
 
         self.send(text_data=json.dumps({
