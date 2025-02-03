@@ -3,6 +3,19 @@ import {defineProps, defineEmits, onMounted, onUnmounted, defineExpose, computed
 import {ref} from 'vue';
 import {authService} from "@/services/auth";
 import store from "@/store";
+import radioSound from "@/assets/sound/radioBtn.mp3";
+import clickSound from "@/assets/sound/click.wav";
+import hoverSound from "@/assets/sound/hover2.wav";
+
+const props = defineProps({
+  questionId: Number,
+  caseTitle: String,
+  questionType: Number,
+  visible: Boolean,
+  color: String,
+  isMyTurn: Boolean,
+  soundOn: Boolean
+});
 
 const emit = defineEmits(['close', 'update-balance', 'plus', 'minus', 'setVotingTimer']);
 const answerText = ref("Ваше действие будет иметь последствия");
@@ -18,21 +31,35 @@ const handleKeyDown = (event) => {
   }
 };
 
+const radioAudio = new Audio(radioSound);
+const clickAudio = new Audio(clickSound);
+const hoverAudio = new Audio(hoverSound);
+clickAudio.volume = 0.1
+hoverAudio.volume = 0.1
+radioAudio.volume = 0.6
+
+const buttonClickSound = () => {
+  if(props.soundOn){
+    clickAudio.play()
+  }
+}
+const buttonHoverSound = () => {
+  if(props.soundOn) {
+    hoverAudio.play()
+  }
+}
+const radioButtonClickSound = () => {
+  if(props.soundOn) {
+    radioAudio.play()
+  }
+}
+
 onMounted(() => {
   window.addEventListener('keydown', handleKeyDown);
 });
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown);
-});
-
-const props = defineProps({
-  questionId: Number,
-  caseTitle: String,
-  questionType: Number,
-  visible: Boolean,
-  color: String,
-  isMyTurn: Boolean
 });
 
 let answerTextVisible = ref(false);
@@ -93,6 +120,7 @@ function update_variables() {
     timeBeforeClose.value = 10
 }
 function vote_minus() {
+  buttonClickSound();
     if (stopAnswering.value && !didIVote.value) {
         votes_minuses.value++
         didIVote.value = true
@@ -101,6 +129,7 @@ function vote_minus() {
 }
 
 function vote_plus() {
+  buttonClickSound();
     if (stopAnswering.value && !didIVote.value) {
         didIVote.value = true
         emit('plus')
@@ -113,8 +142,6 @@ function get_votes() {
         "minuses": votes_minuses.value
     }
 }
-
-
 
 onMounted(() => {
   const textarea = document.querySelector('.input-custom');
@@ -154,7 +181,9 @@ function getIdOfActiveRadioButton() {
 
 function setTimerThenClose() {
     stopAnswering.value = true
-    console.log("я пидорас!")
+  if(timeBeforeClose.value === 10) {
+    buttonClickSound();
+  }
     if (timeBeforeClose.value-- > 0) {
         setTimeout(setTimerThenClose, 1000)
     }
@@ -166,6 +195,9 @@ function setTimerThenClose() {
 }
 
 function setVotingTimer() {
+  if(timeBeforeClose.value === 10) {
+    buttonClickSound();
+  }
     stopAnswering.value = true
     if (timeBeforeClose.value-- > 0) {
         setTimeout(setVotingTimer, 1000)
@@ -177,6 +209,7 @@ function setVotingTimer() {
 }
 
 async function addAnswer() {
+  buttonClickSound();
   let rates = document.getElementsByName('answer');
   for (let ans of rates) {
     if (ans.checked) {
@@ -191,6 +224,7 @@ async function addAnswer() {
 }
 
 function setActiveRadioButtonForId(id) {
+  // radioButtonClickSound();
     let rates = document.getElementsByName('answer');
     if (Number(id) === -1 || rates.length === 0) return;
     for(let i = 0; i < rates.length; i++){
@@ -248,10 +282,10 @@ defineExpose({
         <div v-if="questionType === 2" class="answers" style="justify-content: space-between;">
           <div
             class="radio-container column"
-            style="margin-bottom: 8px; align-items: center; -ms-overflow-style: none; scrollbar-width: none;"
+            style="gap:10px; margin-bottom: 8px; align-items: center; -ms-overflow-style: none; scrollbar-width: none;"
           >
             <label v-for="answer in answers"
-            :key="answer.id" style="color:black; display: flex; align-items: center;">
+            :key="answer.id" style="color:black; display: flex; align-items: center;" @click="radioButtonClickSound">
               <input type="radio" name="answer" :value="answer.id" :disabled="!isMyTurn" />
               <div class="radio-custom"></div>
               {{ answer.text }}
@@ -263,6 +297,7 @@ defineExpose({
         role="button"
         style="margin-bottom: 16px;"
         @click="addAnswer"
+        @mouseenter="buttonHoverSound"
       >
         Ответить
       </button>
@@ -271,6 +306,7 @@ defineExpose({
         role="button"
         style="margin-bottom: 16px;"
         @click="close"
+        @mouseenter="buttonHoverSound"
       >
         Закрыть
       </button>
@@ -280,6 +316,7 @@ defineExpose({
         role="button"
         :hidden="didIVote || !stopAnswering"
         style="margin-bottom: 16px;"
+        @mouseenter="buttonHoverSound"
         @click="vote_plus"
       >
         +
@@ -289,6 +326,7 @@ defineExpose({
         role="button"
         :hidden="didIVote || !stopAnswering"
         style="margin-bottom: 16px;"
+        @mouseenter="buttonHoverSound"
         @click="vote_minus"
       >
         -
@@ -300,6 +338,7 @@ defineExpose({
         :hidden="stopAnswering"
         style="margin-bottom: 16px;"
         @click="setTimerThenClose(); emit('setVotingTimer')"
+        @mouseenter="buttonHoverSound"
       >
         Ответить
       </button>
@@ -318,6 +357,7 @@ defineExpose({
         role="button"
         style="margin-bottom: 16px;"
         @click="close"
+        @mouseenter="buttonHoverSound"
       >
         Закрыть
       </button>
@@ -371,7 +411,7 @@ input[type="radio"] {
 .radio-custom {
     width: 20px;
     height: 20px;
-    border: 2px solid rgba(44, 187, 99, .6);
+    border: 2px solid rgba(44, 187, 99);
     border-radius: 10px;
     position: relative;
     margin-right: 10px;
@@ -380,7 +420,7 @@ input[type="radio"] {
 }
 
 input[type="radio"]:checked + .radio-custom {
-    background-color: rgba(44, 187, 99, .3);
+    background-color: rgba(44, 187, 99);
 }
 
 .radio-custom::after {
@@ -401,11 +441,11 @@ input[type="radio"]:checked + .radio-custom::after {
 }
 
 .radio-custom:hover {
-    border-color: rgba(44, 187, 99, .3);
+    border-color: rgba(44, 187, 99);
 }
 
 input[type="radio"]:checked + .radio-custom:hover {
-    background-color: rgba(44, 187, 99, .3);
+    background-color: rgba(44, 187, 99);
 }
 
 

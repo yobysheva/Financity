@@ -9,12 +9,23 @@ defineProps({
   shine: Boolean,
   balanceChange: String
 });
+import moneySound from "@/assets/sound/money.mp3"
+
+const moneyAudio = new Audio(moneySound);
+
+const moneyMakeSound = () => {
+  moneyAudio.volume = 0.3
+  moneyAudio.play()
+}
 
 const balanceChanged = ref(false);
 const visibleTimer = ref(5);
 
 function makeBalanceChanceVisible(){
   balanceChanged.value = true
+  if (visibleTimer.value === 5){
+    moneyMakeSound();
+  }
   console.log('Баланс изменился!')
     if (visibleTimer.value > 0) {
         // console.log(`${visibleTimer.value--} осталось`)

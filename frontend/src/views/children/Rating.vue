@@ -35,18 +35,21 @@ export default {
   },
   methods: {
     async getUsersStats() {
-      try {
-        const response = await authService.getUsersStats(store.state.username);
-        this.usersStats[0] = response.data['user_data'];
-      } catch (error) {
-        if (error.response) {
-          alert("Login failed: " + error.response.data || "Unknown error");
-        } else if (error.request) {
-          alert("No response from server. Please try again later.");
-        } else {
-          alert("Error setting up request: " + error.message);
+      if (store.state.username){
+          try {
+          const response = await authService.getUsersStats(store.state.username);
+          this.usersStats[0] = response.data['user_data'];
+        } catch (error) {
+          if (error.response) {
+            alert("Login failed: " + error.response.data || "Unknown error");
+          } else if (error.request) {
+            alert("No response from server. Please try again later.");
+          } else {
+            alert("Error setting up request: " + error.message);
+          }
         }
       }
+
     },
   }
 };

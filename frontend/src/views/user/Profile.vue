@@ -21,16 +21,18 @@ const images = ref([
 
 
 async function getData() {
-  try {
-    const response = await authService.getData(store.state.username);
-    user.value.username = store.state.username;
-    user.value.countGames = response.data['countGames'];
-    user.value.winGames = response.data['winGames'];
-    user.value.photo = images.value[response.data['indexPhoto']] || images.value[0];
-    user.value.place = response.data['place'];
-    await store.dispatch('updatePhoto', response.data['indexPhoto'] || 0);
-  } catch (error) {
-        console.error(error);
+  if (store.state.username){
+    try {
+        const response = await authService.getData(store.state.username);
+        user.value.username = store.state.username;
+        user.value.countGames = response.data['countGames'];
+        user.value.winGames = response.data['winGames'];
+        user.value.photo = images.value[response.data['indexPhoto']] || images.value[0];
+        user.value.place = response.data['place'];
+        await store.dispatch('updatePhoto', response.data['indexPhoto'] || 0);
+      } catch (error) {
+            console.error(error);
+      }
   }
 }
 
