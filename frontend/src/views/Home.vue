@@ -107,12 +107,21 @@ export default {
         this.activeGamesSocket = new WebSocket(`ws://localhost:8200/ws/home/`);
         this.activeGamesSocket.onmessage = (event) => {
         let text_data = JSON.parse(event.data)
-        this.activeGame.push(text_data)
+        let type = text_data['type']
+        switch (type) {
+          case 'gameStarted':
+            this.activeGame.push(text_data)
+            break;
+          case 'gameFinished':
+            this.activeGame = this.activeGame.filter(game => game.game_id !== text_data['game_id']);
+            break;
+        }
       }
     },
 
     sendMessageToActiveGamesSocket(gameId) {
       let data = {
+        "type": 'gameStarted',
         "game_id": gameId,
         "username": store.state.username,
       }

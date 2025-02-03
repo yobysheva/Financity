@@ -11,6 +11,7 @@ import {nextTick, ref} from 'vue';
 // import { getCurrentInstance } from 'vue';
 import store from "@/store";
 import routes from "../router/index.js";
+import { onMounted, onUnmounted } from 'vue';
 
 let images = ref([
   require('@/assets/av1.png'),
@@ -48,6 +49,22 @@ let votes = ref({
 window.onbeforeunload = () => {
 
 }
+
+const handleUnload = (event) => {
+  event.preventDefault();
+  leaveCall();
+  if (players.value.length === 0) {
+    endGame()
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('unload', handleUnload);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('unload', handleUnload);
+});
 
 
 let players = ref([])
@@ -274,6 +291,20 @@ async function endGame () {
         "player_id": winner.value.id,
         'secret': store.state.mySecret
     })
+  let activeGamesSocket = new WebSocket(`ws://localhost:8200/ws/home/`);
+
+  activeGamesSocket.onopen = () => {
+    let data = {
+      "type": 'gameFinished',
+      "game_id": store.state.gameID,
+      "username": store.state.username,
+    };
+    activeGamesSocket.send(JSON.stringify(data));
+  };
+
+  activeGamesSocket.onerror = (error) => {
+    console.error("Ошибка WebSocket:", error);
+  };
 }
 
 function redirectToHome(){
@@ -665,6 +696,9 @@ const generateAndSpin = () => {
 };
 
 function leaveCall() {
+  if (players.value.length === 1) {
+    endGame()
+  }
   console.log("player_leaving", store.state.playerID)
   const info = {
       "type": "player_leaving",
