@@ -12,9 +12,9 @@ const props = defineProps({
 import moneySound from "@/assets/sound/money.mp3"
 
 const moneyAudio = new Audio(moneySound);
+moneyAudio.volume = 0.25
 
 const moneyMakeSound = () => {
-  moneyAudio.volume = 0.3
   moneyAudio.play()
 }
 

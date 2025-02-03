@@ -53,6 +53,7 @@ hoverAudio.volume = 0.1
 modalAudio.volume = 0.1
 spinAudio.volume = 0.05
 messageAudio.volume = 1
+moneyAudio.volume = 0.3
 
 
 // const buttonClickSound = () => {
@@ -73,8 +74,6 @@ messageAudio.volume = 1
 // const messageDelieveredSound = () => {
 //   messageAudio.play()
 // }
-
-
 
 function makeSound(sound){
   if(soundOn.value){
