@@ -317,7 +317,7 @@ export default {
     <div class="column" style="width: 100%; align-items: center; justify-content: center;">
       <div class="column" style="justify-content: center;">
       <h1 style="text-align: center; margin-bottom: 15px; margin-top: 15px;">Вы пригласили в игру пользователей:</h1>
-          <ul>
+          <ul style="margin-bottom: 5px;">
           <h3 v-for="user in  groupUsers" :key="user.id">{{ user }}</h3>
           </ul>
     </div>
@@ -388,13 +388,13 @@ export default {
 
 <style scoped>
 input {
-  margin: 25px 30px;
+  margin: 15px 30px;
   padding: 10px 20px;
   font-size:14px;
 }
 @media (max-width: 1200px) {
   input {
-    margin: 17px 26px;
+    margin: 10px 26px;
     padding: 5px 17px;
     font-size:12px;
   }
@@ -402,7 +402,7 @@ input {
 
 @media (max-width: 900px) {
   input {
-    margin: 13px 23px;
+    margin: 8px 23px;
     padding: 3px 13px;
     font-size: 10px;
   }
@@ -410,7 +410,7 @@ input {
 
 @media (max-width: 770px) {
   input {
-    margin: 10px 19px;
+    margin: 5px 19px;
     padding: 3px 10px;
     font-size: 9px;
   }

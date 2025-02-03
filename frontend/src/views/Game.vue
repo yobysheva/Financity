@@ -52,7 +52,7 @@ clickAudio.volume = 0.1
 hoverAudio.volume = 0.1
 modalAudio.volume = 0.1
 spinAudio.volume = 0.05
-messageAudio.volume = 0.9
+messageAudio.volume = 1
 
 
 // const buttonClickSound = () => {
@@ -82,7 +82,7 @@ function makeSound(sound){
   }
 }
 const audio = new Audio(song)
-audio.volume = 0.35
+audio.volume = 0.3
 audio.loop = true
 
       const playMelody = () => {

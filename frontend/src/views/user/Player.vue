@@ -1,6 +1,6 @@
 <script setup>
-import {defineExpose, defineProps, ref} from 'vue';
-defineProps({
+import {defineExpose, defineProps, ref, watch} from 'vue';
+const props = defineProps({
   name: String,
   jobName: String,
   jobPayment: Number,
@@ -40,6 +40,30 @@ function makeBalanceChanceVisible(){
 defineExpose({
     makeBalanceChanceVisible
 });
+
+const animatedBalance = ref(props.balance);
+
+watch(
+  () => props.balance,
+  (newBalance) => {
+    const duration = 1500;
+    const start = animatedBalance.value;
+    const end = newBalance;
+    const startTime = performance.now();
+
+    const animate = (currentTime) => {
+      const elapsedTime = currentTime - startTime;
+      const progress = Math.min(elapsedTime / duration, 1);
+      animatedBalance.value = Math.floor(start + (end - start) * progress);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+    requestAnimationFrame(animate);
+  }
+);
+
 </script>
 
 <template>
@@ -55,7 +79,7 @@ defineExpose({
   display: block; "/></div>
     <p>{{name}}</p>
         <p>{{jobName}} {{jobPayment}}₽</p>
-    <p>Баланс: {{balance}}₽</p>
+    <p>Баланс: {{animatedBalance}}₽</p>
   </div>
   <div class="balance-change" v-if="balanceChanged">
     <div class="container">
@@ -183,5 +207,11 @@ p{
     margin: 2px;
   }
 }
+.player-container {
+  transition: background-color 0.3s ease;
+}
 
+.balance-change {
+  transition: opacity 0.3s ease;
+}
 </style>
