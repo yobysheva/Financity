@@ -29,7 +29,6 @@ export default {
   },
   methods: {
     updateUserGames(username, games, wins) {
-      console.log(this.usersStats[0], games, wins)
       for (let i = 0; i < this.usersStats[0].length; i++) {
         if (this.usersStats[0][i].username === username) {
           this.usersStats[0][i].winGames = wins
@@ -39,7 +38,7 @@ export default {
       }
 
       this.usersStats[0].sort((a, b) => {
-        return a.winGames - b.winGames
+        return b.winGames - a.winGames
       })
 
     },

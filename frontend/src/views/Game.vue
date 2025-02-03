@@ -45,6 +45,11 @@ let votes = ref({
 //   username: 'name',
 //   uid: 0,
 // });
+window.onbeforeunload = () => {
+
+}
+
+
 let players = ref([])
 if (store.state.playerID !== '') {
     localStorage.setItem('player_id', JSON.stringify(store.state.playerID))

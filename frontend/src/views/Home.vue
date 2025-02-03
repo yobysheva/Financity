@@ -8,6 +8,10 @@ import {useTemplateRef} from "vue";
 
 export default {
   setup() {
+    window.onbeforeunload = () => {
+      localStorage.setItem('store_state', JSON.stringify(store.state))
+      console.log(localStorage.getItem('store_state'), 1231)
+    }
     let ratingComponent = useTemplateRef('rating')
 
     return {
@@ -51,6 +55,7 @@ export default {
     window.addEventListener('keydown', this.handleKeyDown);
   },
   created() {
+    this.checkOnRefresh()
     this.createWaitingRequestSocket()
     this.createActiveGamesSocket()
     this.createRatingSocket();
@@ -59,11 +64,18 @@ export default {
   },
 
   methods: {
+    checkOnRefresh() {
+      if (store.state.username === '') {
+        let state = JSON.parse(localStorage.getItem('store_state'))
+        store.dispatch("updateUsername", state['username'])
+        store.dispatch("updateSecret", state['mySecret'])
+        store.dispatch("updatePhoto", state['photo'])
+     }
+    },
     createRatingSocket() {
       this.ratingSocket = new WebSocket(`ws://localhost:8200/ws/rating/${store.state.username}/`)
       this.ratingSocket.onmessage = (event) => {
         let text_data = JSON.parse(event.data)['info']
-        console.log(text_data, 'handle message from server')
 
         let type_ = text_data['type']
         switch (type_) {
@@ -90,7 +102,6 @@ export default {
               data
           )
       )
-      console.log('send message to socket')
     },
     createActiveGamesSocket() {
         this.activeGamesSocket = new WebSocket(`ws://localhost:8200/ws/home/`);
