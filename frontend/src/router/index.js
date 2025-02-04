@@ -4,7 +4,6 @@ import Login from '../views/auth/LoginRegistrationModal.vue';
 // import Profile from '../views/Profile.vue';
 import Home from '../views/Home.vue';
 import Game from '../views/Game.vue'
-import store from "@/store";
 
 const routes = [
   {
@@ -46,18 +45,13 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.meta.source === 'game') {
-      if (from.meta.source === 'game') {
-          next({
-            path: '/home',
-          })
-          return
-      }
-      if (!store.state.gameID) {
-          next({
-            path: '/home',
-          })
-          return;
-      }
+    console.log(JSON.parse(sessionStorage.getItem("store_state")))
+    if (!JSON.parse(sessionStorage.getItem('store_state'))['gameID']){
+      next({
+        path: '/home',
+      })
+      return
+    }
   }
   next();
 });

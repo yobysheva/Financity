@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from django.http import JsonResponse
 from django.template.defaultfilters import random
 from rest_framework.decorators import api_view
@@ -21,8 +23,10 @@ def createGame(request):
             player.balance = profession.salary
             player.save()
             game = Game.objects.create(status='newGame')
-            game.players.add(player)
-            return JsonResponse({'gameId': game.id, 'playerID': player.id})
+            if game.players.filter(id=player.id).count() == 0 and not any(i.user_id == player.user_id for i in list(game.players.all())):
+                game.players.add(player)
+                return JsonResponse({'gameId': game.id, 'playerID': player.id}, status=status.HTTP_201_CREATED)
+            return JsonResponse({'msg': 'player already in room'}, status=HTTPStatus.BAD_REQUEST)
         except User.DoesNotExist:
             return JsonResponse({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -35,8 +39,10 @@ def createPlayer(request):
             user = User.objects.get(username=data['username'])
             player = Player.objects.create(user=user)
             game = Game.objects.get(id=data['id'])
-            game.players.add(player)
-            return JsonResponse({'gameId': game.id, 'playerID': player.id})
+            if game.players.filter(id=player.id).count() == 0 and not any(i.user_id == player.user_id for i in list(game.players.all())):
+                game.players.add(player)
+                return JsonResponse({'gameId': game.id, 'playerID': player.id}, status=status.HTTP_201_CREATED)
+            return JsonResponse({'msg': 'player already in room'}, status=HTTPStatus.BAD_REQUEST)
         except User.DoesNotExist:
             return JsonResponse({"detail": "User or game not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -282,8 +288,12 @@ def connectToGame(request):
             player.balance = profession.salary
             player.save()
             game = Game.objects.get(id=data["game_id"])
-            game.players.add(player)
-            return JsonResponse({'gameId': game.id, 'playerID': player.id})
+            print('----------------------------------------------------------------')
+            print(not any(i.user_id == player.user_id for i in list(game.players.all())))
+            if game.players.filter(id=player.id).count() == 0 and not any(i.user_id == player.user_id for i in list(game.players.all())):
+                game.players.add(player)
+                return JsonResponse({'gameId': game.id, 'playerID': player.id}, status=status.HTTP_201_CREATED)
+            return JsonResponse({'msg': 'player already in room'}, status=HTTPStatus.BAD_REQUEST)
         except User.DoesNotExist:
             return JsonResponse({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 

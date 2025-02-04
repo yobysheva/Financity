@@ -9,8 +9,7 @@ import {useTemplateRef} from "vue";
 export default {
   setup() {
     window.onbeforeunload = () => {
-      localStorage.setItem('store_state', JSON.stringify(store.state))
-      console.log(localStorage.getItem('store_state'), 1231)
+      sessionStorage.setItem('store_state', JSON.stringify(store.state))
     }
     let ratingComponent = useTemplateRef('rating')
 
@@ -66,7 +65,7 @@ export default {
   methods: {
     checkOnRefresh() {
       if (store.state.username === '') {
-        let state = JSON.parse(localStorage.getItem('store_state'))
+        let state = JSON.parse(sessionStorage.getItem('store_state'))
         store.dispatch("updateUsername", state['username'])
         store.dispatch("updateSecret", state['mySecret'])
         store.dispatch("updatePhoto", state['photo'])
@@ -158,6 +157,7 @@ export default {
         let data = JSON.parse(event.data);
         if (data.type === "game_invitation") {
           await store.dispatch("updateGameID", data.game_id);
+          sessionStorage.setItem('store_state', JSON.stringify(store.state))
           this.senderName = data.sender;
           this.incomingInvite = true
         }
@@ -194,7 +194,7 @@ export default {
         this.groupUsers.push(this.newUser);
         this.newUser = '';
     } else if(this.groupUsers.length >= 5){
-        alert('Максимальное число игорков: 6');
+        alert('Максимальное число игроков: 6');
       }
     },
 
@@ -214,9 +214,10 @@ export default {
     const response = await authService.createGame({
       username: store.state.username,
     });
-    if (response.status === 200) {
+    if (response.status === 201) {
       await store.dispatch("updateGameID", response.data.gameId);
       await store.dispatch("updatePlayerID", response.data.playerID);
+      sessionStorage.setItem('store_state', JSON.stringify(store.state))
       this.sendMessageToActiveGamesSocket(response.data.gameId, response.data.playerID);
       this.$router.push({ name: "Game", query: { id: store.state.gameID } });
       this.gameId = String(response.data.gameId);
@@ -253,9 +254,10 @@ export default {
         username: store.state.username,
         game_id: gameID,
       });
-      if (response.status === 200) {
+      if (response.status === 201) {
         await store.dispatch("updateGameID", response.data.gameId);
         await store.dispatch("updatePlayerID", response.data.playerID);
+        sessionStorage.setItem('store_state', JSON.stringify(store.state))
         this.$router.push({name: "Game", query: {id: store.state.gameID}});
       }
     },
@@ -265,7 +267,7 @@ export default {
         username: store.state.username,
         game_id: store.state.gameID,
       });
-      if (response.status === 200) {
+      if (response.status === 201) {
         await store.dispatch("updatePlayerID", response.data.playerID);
       this.$router.push({name: "Game", query: {id: store.state.gameID}});
       }

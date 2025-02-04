@@ -2,7 +2,7 @@ import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 
-from gameapp.models import Player, Professions
+from gameapp.models import Player, Professions, Game
 from user.models import User
 
 
@@ -14,6 +14,7 @@ class GameConsumer(WebsocketConsumer):
     def connect(self):
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
         self.player_id = self.scope["url_route"]["kwargs"]["player_id"]
+        self.is_player_new = bool(int(self.scope["url_route"]["kwargs"]["is_player_new"]))
         self.room_group_name = f'game_{self.game_id}'
 
         async_to_sync(self.channel_layer.group_add)(
@@ -21,20 +22,20 @@ class GameConsumer(WebsocketConsumer):
             self.channel_name
         )
         player = Player.objects.get(id=self.player_id)
-        async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name,
-            {
-                'type': 'notification_about_connect_to_game_handler',
-                'info': {
-                    'id': player.id,
-                    'name': player.user.username,
-                    'profession': player.profession.name,
-                    'balance': player.balance,
-                    'salary': player.profession.salary
+        if self.is_player_new:
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    'type': 'notification_about_connect_to_game_handler',
+                    'info': {
+                        'id': player.id,
+                        'name': player.user.username,
+                        'profession': player.profession.name,
+                        'balance': player.balance,
+                        'salary': player.profession.salary
+                    }
                 }
-            }
-        )
-
+            )
         self.accept()
 
     def receive(self, text_data=None, bytes_data=None):

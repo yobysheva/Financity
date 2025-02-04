@@ -12,6 +12,16 @@ import {nextTick, ref} from 'vue';
 import store from "@/store";
 import routes from "../router/index.js";
 import { onMounted, onUnmounted } from 'vue';
+let flag = false
+if (!store.state.username) {
+  flag = true
+  const store_state = JSON.parse(sessionStorage.getItem("store_state"))
+  store.dispatch("updatePlayerID", store_state['playerID'])
+  store.dispatch("updateGameID", store_state['gameID'])
+  store.dispatch("updateSecret", store_state['mySecret'])
+  store.dispatch("updatePhoto", store_state['photo'])
+  store.dispatch("updateUsername", store_state['username'])
+}
 
 let images = ref([
   require('@/assets/av1.png'),
@@ -27,58 +37,67 @@ let votes = ref({
   "minuses": 0
 })
 
-// const props = defineProps({
-//   id: {
-//     type: String,
-//     required: true
-//   },
-//   sessionId: {
-//     type: String,
-//     required: false
-//   },
-//   userType: {
-//     type: Boolean,
-//     required: true
-//   }
-// });
-
-// let loggedUser = ref({
-//   username: 'name',
-//   uid: 0,
-// });
-window.onbeforeunload = () => {
-
-}
-
 const handleUnload = (event) => {
-  event.preventDefault();
-  leaveCall();
-  if (players.value.length === 0) {
-    endGame()
+  event.preventDefault()
+  sessionStorage.setItem("game_state", JSON.stringify({
+    'players': players.value,
+    'votes': votes.value,
+    'current_player_index': current_player_index,
+    'shine': shine.value,
+    'isGameStarted': isGameStarted.value,
+    'isGameEnded': isGameEnded.value,
+    'need_to_share_text_answer': need_to_share_text_answer,
+    'need_to_share_radio_button_answer': need_to_share_radio_button_answer,
+    'isMyTurn': isMyTurn.value,
+    'winner': winner.value,
+    'scipPlayer': scipPlayer.value,
+    'playerComponent': playerComponent.value,
+    'balanceChange': balanceChange.value,
+    'newMessage': newMessage.value,
+    'rulesVisible': rulesVisible.value,
+    'global_id': global_id,
+    'dotStyleMassive': dotStyleMassive.value,
+    'result': result.value,
+    'diceStyle': diceStyle.value,
+    'totalSumMassive': totalSumMassive.value,
+    'currentIndexMassive': currentIndexMassive.value,
+    'lastRoll': lastRoll.value,
+    'lastX': lastX.value,
+    'lastY': lastY.value,
+    'isSpinDisabled': isSpinDisabled.value,
+    'spinButtonLabel': spinButtonLabel.value,
+    'modalVisible': modalVisible.value,
+    'modalTitle': modalTitle.value,
+    'modalQuestionId': modalQuestionId.value,
+    'modalQuestionType': modalQuestionType.value,
+    'questionComponent': questionComponent.value,
+    'modalColor': modalColor.value
+  }))
+  sessionStorage.setItem('store_state', JSON.stringify(store.state))
+
+  const isReload = performance.getEntriesByType("navigation")[0].type === 'reload';
+  const sad = window.confirm('qweq')
+  console.log(isReload, sad)
+  if (!isReload) {
+    leaveCall();
+    if (players.value.length < 2 && isGameStarted) {
+      endGame()
+    } else if (players.value.length === 0) {
+      endGame()
+    }
   }
 };
 
 onMounted(() => {
-  window.addEventListener('unload', handleUnload);
+  window.addEventListener('beforeunload', handleUnload);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('unload', handleUnload);
+  window.removeEventListener('beforeunload', handleUnload);
 });
 
 
 let players = ref([])
-if (store.state.playerID !== '') {
-    localStorage.setItem('player_id', JSON.stringify(store.state.playerID))
-    localStorage.setItem('game_id', JSON.stringify(store.state.gameID))
-}
-else {
-    const PID = JSON.parse(localStorage.getItem("player_id"))
-    const GID = JSON.parse(localStorage.getItem("game_id"))
-    store.dispatch("updatePlayerID", PID)
-    store.dispatch("updateGameID", GID)
-}
-players.value = []
 let current_player_index = 0
 let shine = ref([])
 let isGameStarted = ref(false)
@@ -92,6 +111,7 @@ let scipPlayer = ref([])
 const playerComponent = ref([])
 const balanceChange = ref([])
 
+if (store.state.username)
 authService.getInfoAboutGame(
       store.state.gameID
 ).then((response) => {
@@ -147,9 +167,6 @@ function startGame() {
     isGameStarted.value = true
 }
 
-// if(!props.userType){
-  // let sessionID = props.sessionId;
-
 let global_id = 0;
 const positions = [
   [5.3, 8], [14.3, 8], [25.5, 8], [36.7, 8], [47, 9], [56.7, 8], [67.7, 8],
@@ -159,14 +176,6 @@ const positions = [
   [5.3, 22]
 ];
 
-// const dotStyle = ref({
-//   width: "auto",
-//   height: "8%",
-//   position: "absolute",
-//   left: `${positions[0][0]}%`,
-//   top: `${positions[0][1]}%`,
-//   transition: "all 0.3s ease"
-// });
 
 const dotStyleMassive = ref([{
   width: "auto",
@@ -177,10 +186,8 @@ const dotStyleMassive = ref([{
   transition: "all 0.3s ease"
 }]);
 
-// const dotVisible = ref(true);
 const result = ref("");
 const diceStyle = ref({});
-// const totalSum = ref(0);
 let totalSumMassive = ref([0]);
 let currentIndexMassive = ref([0]);
 const lastRoll = ref(null);
@@ -189,14 +196,11 @@ let lastY = ref(0);
 
 const isSpinDisabled = ref(false);
 const spinButtonLabel = ref("Крутить");
-let spinTimer = null;
 
 const modalVisible = ref(false);
 
 const modalTitle = ref("");
-// const modalQuestion = ref("");
 const modalQuestionId = ref(0);
-// const modalChanceId = ref(0);
 const modalQuestionType = ref(1);
 
 const questionComponent = ref(null);
@@ -305,6 +309,7 @@ async function endGame () {
   activeGamesSocket.onerror = (error) => {
     console.error("Ошибка WebSocket:", error);
   };
+  activeGamesSocket.close()
 }
 
 function redirectToHome(){
@@ -363,7 +368,6 @@ async function closeModal(){
     }
 
     modalVisible.value = false;
-    // modalChanceVisible.value = false;
     sendCloseQuestion();
 }
 
@@ -415,7 +419,52 @@ const scrollToBottom = () => {
 
 const messages = ref([
 ])
+if (flag) {
+  const game_state = JSON.parse(sessionStorage.getItem("game_state"))
+  console.log(game_state)
+  players.value = game_state['players']
+  votes.value = game_state['votes']
+  current_player_index = game_state['current_player_index']
+  shine.value = game_state['shine']
+  isGameStarted.value = game_state['isGameStarted']
+  isGameEnded.value = game_state['isGameEnded']
+  need_to_share_text_answer = game_state['need_to_share_text_answer']
+  need_to_share_radio_button_answer = game_state['need_to_share_radio_button_answer']
+  winner.value = game_state['winner']
+  scipPlayer.value = game_state['scipPlayer']
+  playerComponent.value = game_state['playerComponent']
+  balanceChange.value = game_state['balanceChange']
+  newMessage.value = game_state['newMessage']
+  rulesVisible.value = game_state['rulesVisible']
+  global_id = game_state['global_id']
+  dotStyleMassive.value = game_state['dotStyleMassive']
+  result.value = game_state['result']
+  diceStyle.value = game_state['diceStyle']
+  totalSumMassive.value = game_state['totalSumMassive']
+  currentIndexMassive.value = game_state['currentIndexMassive']
+  lastRoll.value = game_state['lastRoll']
+  lastX.value = game_state['lastX']
+  lastY.value = game_state['lastY']
+  isSpinDisabled.value = game_state['isSpinDisabled']
+  spinButtonLabel.value = game_state['spinButtonLabel']
+  modalVisible.value = game_state['modalVisible']
+  modalTitle.value = game_state['modalTitle']
+  modalQuestionId.value = game_state['modalQuestionId']
+  modalQuestionType.value = game_state['modalQuestionType']
+  questionComponent.value = game_state['questionComponent']
+  modalColor.value = game_state['modalColor']
 
+  isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
+  console.log(
+      isMyTurn.value,
+      isSpinDisabled.value,
+      isGameStarted.value,
+      isGameEnded.value,
+      !(isMyTurn.value) || isSpinDisabled.value || !(isGameStarted.value) || isGameEnded.value
+  )
+  sessionStorage.clear()
+
+}
 const gameId = new URLSearchParams(window.location.search).get('id');
 const chatSocket = new WebSocket(`ws://${process.env.VUE_APP_SERVER_IP}/ws/chat/${gameId}/`);
 chatSocket.onmessage = function (event) {
@@ -447,13 +496,13 @@ answerSocket.onmessage = (event) => {
     let content = text_data['content']
     switch (type) {
         case 'change_text_answer':
-            if (players[current_player_index] === store.state.playerID) break
+            if (players.value[current_player_index] === store.state.playerID) break
             // eslint-disable-next-line no-case-declarations
             let text = content['text']
             questionComponent.value?.setTextInTextArea(text)
             break;
         case 'radio_button_answer':
-            if (players[current_player_index] === store.state.playerID) break
+            if (players.value[current_player_index] === store.state.playerID) break
             // eslint-disable-next-line no-case-declarations
             let button_id = content['button_id']
             questionComponent.value?.setActiveRadioButtonForId(button_id)
@@ -513,8 +562,7 @@ function sendMinus() {
         }
     ))
 }
-
-const gameSocket = new WebSocket(`ws://${process.env.VUE_APP_SERVER_IP}/ws/game/${gameId}/${store.state.playerID}/`);
+const gameSocket = new WebSocket(`ws://${process.env.VUE_APP_SERVER_IP}/ws/game/${gameId}/${store.state.playerID}/${!flag ? 1 : 0}/`);
 gameSocket.onmessage = async (event) => {
     let text_data = JSON.parse(event.data);
     text_data = text_data["info"];
@@ -699,7 +747,6 @@ function leaveCall() {
   if (players.value.length === 1) {
     endGame()
   }
-  console.log("player_leaving", store.state.playerID)
   const info = {
       "type": "player_leaving",
       "info": {
@@ -757,8 +804,6 @@ function spin(rnd) {
 
 
 const manualSpin = () => {
-  clearTimeout(spinTimer);
-   // spinButtonLabel.value = "Крутить ХАХАХАХАХ"
   if (players.value[current_player_index].id === store.state.playerID)
     generateAndSpin();
 };
@@ -775,27 +820,13 @@ const handleUpdateBalance = (newBalance, player_id) => {
     }
   });
 };
-
-// const startTurn = () => {
-//   isSpinDisabled.value = false;
-//   spinButtonLabel.value = "Крутить (3 сек)";
-//   let countdown = 3;
-//
-//   const updateLabel = () => {
-//     if (countdown > 0) {
-//       spinButtonLabel.value = `Крутить (${countdown--} сек)`;
-//       spinTimer = setTimeout(updateLabel, 1000);
-//     } else {
-//       if (players.value[current_player_index].id === store.state.playerID)
-//       generateAndSpin();
-//     }
-//   };
-//
-//   updateLabel();
-// };
-
-
-// getLoggedInUser();
+console.log(
+      isMyTurn.value,
+      isSpinDisabled.value,
+      isGameStarted.value,
+      isGameEnded.value,
+      !(isMyTurn.value) || isSpinDisabled.value || !(isGameStarted.value) || isGameEnded.value
+  )
 </script>
 
 <template>
