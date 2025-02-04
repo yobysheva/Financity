@@ -1,7 +1,7 @@
 <template>
   <div v-if="isRegistrationModalVisible" class="modal" id="registration-modal">
-    <div class="modal-content" style="align-items: center; justify-content: center;">
-      <h2 style="width: 80%; word-break: break-all;">Войдите или зарегистрируйтесь.</h2>
+    <div class="modal-content">
+      <h2>Войдите или зарегистрируйтесь.</h2>
       <input
           v-model="username"
           class="input-custom"
@@ -57,8 +57,25 @@
 <script>
 import {authService} from "@/services/auth";
 import store from "../../store.js";
+const clickSound = require("../../assets/sound/click.wav");
+const hoverSound = require("../../assets/sound/hover2.wav")
 
 export default {
+  setup() {
+      const clickAudio = new Audio(clickSound);
+      const hoverAudio = new Audio(hoverSound)
+
+      const buttonClickSound = () => {
+        clickAudio.volume = 0.1
+        clickAudio.play()
+      }
+      const buttonHoverSound = () => {
+        hoverAudio.volume = 0.1
+        hoverAudio.play()
+      }
+
+      return { clickAudio ,hoverAudio, buttonClickSound, buttonHoverSound }
+  },
   data() {
     return {
       isRegistrationModalVisible: false,
@@ -86,16 +103,19 @@ export default {
       store.dispatch("updateSecret", this.secret)
     },
     openLogin() {
+      this.buttonClickSound();
       this.isRegistrationModalVisible = false;
       this.isLoginModalVisible = true;
     },
     openRegistration() {
+      this.buttonClickSound();
       this.username = '';
       this.password = '';
       this.isRegistrationModalVisible = true;
       this.isLoginModalVisible = false;
     },
     async login() {
+      this.buttonClickSound();
       try {
         const response = await authService.login({
           username: this.username,
@@ -123,6 +143,7 @@ export default {
       this.isLandscape = window.innerWidth > window.innerHeight;
     },
     async register() {
+      this.buttonClickSound();
       if (this.password2 === this.password) {
         if (this.username.length <= 15) {
           try {

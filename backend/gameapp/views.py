@@ -111,14 +111,17 @@ def addActionChance(request):
         try:
             player = Player.objects.get(id=player_id)
             chance = Chance.objects.get(id=chance_id)
+            balance_changed = False
             if chance.period or chance.scip:
                 action = Action.objects.create(player=player, sum=chance.sum, period=chance.period, scip = chance.scip, category=chance.category)
-                return Response({"action_id": action.id, "balance": player.balance, "scip": chance.scip}, status=status.HTTP_201_CREATED)
+                return Response({"action_id": action.id, "balance": player.balance, "scip": chance.scip, "balance_changed": balance_changed}, status=status.HTTP_201_CREATED)
             if chance.period == 0:
+                if chance.sum:
+                    balance_changed = True
                 player.balance += chance.sum
                 player.save()
-                return JsonResponse({"balance": player.balance, "scip": chance.scip})
-            return Response({"detail": "Action created", "balance": player.balance}, status=status.HTTP_200_OK)
+                return JsonResponse({"balance": player.balance, "scip": chance.scip, "balance_changed": balance_changed})
+            return Response({"detail": "Action created", "balance": player.balance, "balance_changed": balance_changed}, status=status.HTTP_200_OK)
         except Exception as e:
             print(e)
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

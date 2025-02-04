@@ -7,10 +7,21 @@ import Player from "@/views/user/Player.vue";
   // import Chance from "@/views/children/Chance.vue";
   import { authService } from "@/services/auth";
 // import QuizQuestion from "@/views/QuizQuestion.vue";
-import {nextTick, ref} from 'vue';
+import {nextTick, onBeforeUnmount, ref} from 'vue';
 // import { getCurrentInstance } from 'vue';
 import store from "@/store";
 import routes from "../router/index.js";
+import clickSound from "@/assets/sound/click.wav";
+import hoverSound from "@/assets/sound/hover2.wav";
+import modalSound from "@/assets/sound/modal.mp3";
+import jumpSound from "@/assets/sound/jump.mp3"
+import spinSound from "@/assets/sound/spin.wav"
+import messageSound from "@/assets/sound/message.wav"
+import moneySound from "@/assets/sound/money.mp3"
+
+import soundOnImg from "@/assets/sound_on.png"
+import soundOfImg from "@/assets/sound_of.png"
+import song from "@/assets/sound/game_compress2.wav";
 import { onMounted, onUnmounted } from 'vue';
 let flag = false
 if (!store.state.username) {
@@ -36,6 +47,101 @@ let votes = ref({
   "pluses": 0,
   "minuses": 0
 })
+
+let soundOn = ref(true);
+let soundButtonLabel = ref(soundOnImg);
+
+const clickAudio = new Audio(clickSound);
+const hoverAudio = new Audio(hoverSound);
+const modalAudio = new Audio(modalSound);
+const jumpAudio = new Audio(jumpSound);
+const spinAudio = new Audio(spinSound);
+const messageAudio = new Audio(messageSound);
+const moneyAudio = new Audio(moneySound);
+
+clickAudio.volume = 0.1
+hoverAudio.volume = 0.1
+modalAudio.volume = 0.1
+spinAudio.volume = 0.05
+messageAudio.volume = 1
+moneyAudio.volume = 0.3
+
+
+// const buttonClickSound = () => {
+//   clickAudio.play()
+// }
+// const buttonHoverSound = () => {
+//   hoverAudio.play()
+// }
+// const modalShowSound = () => {
+//   modalAudio.play()
+// }
+// const jumpingSound = () => {
+//   jumpAudio.play()
+// }
+// const spinDiceSound = () => {
+//   spinAudio.play()
+// }
+// const messageDelieveredSound = () => {
+//   messageAudio.play()
+// }
+
+function makeSound(sound){
+  if(soundOn.value){
+    sound.play();
+  }
+}
+const audio = new Audio(song)
+audio.volume = 0.3
+audio.loop = true
+
+      const playMelody = () => {
+      if (soundOn.value) {
+        audio.play()
+      }
+    }
+
+      const disableOrEnableSound = () => {
+        soundOn.value = !soundOn.value
+        soundButtonLabel = soundOn.value ? soundOnImg : soundOfImg
+        makeSound(clickAudio)
+        if (soundOn.value) {
+          playMelody()
+        } else {
+          audio.pause()
+        }
+      }
+      playMelody()
+
+    const disableSound = () => {
+        soundOn.value = false
+        audio.pause()
+    }
+
+  //   const handleVisibilityChange = () => {
+  //   if (document.hidden) {
+  //     audio.pause();
+  //     audio.currentTime = 0;
+  //   }else {
+  //     if (soundOn.value) {
+  //       playMelody();
+  //     }
+  //   }
+  // };
+  // document.addEventListener('visibilitychange', handleVisibilityChange);
+
+  onBeforeUnmount(() => {
+    disableSound();
+    // document.removeEventListener('visibilitychange', handleVisibilityChange);
+  });
+
+// let loggedUser = ref({
+//   username: 'name',
+//   uid: 0,
+// });
+window.onbeforeunload = () => {
+
+}
 
 const handleUnload = (event) => {
   event.preventDefault()
@@ -98,6 +204,17 @@ onUnmounted(() => {
 
 
 let players = ref([])
+if (store.state.playerID !== '') {
+    localStorage.setItem('player_id', JSON.stringify(store.state.playerID))
+    localStorage.setItem('game_id', JSON.stringify(store.state.gameID))
+}
+else {
+    const PID = JSON.parse(localStorage.getItem("player_id"))
+    const GID = JSON.parse(localStorage.getItem("game_id"))
+    store.dispatch("updatePlayerID", PID)
+    store.dispatch("updateGameID", GID)
+}
+players.value = []
 let current_player_index = 0
 let shine = ref([])
 let isGameStarted = ref(false)
@@ -142,10 +259,12 @@ let newMessage = ref("")
 let rulesVisible = ref(false)
 
 function showRules() {
+  makeSound(modalAudio);
   rulesVisible.value = !rulesVisible.value;
 }
 
 async function sendStartGame() {
+  makeSound(clickAudio);
   if (players.value.length < 2) return
 
   gameSocket.send(
@@ -216,7 +335,7 @@ async function checkPositionAndShowModal (currentCoords){
   let category = null;
   if (stateCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
     category = 1;
-    modalColor.value = "#ADA1F6"; // Фиолетовый
+    modalColor.value = "#c4beee"; // Фиолетовый
   } else if (entertainmentCoords.some(([x, y]) => x === currentCoords[0] && y === currentCoords[1])) {
     category = 2;
     modalColor.value = "#FFBBF8"; // Розовый
@@ -278,11 +397,13 @@ async function openModalWithValues (title, questionId, questionType) {
   modalQuestionType.value = questionType
   await questionComponent.value?.getQuestion(questionId, questionType)
   setTimeout(() => {
+    makeSound(modalAudio);
         modalVisible.value = true;
     }, 500);
 }
 
 async function endGame () {
+  makeSound(moneyAudio)
     await authService.updateGameStatus({
         "game_id": store.state.gameID,
         "status": "finished"
@@ -313,6 +434,8 @@ async function endGame () {
 }
 
 function redirectToHome(){
+  makeSound(clickAudio);
+  disableSound();
   routes.push({ name: "home" });
 }
 
@@ -389,6 +512,7 @@ const moveDot = (targetIndex) => {
 
   let stepIndex = 0;
   const moveNext = () => {
+    makeSound(jumpAudio);
     if (stepIndex < steps.length) {
       const [leftPercent, topPercent] = positions[steps[stepIndex]];
       dotStyleMassive.value[current_player_index].left = `${leftPercent}%`;
@@ -468,6 +592,7 @@ if (flag) {
 const gameId = new URLSearchParams(window.location.search).get('id');
 const chatSocket = new WebSocket(`ws://${process.env.VUE_APP_SERVER_IP}/ws/chat/${gameId}/`);
 chatSocket.onmessage = function (event) {
+  makeSound(messageAudio);
     let data = JSON.parse(event.data)
     messages.value.push({
       id: global_id += 1,
@@ -482,6 +607,7 @@ chatSocket.onmessage = function (event) {
 function sendMessage() {
     const input = newMessage.value
     newMessage.value = ""
+  if(!input) return
     chatSocket.send(JSON.stringify({
         "message": input,
         "username": store.state.username
@@ -546,6 +672,7 @@ function radioButtonAnswerTranslate() {
 }
 
 function sendPlus() {
+  // makeSound(clickAudio);
     answerSocket.send(JSON.stringify(
         {
           "type": "vote",
@@ -555,6 +682,7 @@ function sendPlus() {
 }
 
 function sendMinus() {
+  // makeSound(clickAudio);
     answerSocket.send(JSON.stringify(
         {
           "type": "vote",
@@ -577,7 +705,7 @@ gameSocket.onmessage = async (event) => {
           // eslint-disable-next-line no-case-declarations
             const turn_count = info["turn_count"];
             // totalSum.value += turn_count;
-
+            makeSound(spinAudio);
             if(totalSumMassive.value[current_player_index] % 26 + turn_count >= 26){
               let response = "";
               if (isMyTurn.value){
@@ -594,6 +722,7 @@ gameSocket.onmessage = async (event) => {
             spin(turn_count);
             break;
         case "on_question_open":
+          makeSound(modalAudio);
           // eslint-disable-next-line no-case-declarations
             const title = info["title"]
           // eslint-disable-next-line no-case-declarations
@@ -608,6 +737,7 @@ gameSocket.onmessage = async (event) => {
             }
             break;
         case "on_question_close":
+          makeSound(modalAudio);
             need_to_share_text_answer = false
             need_to_share_radio_button_answer = false
             players.value[info['player_index']].balance = info['balance'];
@@ -757,6 +887,7 @@ function leaveCall() {
         info
     ))
   routes.push({ name: "home" });
+  disableSound();
 }
 
 function spin(rnd) {
@@ -835,10 +966,10 @@ console.log(
   <div class="container" style="width: 100%; height: 100%;">
   <h1 style="margin-top: 30px;">Победитель: игрок {{winner.name}}</h1>
   <h3>Победитель накопил наибольший капитал размером {{winner.balance}}₽</h3>
-  <button class="button-33" style="margin-bottom: 30px;" @click="redirectToHome">Вернуться в меню</button>
+  <button class="button-33" style="margin-bottom: 30px;" @click="redirectToHome" @mouseenter="makeSound(hoverAudio)">Вернуться в меню</button>
   </div>
 </div>
-    <div class="overlay" v-if="isGameEnded" @click="redirectToHome"></div>
+    <div class="overlay" v-if="isGameEnded" @click="redirectToHome" @mouseenter="makeSound(hoverAudio)"></div>
 <div class="outer-container">
 <div class="transparent-container game-page" style="min-height: 98%; max-height: 98%; min-width: 100%; max-width: 100%; width: 100%;">
   <div class="row" style="height: 100%; width: 100%;">
@@ -860,7 +991,8 @@ console.log(
       class="button-33"
       :hidden="isGameStarted"
       :disabled="!isMyTurn"
-      @click="sendStartGame">
+      @click="sendStartGame"
+        @mouseenter="makeSound(hoverAudio)">
       Начать игру
     </button>
       <div class="container" style="width: 100%; height: 100%; position: relative">
@@ -941,6 +1073,7 @@ console.log(
                 :visible="modalVisible"
                 :color="modalColor"
                 :isMyTurn="isMyTurn"
+                :soundOn="soundOn"
                 @setVotingTimer="setVotingTimer"
                 @close="closeModal"
                 @minus="sendMinus"
@@ -949,8 +1082,9 @@ console.log(
     </div>
   <div class="column" style="width: 22%; min-height: 95vh; height: 95%; max-height: 95vh; margin-left: 2%;  padding: 1%;">
     <div class="row buttons">
-      <button class="button-33" role="button" @click="leaveCall">Выйти из игры</button>
-      <button class="button-33" role="button" @click="showRules">?</button>
+      <button class="button-33" role="button" @click="leaveCall" @mouseenter="makeSound(hoverAudio)">Выйти из игры</button>
+      <button class="button-33" role="button" @click="disableOrEnableSound" @mouseenter="makeSound(hoverAudio)"><img :src="soundButtonLabel" class="sound"></button>
+      <button class="button-33" role="button" @click="showRules" @mouseenter="makeSound(hoverAudio)">?</button>
     </div>
     <div class="container" style="padding: 3px; min-height: 82vh; max-height:82%; display:flex; flex-direction:column; align-items:center; justify-content: end; position: relative;">
     <div class="column message-container"
@@ -983,7 +1117,7 @@ console.log(
       </div>
     </div>
     <input class="input-custom" id="123" v-model="newMessage" style="width: 90%;" @keydown.enter="sendMessage">
-    <button class="button-33" role="button" @click="sendMessage" style="width: 90%; margin-bottom: 15px;">
+    <button class="button-33" role="button" @click="sendMessage" @mouseenter="makeSound(hoverAudio)" style="width: 90%; margin-bottom: 15px;">
       send message
     </button>
 </div>
@@ -1021,31 +1155,46 @@ console.log(
 
 .button-33{
   font-size: 14px;
-  margin: 15px;
+  margin: 15px 7px;
 }
-
+.sound{
+  width: 16px;
+  height: 16px;
+}
 @media (max-width: 1200px) {
   .button-33 {
-    margin: 10px 5px;
-    padding: 5px 17px;
+    margin: 10px 4px;
+    padding: 5px 13px;
     font-size: 12px;
   }
+  .sound{
+  width: 14px;
+  height: 14px;
+}
 }
 
 @media (max-width: 900px) {
   .button-33 {
-    margin: 7px 4px;
-    padding: 3px 13px;
+    margin: 7px 3px;
+    padding: 3px 10px;
     font-size: 10px;
   }
+  .sound{
+  width: 12px;
+  height: 12px;
+}
 }
 
 @media (max-width: 770px) {
   .button-33 {
     margin: 5px 3px;
-    padding: 3px 10px;
+    padding: 3px 8px;
     font-size: 8px;
   }
+  .sound{
+  width: 10px;
+  height: 10px;
+}
 }
 
 .buttons{
@@ -1201,7 +1350,7 @@ console.log(
 
 .message {
   word-break: break-word;
-  margin: 7px 0;
+  margin: 7px 3px;
   padding: 15px;
   border-radius: 10px;
   max-width: 100%;
@@ -1211,7 +1360,7 @@ console.log(
 
 @media (max-width: 1200px) {
   .message {
-    margin: 5px 0;
+    margin: 5px 3px;
     padding: 10px;
     font-size:11px;
   }
@@ -1219,7 +1368,7 @@ console.log(
 
 @media (max-width: 900px) {
   .message {
-    margin: 5px 0;
+    margin: 5px 3px;
     padding: 8px;
     font-size: 10px;
   }
@@ -1227,7 +1376,7 @@ console.log(
 
 @media (max-width: 770px) {
   .message {
-    margin: 4px 0;
+    margin: 4px 3px;
     padding: 7px;
     font-size: 8px;
   }

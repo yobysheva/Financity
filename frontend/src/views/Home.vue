@@ -4,24 +4,98 @@ import Profile from "@/views/user/Profile.vue";
 // import CurrentGames from "@/views/children/CurrentGames.vue";
 import { authService } from "@/services/auth";
 import store from "../store.js";
+import clickSound from "@/assets/sound/click.wav";
+import hoverSound from "@/assets/sound/hover2.wav";
+import requestSound from "@/assets/sound/request.wav"
+import soundOnImg from "@/assets/sound_on.png";
+import soundOfImg from "@/assets/sound_of.png";
+import song from "@/assets/sound/menu.mp3"
+import {onBeforeUnmount, ref} from "vue";
 import {useTemplateRef} from "vue";
-
 export default {
+  components: {
+    Rating,
+    Profile,
+  },
   setup() {
     window.onbeforeunload = () => {
       sessionStorage.setItem('store_state', JSON.stringify(store.state))
     }
     let ratingComponent = useTemplateRef('rating')
 
-    return {
-      ratingComponent
-    }
-  },
-  components: {
-    Rating,
-    Profile,
-  },
+    const soundOn = ref(true);
+      const clickAudio = new Audio(clickSound);
+      const hoverAudio = new Audio(hoverSound);
+      const requestAudio = new Audio(requestSound);
+      const audio = new Audio(song)
+      audio.volume = 0.6
+      audio.loop = true
 
+      clickAudio.volume = 0.1
+      hoverAudio.volume = 0.1
+      requestAudio.volume = 0.3
+
+      const buttonClickSound = () => {
+        if(soundOn.value){
+          clickAudio.play()
+        }
+      }
+      const buttonHoverSound = () => {
+        if(soundOn.value) {
+          hoverAudio.play()
+        }
+      }
+
+      const invitationSound = () => {
+        if(soundOn.value) {
+          requestAudio.play()
+        }
+      }
+
+      const playMelody = () => {
+      if (soundOn.value) {
+        audio.play()
+      }
+    }
+
+      const disableOrEnableSound = () => {
+        soundOn.value = !soundOn.value
+        buttonClickSound()
+        if (soundOn.value) {
+          playMelody()
+        } else {
+          audio.pause()
+          audio.currentTime = 0
+        }
+      }
+      playMelody()
+
+    const disableSound = () => {
+        soundOn.value = false
+        audio.pause()
+        audio.currentTime = 0
+    }
+
+  //   const handleVisibilityChange = () => {
+  //   if (document.hidden) {
+  //     audio.pause();
+  //     audio.currentTime = 0;
+  //   }else {
+  //     if (soundOn.value) {
+  //       playMelody();
+  //     }
+  //   }
+  // };
+
+  // document.addEventListener('visibilitychange', handleVisibilityChange);
+
+  onBeforeUnmount(() => {
+    disableSound();
+    // document.removeEventListener('visibilitychange', handleVisibilityChange);
+  });
+
+      return {ratingComponent, buttonClickSound, buttonHoverSound, invitationSound, disableOrEnableSound, disableSound, soundOn, soundOnImg, soundOfImg}
+  },
   data() {
     return {
       user: {
@@ -156,6 +230,7 @@ export default {
       this.waitingRequestSocket.onmessage = async (event) => {
         let data = JSON.parse(event.data);
         if (data.type === "game_invitation") {
+          this.invitationSound();
           await store.dispatch("updateGameID", data.game_id);
           sessionStorage.setItem('store_state', JSON.stringify(store.state))
           this.senderName = data.sender;
@@ -190,6 +265,7 @@ export default {
     },
 
     addUserToGroup() {
+      this.buttonClickSound();
       if (this.newUser && this.groupUsers.length < 5) {
         this.groupUsers.push(this.newUser);
         this.newUser = '';
@@ -199,10 +275,12 @@ export default {
     },
 
     addUsersToGame() {
+      this.buttonClickSound();
       this.GameCreated = true;
     },
 
     sendInvitation(gameID) {
+      this.buttonClickSound();
       let senderUser = store.state.username
       for (let user in this.groupUsers) {
         this.sendWaitingRequestSocket(senderUser, this.groupUsers[user], gameID)
@@ -210,6 +288,7 @@ export default {
     },
 
     async makeNewGame() {
+      this.buttonClickSound();
     try {
     const response = await authService.createGame({
       username: store.state.username,
@@ -224,6 +303,7 @@ export default {
       try {
         this.sendInvitation(this.gameId);
         this.groupUsers = [];
+        this.disableSound();
         this.$router.push({ name: "Game", query: { id: response.data.gameId} });
       } catch (error) {
         console.error("Failed to create group or initiate call:", error);
@@ -240,16 +320,19 @@ export default {
   }
 },
     closeModals() {
+      this.buttonClickSound();
       this.GameCreated = false;
     },
 
     handleKeyDown(event) {
       if (event.key === 'Escape') {
+        this.buttonClickSound();
         this.closeModals();
       }
     },
 
     async joinToGame(gameID) {
+      this.buttonClickSound();
       const response = await authService.connectToGame({
         username: store.state.username,
         game_id: gameID,
@@ -258,22 +341,26 @@ export default {
         await store.dispatch("updateGameID", response.data.gameId);
         await store.dispatch("updatePlayerID", response.data.playerID);
         sessionStorage.setItem('store_state', JSON.stringify(store.state))
+        this.disableSound();
         this.$router.push({name: "Game", query: {id: store.state.gameID}});
       }
     },
 
     async acceptInvite() {
+      this.buttonClickSound();
       const response = await authService.connectToGame({
         username: store.state.username,
         game_id: store.state.gameID,
       });
       if (response.status === 201) {
         await store.dispatch("updatePlayerID", response.data.playerID);
+        this.disableSound();
       this.$router.push({name: "Game", query: {id: store.state.gameID}});
       }
     },
 
     rejectInvite() {
+      this.buttonClickSound();
       this.$router.push({ name: "home" });
       this.incomingInvite = false
     }
@@ -289,14 +376,14 @@ export default {
     <div class="column" style="width: 100%; align-items: center; justify-content: center;">
       <div class="column" style="justify-content: center;">
       <h1 style="text-align: center; margin-bottom: 15px; margin-top: 15px;">Вы пригласили в игру пользователей:</h1>
-          <ul>
+          <ul style="margin-bottom: 5px;">
           <h3 v-for="user in  groupUsers" :key="user.id">{{ user }}</h3>
           </ul>
     </div>
       <input id="add-user" v-model="newUser" class="input-custom" style="min-height: 20%; width: 80%;" placeholder="Введите уникальный id пользователей, которых хотите пригласить в игру">
     </div>
-    <button class="button-33" role="button" @click="addUserToGroup">Пригласить</button>
-    <button class="button-33" role="button" @click="makeNewGame">Начать игру</button>
+    <button class="button-33" role="button" @click="addUserToGroup" @mouseenter="buttonHoverSound">Пригласить</button>
+    <button class="button-33" role="button" @click="makeNewGame" @mouseenter="buttonHoverSound">Начать игру</button>
   </div>
 </div>
     <div v-if="GameCreated" class="overlay" @click="closeModals" id="overlay"></div>
@@ -320,8 +407,8 @@ export default {
                 <h3>{{this.senderName}} приглашает вас присоединиться к игре</h3>
               </div>
                 <div class="row" style=" align-items: center; justify-content: center;">
-                <button class="button-33" role="button" @click="acceptInvite">Принять приглашение</button>
-                <button class="button-33" role="button" @click="rejectInvite">Отклонить приглашение</button>
+                <button class="button-33" role="button" @click="acceptInvite" @mouseenter="buttonHoverSound">Принять приглашение</button>
+                <button class="button-33" role="button" @click="rejectInvite" @mouseenter="buttonHoverSound">Отклонить приглашение</button>
                 </div>
             </div>
           </div>
@@ -342,7 +429,7 @@ export default {
             <p>Создана игра: {{game.game_id}}</p>
           </div>
             <div style="justify-content: flex-end;">
-              <button class="button-33" role="button" @click="joinToGame(game.game_id)">Присоединиться к игре</button>
+              <button class="button-33" role="button" @click="joinToGame(game.game_id)" @mouseenter="buttonHoverSound">Присоединиться к игре</button>
             </div>
           </div>            
         </div>
@@ -350,10 +437,11 @@ export default {
     </div>
 
     <div class="column" style="width: 25%; height: 98%; margin: 2.5%;">
-      <button class="button-33" role="button" @click="addUsersToGame">Новая игра</button>
-      <Rating
-          ref="rating"
-      />
+      <div class="row" style="width: 100%; padding: 0px 5%;">
+        <button class="button-33" style="flex-grow: 1;" role="button" @click="addUsersToGame" @mouseenter="buttonHoverSound">Новая игра</button>
+        <button class="button-33" role="button" @click="disableOrEnableSound" @mouseenter="buttonHoverSound"><img :src="soundOn ? soundOnImg : soundOfImg" class="sound"></button>
+      </div>
+      <Rating ref="rating"/>
     </div>
   </div>
 </div>
@@ -361,13 +449,13 @@ export default {
 
 <style scoped>
 input {
-  margin: 25px 30px;
+  margin: 15px 30px;
   padding: 10px 20px;
   font-size:14px;
 }
 @media (max-width: 1200px) {
   input {
-    margin: 17px 26px;
+    margin: 10px 26px;
     padding: 5px 17px;
     font-size:12px;
   }
@@ -375,7 +463,7 @@ input {
 
 @media (max-width: 900px) {
   input {
-    margin: 13px 23px;
+    margin: 8px 23px;
     padding: 3px 13px;
     font-size: 10px;
   }
@@ -383,7 +471,7 @@ input {
 
 @media (max-width: 770px) {
   input {
-    margin: 10px 19px;
+    margin: 5px 19px;
     padding: 3px 10px;
     font-size: 9px;
   }
@@ -608,5 +696,28 @@ h1 {
     font-size: 8px;
   }
 }
+.sound{
+  width: 16px;
+  height: 16px;
+}
+@media (max-width: 1200px) {
+  .sound{
+  width: 14px;
+  height: 14px;
+}
+}
 
+@media (max-width: 900px) {
+  .sound{
+  width: 12px;
+  height: 12px;
+}
+}
+
+@media (max-width: 770px) {
+  .sound{
+  width: 10px;
+  height: 10px;
+}
+}
 </style>
