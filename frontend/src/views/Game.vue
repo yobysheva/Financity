@@ -34,6 +34,8 @@ if (!store.state.username) {
   store.dispatch("updateUsername", store_state['username'])
 }
 
+sessionStorage.setItem("store_state", '')
+
 let images = ref([
   require('@/assets/av1.png'),
   require('@/assets/av2.png'),
@@ -144,7 +146,6 @@ window.onbeforeunload = () => {
 }
 
 const handleUnload = (event) => {
-  event.preventDefault()
   sessionStorage.setItem("game_state", JSON.stringify({
     'players': players.value,
     'votes': votes.value,
@@ -182,8 +183,7 @@ const handleUnload = (event) => {
   sessionStorage.setItem('store_state', JSON.stringify(store.state))
 
   const isReload = performance.getEntriesByType("navigation")[0].type === 'reload';
-  const sad = window.confirm('qweq')
-  console.log(isReload, sad)
+  console.log(isReload)
   if (!isReload) {
     leaveCall();
     if (players.value.length < 2 && isGameStarted) {
@@ -192,6 +192,7 @@ const handleUnload = (event) => {
       endGame()
     }
   }
+  event.preventDefault()
 };
 
 onMounted(() => {
@@ -204,17 +205,7 @@ onUnmounted(() => {
 
 
 let players = ref([])
-if (store.state.playerID !== '') {
-    localStorage.setItem('player_id', JSON.stringify(store.state.playerID))
-    localStorage.setItem('game_id', JSON.stringify(store.state.gameID))
-}
-else {
-    const PID = JSON.parse(localStorage.getItem("player_id"))
-    const GID = JSON.parse(localStorage.getItem("game_id"))
-    store.dispatch("updatePlayerID", PID)
-    store.dispatch("updateGameID", GID)
-}
-players.value = []
+
 let current_player_index = 0
 let shine = ref([])
 let isGameStarted = ref(false)
@@ -251,6 +242,7 @@ authService.getInfoAboutGame(
             scipPlayer.value.push(false);
         }
     )
+    if (!flag)
     isMyTurn.value = (players.value.length === 1)
 })
 
@@ -579,13 +571,6 @@ if (flag) {
   modalColor.value = game_state['modalColor']
 
   isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
-  console.log(
-      isMyTurn.value,
-      isSpinDisabled.value,
-      isGameStarted.value,
-      isGameEnded.value,
-      !(isMyTurn.value) || isSpinDisabled.value || !(isGameStarted.value) || isGameEnded.value
-  )
   sessionStorage.clear()
 
 }
@@ -699,7 +684,12 @@ gameSocket.onmessage = async (event) => {
     players.value.forEach((player, index) => {
       shine.value[index] = (player.id === players.value[current_player_index].id);
     });
-    isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
+    console.log(
+        {
+          dotStyleMassive: dotStyleMassive.value,
+          currentIndexMassive: currentIndexMassive.value,
+        }
+    )
     switch (type) {
         case "on_turn_start":
           // eslint-disable-next-line no-case-declarations
@@ -737,6 +727,7 @@ gameSocket.onmessage = async (event) => {
             }
             break;
         case "on_question_close":
+          isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
           makeSound(modalAudio);
             need_to_share_text_answer = false
             need_to_share_radio_button_answer = false
@@ -798,6 +789,14 @@ gameSocket.onmessage = async (event) => {
             if (Number(info['player_id']) === store.state.playerID) return;
             // eslint-disable-next-line no-case-declarations
             let index = checkPlayerLeave(Number(info['player_id']))
+            console.log(
+                {
+                  images: images.value,
+                  dotStyleMassive: dotStyleMassive.value,
+                  currentIndexMassive: currentIndexMassive.value,
+                }
+            )
+            console.log(index)
             if (index !== -1) {
               players.value.splice(index, 1)
               dotStyleMassive.value.splice(index, 1)
@@ -806,7 +805,18 @@ gameSocket.onmessage = async (event) => {
               balanceChange.value.splice(index, 1)
               playerComponent.value.splice(index, 1)
               scipPlayer.value.splice(index, 1)
+              images.value.splice(index, 1)
+              if (index < current_player_index) {
+                current_player_index--
+              }
             }
+             console.log(
+                {
+                  images: images.value,
+                  dotStyleMassive: dotStyleMassive.value,
+                  currentIndexMassive: currentIndexMassive.value,
+                }
+            )
             if (isGameStarted.value)
             if (checkToEnd()) {
                 await endGame()
@@ -951,13 +961,6 @@ const handleUpdateBalance = (newBalance, player_id) => {
     }
   });
 };
-console.log(
-      isMyTurn.value,
-      isSpinDisabled.value,
-      isGameStarted.value,
-      isGameEnded.value,
-      !(isMyTurn.value) || isSpinDisabled.value || !(isGameStarted.value) || isGameEnded.value
-  )
 </script>
 
 <template>
