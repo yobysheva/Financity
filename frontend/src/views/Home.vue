@@ -10,7 +10,7 @@ import requestSound from "@/assets/sound/request.wav"
 import soundOnImg from "@/assets/sound_on.png";
 import soundOfImg from "@/assets/sound_of.png";
 import song from "@/assets/sound/menu.mp3"
-import {onBeforeUnmount, ref} from "vue";
+import {onBeforeUnmount, ref, onMounted} from "vue";
 import {useTemplateRef} from "vue";
 export default {
   components: {
@@ -68,7 +68,7 @@ export default {
           audio.currentTime = 0
         }
       }
-      playMelody()
+
 
     const disableSound = () => {
         soundOn.value = false
@@ -88,7 +88,26 @@ export default {
   // };
 
   // document.addEventListener('visibilitychange', handleVisibilityChange);
+    onMounted(() => {
+      const navigationEntries = performance.getEntriesByType('navigation');
+      const isPageRefreshed = navigationEntries.length && navigationEntries[0].type === 'reload';
 
+      if (isPageRefreshed) {
+        soundOn.value = false;
+
+        const handleFirstInteraction = () => {
+          soundOn.value = true;
+          playMelody();
+          window.removeEventListener('click', handleFirstInteraction);
+          window.removeEventListener('touchstart', handleFirstInteraction);
+        };
+
+        window.addEventListener('click', handleFirstInteraction);
+        window.addEventListener('touchstart', handleFirstInteraction);
+      } else {
+        playMelody();
+      }
+    });
   onBeforeUnmount(() => {
     disableSound();
     // document.removeEventListener('visibilitychange', handleVisibilityChange);

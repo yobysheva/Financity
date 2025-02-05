@@ -18,11 +18,10 @@ import jumpSound from "@/assets/sound/jump.mp3"
 import spinSound from "@/assets/sound/spin.wav"
 import messageSound from "@/assets/sound/message.wav"
 import moneySound from "@/assets/sound/money.mp3"
-
-import soundOnImg from "@/assets/sound_on.png"
-import soundOfImg from "@/assets/sound_of.png"
 import song from "@/assets/sound/game_compress2.wav";
 import { onMounted, onUnmounted } from 'vue';
+import soundOnImg from "@/assets/sound_on.png";
+import soundOfImg from "@/assets/sound_of.png";
 let flag = false
 if (!store.state.username) {
   flag = true
@@ -51,7 +50,6 @@ let votes = ref({
 })
 
 let soundOn = ref(true);
-let soundButtonLabel = ref(soundOnImg);
 
 const clickAudio = new Audio(clickSound);
 const hoverAudio = new Audio(hoverSound);
@@ -105,7 +103,6 @@ audio.loop = true
 
       const disableOrEnableSound = () => {
         soundOn.value = !soundOn.value
-        soundButtonLabel = soundOn.value ? soundOnImg : soundOfImg
         makeSound(clickAudio)
         if (soundOn.value) {
           playMelody()
@@ -113,7 +110,7 @@ audio.loop = true
           audio.pause()
         }
       }
-      playMelody()
+
 
     const disableSound = () => {
         soundOn.value = false
@@ -183,7 +180,6 @@ const handleUnload = (event) => {
   sessionStorage.setItem('store_state', JSON.stringify(store.state))
 
   const isReload = performance.getEntriesByType("navigation")[0].type === 'reload';
-  console.log(isReload)
   if (!isReload) {
     leaveCall();
     if (players.value.length < 2 && isGameStarted) {
@@ -196,11 +192,29 @@ const handleUnload = (event) => {
 };
 
 onMounted(() => {
-  window.addEventListener('beforeunload', handleUnload);
+  const navigationEntries = performance.getEntriesByType('navigation');
+  const isPageRefreshed = navigationEntries.length && navigationEntries[0].type === 'reload';
+
+  if (isPageRefreshed) {
+    soundOn.value = false;
+
+    const handleFirstInteraction = () => {
+      soundOn.value = true;
+      playMelody();
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('touchstart', handleFirstInteraction);
+    };
+
+    window.addEventListener('click', handleFirstInteraction);
+    window.addEventListener('touchstart', handleFirstInteraction);
+  } else {
+    playMelody();
+  }
+  window.addEventListener('unload', handleUnload);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('beforeunload', handleUnload);
+  window.removeEventListener('unload', handleUnload);
 });
 
 
@@ -242,7 +256,7 @@ authService.getInfoAboutGame(
             scipPlayer.value.push(false);
         }
     )
-    if (!flag)
+  if (!flag)
     isMyTurn.value = (players.value.length === 1)
 })
 
@@ -537,7 +551,6 @@ const messages = ref([
 ])
 if (flag) {
   const game_state = JSON.parse(sessionStorage.getItem("game_state"))
-  console.log(game_state)
   players.value = game_state['players']
   votes.value = game_state['votes']
   current_player_index = game_state['current_player_index']
@@ -571,8 +584,7 @@ if (flag) {
   modalColor.value = game_state['modalColor']
 
   isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
-  sessionStorage.clear()
-
+  sessionStorage.setItem("myTurn", isMyTurn.value)
 }
 const gameId = new URLSearchParams(window.location.search).get('id');
 const chatSocket = new WebSocket(`ws://${process.env.VUE_APP_SERVER_IP}/ws/chat/${gameId}/`);
@@ -684,12 +696,7 @@ gameSocket.onmessage = async (event) => {
     players.value.forEach((player, index) => {
       shine.value[index] = (player.id === players.value[current_player_index].id);
     });
-    console.log(
-        {
-          dotStyleMassive: dotStyleMassive.value,
-          currentIndexMassive: currentIndexMassive.value,
-        }
-    )
+    isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
     switch (type) {
         case "on_turn_start":
           // eslint-disable-next-line no-case-declarations
@@ -789,14 +796,6 @@ gameSocket.onmessage = async (event) => {
             if (Number(info['player_id']) === store.state.playerID) return;
             // eslint-disable-next-line no-case-declarations
             let index = checkPlayerLeave(Number(info['player_id']))
-            console.log(
-                {
-                  images: images.value,
-                  dotStyleMassive: dotStyleMassive.value,
-                  currentIndexMassive: currentIndexMassive.value,
-                }
-            )
-            console.log(index)
             if (index !== -1) {
               players.value.splice(index, 1)
               dotStyleMassive.value.splice(index, 1)
@@ -810,13 +809,6 @@ gameSocket.onmessage = async (event) => {
                 current_player_index--
               }
             }
-             console.log(
-                {
-                  images: images.value,
-                  dotStyleMassive: dotStyleMassive.value,
-                  currentIndexMassive: currentIndexMassive.value,
-                }
-            )
             if (isGameStarted.value)
             if (checkToEnd()) {
                 await endGame()
@@ -961,6 +953,8 @@ const handleUpdateBalance = (newBalance, player_id) => {
     }
   });
 };
+
+
 </script>
 
 <template>
@@ -1086,7 +1080,7 @@ const handleUpdateBalance = (newBalance, player_id) => {
   <div class="column" style="width: 22%; min-height: 95vh; height: 95%; max-height: 95vh; margin-left: 2%;  padding: 1%;">
     <div class="row buttons">
       <button class="button-33" role="button" @click="leaveCall" @mouseenter="makeSound(hoverAudio)">Выйти из игры</button>
-      <button class="button-33" role="button" @click="disableOrEnableSound" @mouseenter="makeSound(hoverAudio)"><img :src="soundButtonLabel" class="sound"></button>
+      <button class="button-33" role="button" @click="disableOrEnableSound" @mouseenter="makeSound(hoverAudio)"><img :src="soundOn ? soundOnImg : soundOfImg" class="sound"></button>
       <button class="button-33" role="button" @click="showRules" @mouseenter="makeSound(hoverAudio)">?</button>
     </div>
     <div class="container" style="padding: 3px; min-height: 82vh; max-height:82%; display:flex; flex-direction:column; align-items:center; justify-content: end; position: relative;">

@@ -1,5 +1,5 @@
 <script setup>
-import {defineProps, defineEmits, onMounted, onUnmounted, defineExpose, computed} from 'vue';
+import {defineProps, defineEmits, onMounted, onUnmounted, defineExpose, computed, watch} from 'vue';
 import {ref} from 'vue';
 import {authService} from "@/services/auth";
 import store from "@/store";
@@ -16,6 +16,9 @@ const props = defineProps({
   isMyTurn: Boolean,
   soundOn: Boolean
 });
+
+const isMyTurn = ref(props.isMyTurn);
+const questionType = ref(props.questionType);
 
 const emit = defineEmits(['close', 'update-balance', 'plus', 'minus', 'setVotingTimer']);
 const answerText = ref("Ваше действие будет иметь последствия");
@@ -110,7 +113,7 @@ let question = ref({
 let stopAnswering = ref(false)
 let didIVote = ref(false)
 let timeBeforeClose = ref(10)
-let answers = ref([])
+const answers = ref([]);
 let votes_pluses = ref(0)
 let votes_minuses = ref(0)
 
@@ -233,15 +236,20 @@ function setActiveRadioButtonForId(id) {
     rates[id].checked = true
 }
 
+let typeEvent = 0
 async function getQuestion(id, type) {
+  typeEvent = type
+  sessionStorage.setItem('typeEvent', typeEvent.toString());
   try {
     if(type === 3){
       const response = await authService.getChance(id);
       question.value.text = response.data['text'];
+      sessionStorage.setItem('eventText', response.data['text']);
       return;
     }
     const response = await authService.getQuestion(id);
     question.value.text = response.data['text'];
+    sessionStorage.setItem('eventText', response.data['text']);
     // question.value.type = response.data['type'];
     if(type === 2){
       const response1 = await authService.getAnswers(id);
@@ -249,11 +257,37 @@ async function getQuestion(id, type) {
       for(const answer of response1.data){
         answers.value.push(answer);
       }
+      console.log(answers)
+      sessionStorage.setItem('answerForEvent', JSON.stringify(answers.value));
     }
   } catch (error) {
         console.error(error);
   }
 }
+
+let flag = false
+if (!question.value.text) {
+  flag = true
+}
+
+watch(() => props.isMyTurn, (newVal) => {
+  isMyTurn.value = newVal;
+});
+watch(() => props.questionType, (newVal) => {
+  questionType.value = newVal;
+});
+
+if(flag) {
+  isMyTurn.value = sessionStorage.getItem("myTurn") === "true";
+  question.value.text = sessionStorage.getItem("eventText");
+  questionType.value = parseInt(sessionStorage.getItem("typeEvent"));
+  if (questionType.value === 2) {
+    answers.value = JSON.parse(sessionStorage.getItem("answerForEvent"));
+    console.log(answers)
+  }
+}
+
+
 
 defineExpose({
     getQuestion ,
