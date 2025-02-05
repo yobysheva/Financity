@@ -176,11 +176,9 @@ function getIdOfActiveRadioButton() {
     if (rates.length === 0) return;
     for(let i = 0; i < rates.length; i++){
         if (rates[i].checked){
-            console.log(i)
             return i
         }
     }
-    console.log(-1)
     return -1
 }
 
@@ -230,7 +228,6 @@ async function addAnswer() {
 
 function setActiveRadioButtonForId(id) {
   // radioButtonClickSound();
-    console.log(id)
     let rates = document.getElementsByName('answer');
     if (Number(id) === -1 || rates.length === 0) return;
     for(let i = 0; i < rates.length; i++){
@@ -260,7 +257,6 @@ async function getQuestion(id, type) {
       for(const answer of response1.data){
         answers.value.push(answer);
       }
-      console.log(answers)
       sessionStorage.setItem('answerForEvent', JSON.stringify(answers.value));
     }
   } catch (error) {
@@ -286,7 +282,6 @@ if(flag) {
   questionType.value = parseInt(sessionStorage.getItem("typeEvent"));
   if (questionType.value === 2) {
     answers.value = JSON.parse(sessionStorage.getItem("answerForEvent"));
-    console.log(answers)
   }
 }
 

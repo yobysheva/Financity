@@ -103,6 +103,7 @@ audio.loop = true
 
       const disableOrEnableSound = () => {
         soundOn.value = !soundOn.value
+        sessionStorage.setItem('soundOn', soundOn.value.toString)
         makeSound(clickAudio)
         if (soundOn.value) {
           playMelody()
@@ -183,7 +184,7 @@ const handleUnload = (event) => {
 
   const isReload = performance.getEntriesByType("navigation")[0].type === 'reload';
   if (!isReload) {
-    leaveCall();
+    leaveGame();
     if (players.value.length < 2 && isGameStarted) {
       endGame()
     } else if (players.value.length === 0) {
@@ -659,10 +660,8 @@ function textAnswerTranslate() {
 }
 
 function radioButtonAnswerTranslate() {
-    console.log(need_to_share_radio_button_answer)
     if (!need_to_share_radio_button_answer) return;
     const input = questionComponent.value?.getIdOfActiveRadioButton()
-    console.log(input)
     if (input || input === 0)
     answerSocket.send(JSON.stringify({
         "type": "radioButtonAnswer",
@@ -881,7 +880,7 @@ const generateAndSpin = () => {
   sendTurnCount(rnd);
 };
 
-function leaveCall() {
+function leaveGame() {
   if (players.value.length === 1) {
     endGame()
   }
@@ -894,7 +893,7 @@ function leaveCall() {
   gameSocket.send(JSON.stringify(
         info
     ))
-  routes.push({ name: "home" });
+  routes.replace({ name: "home" });
   disableSound();
 }
 
@@ -1086,7 +1085,7 @@ const handleUpdateBalance = (newBalance, player_id) => {
     </div>
   <div class="column" style="width: 22%; min-height: 95vh; height: 95%; max-height: 95vh; margin-left: 2%;  padding: 1%;">
     <div class="row buttons">
-      <button class="button-33" role="button" @click="leaveCall" @mouseenter="makeSound(hoverAudio)">Выйти из игры</button>
+      <button class="button-33" role="button" @click="leaveGame" @mouseenter="makeSound(hoverAudio)">Выйти из игры</button>
       <button class="button-33" role="button" @click="disableOrEnableSound" @mouseenter="makeSound(hoverAudio)"><img :src="soundOn ? soundOnImg : soundOfImg" class="sound"></button>
       <button class="button-33" role="button" @click="showRules" @mouseenter="makeSound(hoverAudio)">?</button>
     </div>

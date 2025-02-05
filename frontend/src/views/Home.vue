@@ -60,6 +60,7 @@ export default {
 
       const disableOrEnableSound = () => {
         soundOn.value = !soundOn.value
+        sessionStorage.setItem('soundOn', soundOn.value.toString)
         buttonClickSound()
         if (soundOn.value) {
           playMelody()
@@ -96,7 +97,7 @@ export default {
         soundOn.value = false;
 
         const handleFirstInteraction = () => {
-          soundOn.value = true;
+          soundOn.value = sessionStorage.getItem('soundOn') === 'true'
           playMelody();
           window.removeEventListener('click', handleFirstInteraction);
           window.removeEventListener('touchstart', handleFirstInteraction);
@@ -280,7 +281,7 @@ export default {
 
     getLoggedInUser() {
       if(!store.state.username) {
-        this.$router.push({ name: "login" });
+        this.$router.replace({ name: "login" });
       }
     },
 
@@ -318,13 +319,13 @@ export default {
       await store.dispatch("updatePlayerID", response.data.playerID);
       sessionStorage.setItem('store_state', JSON.stringify(store.state))
       this.sendMessageToActiveGamesSocket(response.data.gameId, response.data.playerID);
-      this.$router.push({ name: "Game", query: { id: store.state.gameID } });
+      this.$router.replace({ name: "Game", query: { id: store.state.gameID } });
       this.gameId = String(response.data.gameId);
       try {
         this.sendInvitation(this.gameId);
         this.groupUsers = [];
         this.disableSound();
-        this.$router.push({ name: "Game", query: { id: response.data.gameId} });
+        this.$router.replace({ name: "Game", query: { id: response.data.gameId} });
       } catch (error) {
         console.error("Failed to create group or initiate call:", error);
       }
@@ -362,7 +363,7 @@ export default {
         await store.dispatch("updatePlayerID", response.data.playerID);
         sessionStorage.setItem('store_state', JSON.stringify(store.state))
         this.disableSound();
-        this.$router.push({name: "Game", query: {id: store.state.gameID}});
+        this.$router.replace({name: "Game", query: {id: store.state.gameID}});
       }
     },
 
@@ -375,13 +376,13 @@ export default {
       if (response.status === 201) {
         await store.dispatch("updatePlayerID", response.data.playerID);
         this.disableSound();
-      this.$router.push({name: "Game", query: {id: store.state.gameID}});
+      this.$router.replace({name: "Game", query: {id: store.state.gameID}});
       }
     },
 
     rejectInvite() {
       this.buttonClickSound();
-      this.$router.push({ name: "home" });
+      this.$router.replace({ name: "home" });
       this.incomingInvite = false
     }
   }

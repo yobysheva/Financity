@@ -125,7 +125,7 @@ export default {
           this.secret = response.data.secret
           this.sendUsername();
           this.sendSecret();
-          this.$router.push({name: "home"});
+          this.$router.replace({name: "home"});
           this.username = '';
           this.password = '';
         }
