@@ -162,6 +162,7 @@ export default {
         store.dispatch("updateUsername", state['username'])
         store.dispatch("updateSecret", state['mySecret'])
         store.dispatch("updatePhoto", state['photo'])
+        sessionStorage.setItem('store_state', '')
      }
     },
     createRatingSocket() {

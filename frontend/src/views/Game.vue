@@ -586,6 +586,9 @@ if (flag) {
 
   isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
   sessionStorage.setItem("myTurn", isMyTurn.value)
+
+  setTimeout(textAnswerTranslate, 1000)
+  setTimeout(radioButtonAnswerTranslate, 1000)
 }
 const gameId = new URLSearchParams(window.location.search).get('id');
 const chatSocket = new WebSocket(`ws://${process.env.VUE_APP_SERVER_IP}/ws/chat/${gameId}/`);
@@ -656,8 +659,10 @@ function textAnswerTranslate() {
 }
 
 function radioButtonAnswerTranslate() {
+    console.log(need_to_share_radio_button_answer)
     if (!need_to_share_radio_button_answer) return;
     const input = questionComponent.value?.getIdOfActiveRadioButton()
+    console.log(input)
     if (input || input === 0)
     answerSocket.send(JSON.stringify({
         "type": "radioButtonAnswer",
