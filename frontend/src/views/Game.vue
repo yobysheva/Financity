@@ -417,7 +417,7 @@ async function endGame () {
     winner.value = getWinner()
     isGameEnded.value = true
 
-    if (winner.value && winner.value.id === store.state.playerID)
+    if (isGameStarted.value && winner.value && winner.value.id === store.state.playerID)
     await authService.addWinToGameWinner({
         "player_id": winner.value.id,
         'secret': store.state.mySecret
@@ -669,7 +669,7 @@ function radioButtonAnswerTranslate() {
 }
 
 function sendPlus() {
-  // makeSound(clickAudio);
+    makeSound(clickAudio);
     answerSocket.send(JSON.stringify(
         {
           "type": "vote",
@@ -679,7 +679,7 @@ function sendPlus() {
 }
 
 function sendMinus() {
-  // makeSound(clickAudio);
+    makeSound(clickAudio);
     answerSocket.send(JSON.stringify(
         {
           "type": "vote",
