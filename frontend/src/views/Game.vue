@@ -142,7 +142,8 @@ window.onbeforeunload = () => {
 
 }
 
-const handleUnload = (event) => {
+const handleUnload = () => {
+  console.log("weq")
   sessionStorage.setItem("game_state", JSON.stringify({
     'players': players.value,
     'votes': votes.value,
@@ -177,8 +178,9 @@ const handleUnload = (event) => {
     'questionComponent': questionComponent.value,
     'modalColor': modalColor.value
   }))
+  console.log('handleunload')
   sessionStorage.setItem('store_state', JSON.stringify(store.state))
-
+  console.log(performance.getEntriesByType('navigation')[0])
   const isReload = performance.getEntriesByType("navigation")[0].type === 'reload';
   if (!isReload) {
     leaveCall();
@@ -188,7 +190,8 @@ const handleUnload = (event) => {
       endGame()
     }
   }
-  event.preventDefault()
+  let xd = window.confirm("weqeqqeq")
+  console.log(isReload, xd)
 };
 
 onMounted(() => {
@@ -210,11 +213,11 @@ onMounted(() => {
   } else {
     playMelody();
   }
-  window.addEventListener('unload', handleUnload);
+  window.addEventListener('beforeunload', handleUnload);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('unload', handleUnload);
+  window.removeEventListener('beforeunload', handleUnload);
 });
 
 
@@ -655,9 +658,10 @@ function textAnswerTranslate() {
 }
 
 function radioButtonAnswerTranslate() {
+  console.log(need_to_share_radio_button_answer)
     if (!need_to_share_radio_button_answer) return;
     const input = questionComponent.value?.getIdOfActiveRadioButton()
-    if (input)
+    if (input || input === 0)
     answerSocket.send(JSON.stringify({
         "type": "radioButtonAnswer",
         "button_id": input.toString()
@@ -734,8 +738,8 @@ gameSocket.onmessage = async (event) => {
             }
             break;
         case "on_question_close":
-          isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
-          makeSound(modalAudio);
+            isMyTurn.value = (players.value[current_player_index].id === store.state.playerID);
+            makeSound(modalAudio);
             need_to_share_text_answer = false
             need_to_share_radio_button_answer = false
             players.value[info['player_index']].balance = info['balance'];

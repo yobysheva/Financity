@@ -176,9 +176,11 @@ function getIdOfActiveRadioButton() {
     if (rates.length === 0) return;
     for(let i = 0; i < rates.length; i++){
         if (rates[i].checked){
+            console.log(i)
             return i
         }
     }
+    console.log(-1)
     return -1
 }
 
@@ -228,6 +230,7 @@ async function addAnswer() {
 
 function setActiveRadioButtonForId(id) {
   // radioButtonClickSound();
+    console.log(id)
     let rates = document.getElementsByName('answer');
     if (Number(id) === -1 || rates.length === 0) return;
     for(let i = 0; i < rates.length; i++){

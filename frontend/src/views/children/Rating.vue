@@ -27,7 +27,9 @@ export default {
     this.getUsersStats();
   },
   methods: {
+
     updateUserGames(username, games, wins) {
+      if (!this.usersStats[0]) return;
       for (let i = 0; i < this.usersStats[0].length; i++) {
         if (this.usersStats[0][i].username === username) {
           this.usersStats[0][i].winGames = wins
