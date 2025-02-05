@@ -142,8 +142,8 @@ window.onbeforeunload = () => {
 
 }
 
-const handleUnload = () => {
-  console.log("weq")
+const handleUnload = (event) => {
+  event.preventDefault()
   sessionStorage.setItem("game_state", JSON.stringify({
     'players': players.value,
     'votes': votes.value,
@@ -178,9 +178,9 @@ const handleUnload = () => {
     'questionComponent': questionComponent.value,
     'modalColor': modalColor.value
   }))
-  console.log('handleunload')
   sessionStorage.setItem('store_state', JSON.stringify(store.state))
-  console.log(performance.getEntriesByType('navigation')[0])
+  sessionStorage.setItem('soundOn', soundOn.value.toString)
+
   const isReload = performance.getEntriesByType("navigation")[0].type === 'reload';
   if (!isReload) {
     leaveCall();
@@ -190,8 +190,6 @@ const handleUnload = () => {
       endGame()
     }
   }
-  let xd = window.confirm("weqeqqeq")
-  console.log(isReload, xd)
 };
 
 onMounted(() => {
@@ -202,7 +200,7 @@ onMounted(() => {
     soundOn.value = false;
 
     const handleFirstInteraction = () => {
-      soundOn.value = true;
+      soundOn.value = sessionStorage.getItem('soundOn') === 'true'
       playMelody();
       window.removeEventListener('click', handleFirstInteraction);
       window.removeEventListener('touchstart', handleFirstInteraction);
@@ -213,11 +211,11 @@ onMounted(() => {
   } else {
     playMelody();
   }
-  window.addEventListener('beforeunload', handleUnload);
+  window.addEventListener('unload', handleUnload);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('beforeunload', handleUnload);
+  window.removeEventListener('unload', handleUnload);
 });
 
 
@@ -658,7 +656,6 @@ function textAnswerTranslate() {
 }
 
 function radioButtonAnswerTranslate() {
-  console.log(need_to_share_radio_button_answer)
     if (!need_to_share_radio_button_answer) return;
     const input = questionComponent.value?.getIdOfActiveRadioButton()
     if (input || input === 0)
