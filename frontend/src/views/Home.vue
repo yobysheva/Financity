@@ -165,7 +165,7 @@ export default {
      }
     },
     createRatingSocket() {
-      this.ratingSocket = new WebSocket(`ws://localhost:8200/ws/rating/${store.state.username}/`)
+      this.ratingSocket = new WebSocket(`ws://${process.env.VUE_APP_SERVER_IP}/ws/rating/${store.state.username}/`)
       this.ratingSocket.onmessage = (event) => {
         let text_data = JSON.parse(event.data)['info']
 
@@ -196,7 +196,7 @@ export default {
       )
     },
     createActiveGamesSocket() {
-        this.activeGamesSocket = new WebSocket(`ws://localhost:8200/ws/home/`);
+        this.activeGamesSocket = new WebSocket(`ws://${process.env.VUE_APP_SERVER_IP}/ws/home/`);
         this.activeGamesSocket.onmessage = (event) => {
         let text_data = JSON.parse(event.data)
         let type = text_data['type']
@@ -243,7 +243,7 @@ export default {
 
     createWaitingRequestSocket() {
       let username = store.state.username;
-      this.waitingRequestSocket = new WebSocket(`ws://localhost:8200/ws/waiting_request/${username}/`);
+      this.waitingRequestSocket = new WebSocket(`ws://${process.env.VUE_APP_SERVER_IP}/ws/waiting_request/${username}/`);
 
 
       this.waitingRequestSocket.onmessage = async (event) => {
@@ -261,7 +261,7 @@ export default {
       }
     },
     sendWaitingRequestSocket(senderUsername, recipientUsername, gameID) {
-      let sendRequestSocket = new WebSocket(`ws://localhost:8200/ws/waiting_request/${recipientUsername}/`);
+      let sendRequestSocket = new WebSocket(`ws://${process.env.VUE_APP_SERVER_IP}/ws/waiting_request/${recipientUsername}/`);
 
       sendRequestSocket.onopen = () => {
         let data = {

@@ -422,7 +422,7 @@ async function endGame () {
         "player_id": winner.value.id,
         'secret': store.state.mySecret
     })
-  let activeGamesSocket = new WebSocket(`ws://localhost:8200/ws/home/`);
+  let activeGamesSocket = new WebSocket(`ws://${process.env.VUE_APP_SERVER_IP}/ws/home/`);
 
   activeGamesSocket.onopen = () => {
     let data = {
@@ -981,6 +981,7 @@ const handleUpdateBalance = (newBalance, player_id) => {
               :av="images[index]"
               :shine="shine[index]"
               :balanceChange="balanceChange[index]"
+              :soundOn="soundOn.value"
       />
     </div>
     <div class="column" style="height: 100%; width: 60%; margin-left: 2%; padding: 5px;">

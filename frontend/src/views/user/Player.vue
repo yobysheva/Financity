@@ -7,7 +7,8 @@ const props = defineProps({
   balance: Number,
   av: String,
   shine: Boolean,
-  balanceChange: String
+  balanceChange: String,
+  soundOn: Boolean
 });
 import moneySound from "@/assets/sound/money.mp3"
 
@@ -15,6 +16,8 @@ const moneyAudio = new Audio(moneySound);
 moneyAudio.volume = 0.25
 
 const moneyMakeSound = () => {
+  if (!props.soundOn)
+    return;
   moneyAudio.play()
 }
 
