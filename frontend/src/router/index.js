@@ -45,8 +45,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.meta.source === 'game') {
-    console.log(JSON.parse(sessionStorage.getItem("store_state")))
-    if (!JSON.parse(sessionStorage.getItem('store_state'))['gameID']){
+        if (!JSON.parse(sessionStorage.getItem('store_state'))['gameID']){
       next({
         path: '/home',
       })

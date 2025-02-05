@@ -29,7 +29,6 @@ function makeBalanceChanceVisible(){
   if (visibleTimer.value === 5){
     moneyMakeSound();
   }
-  console.log('Баланс изменился!')
     if (visibleTimer.value > 0) {
         // console.log(`${visibleTimer.value--} осталось`)
         visibleTimer.value--;
